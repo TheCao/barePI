@@ -34,15 +34,22 @@ hexstring(fb_info.Pitch);
 hexstring(fb_info.Pointer);
 hexstring(fb_info.Height);
 
-	//TestPattern();
+
+//inicjalizacja timera
+//arm_timer_freerun_init();
+arm_timer_init();
+hexstring(0x100);
+
+/*	//TestPattern();
 //	DrawPixel(121, 160, 0xFFFF);
 //	DrawPixel(122, 161, 0xFFFF);
 
-int x,y;
-register unsigned int * ptr=fb_info.Pointer;
+//int x,y;
+//register unsigned int * ptr=fb_info.Pointer;
 
-//for(y=0;y<1080*1920;y++)		*ptr++=0;
+//for(y=0;y<1080*1920;y++)		*ptr++=0;*/
 
+/*
 memset ( (void*)fb_info.Pointer, 0, 1920UL*1080UL*4);
 
 for(as=0;as<438;as++)
@@ -51,13 +58,19 @@ for(as=0;as<438;as++)
 //*((long*)(fb_info.Pointer+(fb_info.Pitch*as)+(as+rand()%30)*4))=0x00000ff;
 //*((long*)(fb_info.Pointer+(fb_info.Pitch*as)+(as+rand()%130)*4))=0x0ff0000;
 };
-	// Flash LED rapidly if complete
+*/
+
+for(int x=0;x < 209; x++) hexstring(arm_timer_tick());
+
+
 BRANCHTO(0x8000);
+// Flash LED rapidly if complete
+
 while(1){
-	      PUT32(GPSET1,1<<(47-32));
+	      PUT32(GPSET1,1<<15);
 
 		wait(DELAY_100_ms);
-		  PUT32(GPCLR1,1<<(47-32));
+		  PUT32(GPCLR1,1<<15);
 		wait(DELAY_100_ms);
 	}
 }
