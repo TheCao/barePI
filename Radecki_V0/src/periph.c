@@ -105,6 +105,16 @@ unsigned int arm_timer_freerun_tick ( void )
 
 // moje dodatki
 
+// obsluga Interrupts
+
+static rpi_irq_controller_t * rpiIRQController = (rpi_irq_controller_t*) RPI_INTERRUPT_CONTROLLER_BASE;
+
+rpi_irq_controller_t* RPI_GetIrqController(void)
+{
+	return rpiIRQController;
+}
+
+// obsluga ARM Timer
 static rpi_arm_timer_t* rpiArmTimer = (rpi_arm_timer_t*)RPI_ARM_TIMER_BASE;
 
 rpi_arm_timer_t* RPI_GetArmTimer(void)
@@ -116,7 +126,7 @@ void arm_timer_init(void)
 {
 	/* Setup the system timer interrupt */
     /* Timer frequency = Clk/256 */
-	RPI_GetArmTimer()->Load = 0x10000;
+	RPI_GetArmTimer()->Load = 0x100;
 
 	// Setup ARM Timer
 	RPI_GetArmTimer()->Control =
@@ -133,7 +143,6 @@ unsigned int arm_timer_tick(void)
 
 void __attribute__ ((interrupt("IRQ"))) interrupt_vector(void)
 {
-	static int lit = 0;
 	RPI_GetArmTimer()->IRQClear = 1;
 	hexstring(0x100000);
 }

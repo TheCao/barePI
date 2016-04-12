@@ -104,150 +104,151 @@ LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm
 LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib\librdimon.a
 END GROUP
 
-.text           0x00010000     0x1000
+.text           0x00010000      0xfd4
  *(.text*)
- .text          0x00010000      0x580 ./src/Asetup.o
+ .text          0x00010000      0x590 ./src/Asetup.o
                 0x00010000                asm_start
                 0x0001005c                MemoryBarrier
                 0x00010070                dummy
                 0x00010574                exc_stack
                 0x00010574                supervisor_sp
- .text          0x00010580       0x2c ./src/Avectors.o
-                0x00010580                PUT32
-                0x00010588                PUT16
-                0x00010590                PUT8
-                0x00010598                GET32
-                0x000105a0                GETPC
-                0x000105a8                BRANCHTO
- .text          0x000105ac        0x0 ./src/FrameBuffer.o
+                0x00010578                _enable_interrupts
+ .text          0x00010590       0x2c ./src/Avectors.o
+                0x00010590                PUT32
+                0x00010598                PUT16
+                0x000105a0                PUT8
+                0x000105a8                GET32
+                0x000105b0                GETPC
+                0x000105b8                BRANCHTO
+ .text          0x000105bc        0x0 ./src/FrameBuffer.o
  .text.InitialiseFrameBuffer
-                0x000105ac      0x248 ./src/FrameBuffer.o
-                0x000105ac                InitialiseFrameBuffer
+                0x000105bc      0x248 ./src/FrameBuffer.o
+                0x000105bc                InitialiseFrameBuffer
  .text.TestPattern
-                0x000107f4       0x3c ./src/FrameBuffer.o
-                0x000107f4                TestPattern
+                0x00010804       0x3c ./src/FrameBuffer.o
+                0x00010804                TestPattern
  .text.DrawPixel
-                0x00010830       0x20 ./src/FrameBuffer.o
-                0x00010830                DrawPixel
+                0x00010840       0x20 ./src/FrameBuffer.o
+                0x00010840                DrawPixel
  .text.DrawLine
-                0x00010850       0xdc ./src/FrameBuffer.o
-                0x00010850                DrawLine
- .text          0x0001092c        0x0 ./src/GPIO.o
+                0x00010860       0xdc ./src/FrameBuffer.o
+                0x00010860                DrawLine
+ .text          0x0001093c        0x0 ./src/GPIO.o
  .text.SetPinFunction
-                0x0001092c       0x60 ./src/GPIO.o
-                0x0001092c                SetPinFunction
- .text.SetPin   0x0001098c       0x14 ./src/GPIO.o
-                0x0001098c                SetPin
+                0x0001093c       0x60 ./src/GPIO.o
+                0x0001093c                SetPinFunction
+ .text.SetPin   0x0001099c       0x14 ./src/GPIO.o
+                0x0001099c                SetPin
  .text.ClearPin
-                0x000109a0       0x14 ./src/GPIO.o
-                0x000109a0                ClearPin
+                0x000109b0       0x14 ./src/GPIO.o
+                0x000109b0                ClearPin
  .text.ErrorFlash
-                0x000109b4       0x6c ./src/GPIO.o
-                0x000109b4                ErrorFlash
- .text          0x00010a20        0x0 ./src/Mailbox.o
+                0x000109c4       0x6c ./src/GPIO.o
+                0x000109c4                ErrorFlash
+ .text          0x00010a30        0x0 ./src/Mailbox.o
  .text.MailboxWrite
-                0x00010a20       0x40 ./src/Mailbox.o
-                0x00010a20                MailboxWrite
+                0x00010a30       0x40 ./src/Mailbox.o
+                0x00010a30                MailboxWrite
  .text.MailboxRead
-                0x00010a60       0x50 ./src/Mailbox.o
-                0x00010a60                MailboxRead
- .text          0x00010ab0        0x0 ./src/SystemTimer.o
- .text.wait     0x00010ab0       0x4c ./src/SystemTimer.o
-                0x00010ab0                wait
- .text          0x00010afc        0x0 ./src/main.o
+                0x00010a70       0x50 ./src/Mailbox.o
+                0x00010a70                MailboxRead
+ .text          0x00010ac0        0x0 ./src/SystemTimer.o
+ .text.wait     0x00010ac0       0x4c ./src/SystemTimer.o
+                0x00010ac0                wait
+ .text          0x00010b0c        0x0 ./src/main.o
  .text.not_main
-                0x00010afc       0xd4 ./src/main.o
-                0x00010afc                not_main
- .text          0x00010bd0        0x0 ./src/periph.o
+                0x00010b0c       0x98 ./src/main.o
+                0x00010b0c                not_main
+ .text          0x00010ba4        0x0 ./src/periph.o
  .text.uart_lcr
-                0x00010bd0        0xc ./src/periph.o
-                0x00010bd0                uart_lcr
+                0x00010ba4        0xc ./src/periph.o
+                0x00010ba4                uart_lcr
  .text.uart_recv
-                0x00010bdc       0x2c ./src/periph.o
-                0x00010bdc                uart_recv
+                0x00010bb0       0x2c ./src/periph.o
+                0x00010bb0                uart_recv
  .text.uart_check
-                0x00010c08       0x18 ./src/periph.o
-                0x00010c08                uart_check
+                0x00010bdc       0x18 ./src/periph.o
+                0x00010bdc                uart_check
  .text.uart_send
-                0x00010c20       0x30 ./src/periph.o
-                0x00010c20                uart_send
+                0x00010bf4       0x30 ./src/periph.o
+                0x00010bf4                uart_send
  .text.uart_flush
-                0x00010c50       0x1c ./src/periph.o
-                0x00010c50                uart_flush
+                0x00010c24       0x1c ./src/periph.o
+                0x00010c24                uart_flush
  .text.hexstrings
-                0x00010c6c       0x78 ./src/periph.o
-                0x00010c6c                hexstrings
+                0x00010c40       0x78 ./src/periph.o
+                0x00010c40                hexstrings
  .text.hexstring
-                0x00010ce4       0xc0 ./src/periph.o
-                0x00010ce4                hexstring
+                0x00010cb8       0xc0 ./src/periph.o
+                0x00010cb8                hexstring
  .text.uart_init
-                0x00010da4      0x118 ./src/periph.o
-                0x00010da4                uart_init
+                0x00010d78      0x118 ./src/periph.o
+                0x00010d78                uart_init
  .text.arm_timer_freerun_init
-                0x00010ebc       0x2c ./src/periph.o
-                0x00010ebc                arm_timer_freerun_init
+                0x00010e90       0x2c ./src/periph.o
+                0x00010e90                arm_timer_freerun_init
  .text.arm_timer_freerun_tick
-                0x00010ee8        0xc ./src/periph.o
-                0x00010ee8                arm_timer_freerun_tick
+                0x00010ebc        0xc ./src/periph.o
+                0x00010ebc                arm_timer_freerun_tick
  .text.RPI_GetArmTimer
-                0x00010ef4        0xc ./src/periph.o
-                0x00010ef4                RPI_GetArmTimer
+                0x00010ec8        0xc ./src/periph.o
+                0x00010ec8                RPI_GetArmTimer
  .text.arm_timer_init
-                0x00010f00       0x1c ./src/periph.o
-                0x00010f00                arm_timer_init
+                0x00010ed4       0x1c ./src/periph.o
+                0x00010ed4                arm_timer_init
  .text.arm_timer_tick
-                0x00010f1c       0x10 ./src/periph.o
-                0x00010f1c                arm_timer_tick
+                0x00010ef0       0x10 ./src/periph.o
+                0x00010ef0                arm_timer_tick
  .text.interrupt_vector
-                0x00010f2c       0xd4 ./src/periph.o
-                0x00010f2c                interrupt_vector
- .text          0x00011000        0x0 ./src/raspi.o
+                0x00010f00       0xd4 ./src/periph.o
+                0x00010f00                interrupt_vector
+ .text          0x00010fd4        0x0 ./src/raspi.o
 
-.data           0x00011000        0x0
- .data          0x00011000        0x0 ./src/Asetup.o
- .data          0x00011000        0x0 ./src/Avectors.o
- .data          0x00011000        0x0 ./src/FrameBuffer.o
- .data          0x00011000        0x0 ./src/GPIO.o
- .data          0x00011000        0x0 ./src/Mailbox.o
- .data          0x00011000        0x0 ./src/SystemTimer.o
- .data          0x00011000        0x0 ./src/main.o
- .data          0x00011000        0x0 ./src/periph.o
- .data          0x00011000        0x0 ./src/raspi.o
+.data           0x00010fd4        0x0
+ .data          0x00010fd4        0x0 ./src/Asetup.o
+ .data          0x00010fd4        0x0 ./src/Avectors.o
+ .data          0x00010fd4        0x0 ./src/FrameBuffer.o
+ .data          0x00010fd4        0x0 ./src/GPIO.o
+ .data          0x00010fd4        0x0 ./src/Mailbox.o
+ .data          0x00010fd4        0x0 ./src/SystemTimer.o
+ .data          0x00010fd4        0x0 ./src/main.o
+ .data          0x00010fd4        0x0 ./src/periph.o
+ .data          0x00010fd4        0x0 ./src/raspi.o
 
-.igot.plt       0x00011000        0x0
+.igot.plt       0x00010fd4        0x0
  .igot.plt      0x00000000        0x0 ./src/Asetup.o
 
-.glue_7         0x00011000        0x0
+.glue_7         0x00010fd4        0x0
  .glue_7        0x00000000        0x0 linker stubs
 
-.glue_7t        0x00011000        0x0
+.glue_7t        0x00010fd4        0x0
  .glue_7t       0x00000000        0x0 linker stubs
 
-.vfp11_veneer   0x00011000        0x0
+.vfp11_veneer   0x00010fd4        0x0
  .vfp11_veneer  0x00000000        0x0 linker stubs
 
-.v4_bx          0x00011000        0x0
+.v4_bx          0x00010fd4        0x0
  .v4_bx         0x00000000        0x0 linker stubs
 
-.iplt           0x00011000        0x0
+.iplt           0x00010fd4        0x0
  .iplt          0x00000000        0x0 ./src/Asetup.o
 
-.rel.dyn        0x00011000        0x0
+.rel.dyn        0x00010fd4        0x0
  .rel.iplt      0x00000000        0x0 ./src/Asetup.o
 
-.bss            0x00011000       0x18
+.bss            0x00010fd4       0x18
  *(.bss*)
- .bss           0x00011000        0x0 ./src/Asetup.o
- .bss           0x00011000        0x0 ./src/Avectors.o
- .bss           0x00011000        0x0 ./src/FrameBuffer.o
- .bss           0x00011000        0x0 ./src/GPIO.o
- .bss           0x00011000        0x0 ./src/Mailbox.o
- .bss           0x00011000        0x0 ./src/SystemTimer.o
- .bss           0x00011000        0x0 ./src/main.o
- .bss           0x00011000        0x0 ./src/periph.o
- .bss           0x00011000        0x0 ./src/raspi.o
- COMMON         0x00011000       0x18 ./src/FrameBuffer.o
-                0x00011000                fb_info
+ .bss           0x00010fd4        0x0 ./src/Asetup.o
+ .bss           0x00010fd4        0x0 ./src/Avectors.o
+ .bss           0x00010fd4        0x0 ./src/FrameBuffer.o
+ .bss           0x00010fd4        0x0 ./src/GPIO.o
+ .bss           0x00010fd4        0x0 ./src/Mailbox.o
+ .bss           0x00010fd4        0x0 ./src/SystemTimer.o
+ .bss           0x00010fd4        0x0 ./src/main.o
+ .bss           0x00010fd4        0x0 ./src/periph.o
+ .bss           0x00010fd4        0x0 ./src/raspi.o
+ COMMON         0x00010fd4       0x18 ./src/FrameBuffer.o
+                0x00010fd4                fb_info
 OUTPUT(Radecki_V0.elf elf32-littlearm)
 
 .ARM.attributes
@@ -281,38 +282,38 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
  .comment       0x00000000       0x71 ./src/periph.o
  .comment       0x00000000       0x71 ./src/raspi.o
 
-.debug_line     0x00000000      0x970
- .debug_line    0x00000000       0x64 ./src/Asetup.o
- .debug_line    0x00000064       0x49 ./src/Avectors.o
- .debug_line    0x000000ad      0x1ce ./src/FrameBuffer.o
- .debug_line    0x0000027b       0xcf ./src/GPIO.o
- .debug_line    0x0000034a       0xaf ./src/Mailbox.o
- .debug_line    0x000003f9       0x73 ./src/SystemTimer.o
- .debug_line    0x0000046c      0x2ff ./src/main.o
- .debug_line    0x0000076b      0x1bc ./src/periph.o
- .debug_line    0x00000927       0x49 ./src/raspi.o
+.debug_line     0x00000000      0x964
+ .debug_line    0x00000000       0x6a ./src/Asetup.o
+ .debug_line    0x0000006a       0x49 ./src/Avectors.o
+ .debug_line    0x000000b3      0x1ce ./src/FrameBuffer.o
+ .debug_line    0x00000281       0xcf ./src/GPIO.o
+ .debug_line    0x00000350       0xaf ./src/Mailbox.o
+ .debug_line    0x000003ff       0x73 ./src/SystemTimer.o
+ .debug_line    0x00000472      0x2ed ./src/main.o
+ .debug_line    0x0000075f      0x1bc ./src/periph.o
+ .debug_line    0x0000091b       0x49 ./src/raspi.o
 
-.debug_info     0x00000000     0x14fa
+.debug_info     0x00000000     0x14a1
  .debug_info    0x00000000       0x7c ./src/Asetup.o
  .debug_info    0x0000007c       0x7e ./src/Avectors.o
  .debug_info    0x000000fa      0x42f ./src/FrameBuffer.o
  .debug_info    0x00000529      0x276 ./src/GPIO.o
  .debug_info    0x0000079f      0x18a ./src/Mailbox.o
  .debug_info    0x00000929       0xf9 ./src/SystemTimer.o
- .debug_info    0x00000a22      0x340 ./src/main.o
- .debug_info    0x00000d62      0x730 ./src/periph.o
- .debug_info    0x00001492       0x68 ./src/raspi.o
+ .debug_info    0x00000a22      0x2e7 ./src/main.o
+ .debug_info    0x00000d09      0x730 ./src/periph.o
+ .debug_info    0x00001439       0x68 ./src/raspi.o
 
-.debug_abbrev   0x00000000      0x939
+.debug_abbrev   0x00000000      0x933
  .debug_abbrev  0x00000000       0x14 ./src/Asetup.o
  .debug_abbrev  0x00000014       0x14 ./src/Avectors.o
  .debug_abbrev  0x00000028      0x214 ./src/FrameBuffer.o
  .debug_abbrev  0x0000023c      0x16b ./src/GPIO.o
  .debug_abbrev  0x000003a7       0xe2 ./src/Mailbox.o
  .debug_abbrev  0x00000489       0x97 ./src/SystemTimer.o
- .debug_abbrev  0x00000520      0x174 ./src/main.o
- .debug_abbrev  0x00000694      0x27c ./src/periph.o
- .debug_abbrev  0x00000910       0x29 ./src/raspi.o
+ .debug_abbrev  0x00000520      0x16e ./src/main.o
+ .debug_abbrev  0x0000068e      0x27c ./src/periph.o
+ .debug_abbrev  0x0000090a       0x29 ./src/raspi.o
 
 .debug_aranges  0x00000000      0x1b8
  .debug_aranges
@@ -382,7 +383,7 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
  .debug_macro   0x00001809       0xd6 ./src/periph.o
  .debug_macro   0x000018df       0x24 ./src/raspi.o
 
-.debug_str      0x00000000     0x5b0d
+.debug_str      0x00000000     0x5b17
  .debug_str     0x00000000     0x2de3 ./src/FrameBuffer.o
                                0x2e68 (size before relaxing)
  .debug_str     0x00002de3      0x13c ./src/GPIO.o
@@ -391,11 +392,11 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
                                0x2df6 (size before relaxing)
  .debug_str     0x00002f4e       0x3b ./src/SystemTimer.o
                                0x28bf (size before relaxing)
- .debug_str     0x00002f89     0x2a68 ./src/main.o
-                               0x599b (size before relaxing)
- .debug_str     0x000059f1      0x10d ./src/periph.o
+ .debug_str     0x00002f89     0x2a72 ./src/main.o
+                               0x59a0 (size before relaxing)
+ .debug_str     0x000059fb      0x10d ./src/periph.o
                                0x2fb2 (size before relaxing)
- .debug_str     0x00005afe        0xf ./src/raspi.o
+ .debug_str     0x00005b08        0xf ./src/raspi.o
                                0x27ba (size before relaxing)
 
 .debug_frame    0x00000000      0x314

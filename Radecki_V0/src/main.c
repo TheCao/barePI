@@ -10,6 +10,7 @@
 extern struct FrameBufferInfo fb_info;
 extern void BRANCHTO();
 extern void rand();
+extern void _enable_interrupts();
 __attribute__((no_instrument_function))  VOID not_main(VOID)
 {
 	UINT32 result;
@@ -37,6 +38,8 @@ hexstring(fb_info.Height);
 
 //inicjalizacja timera
 //arm_timer_freerun_init();
+_enable_interrupts();
+RPI_GetIrqController() -> Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
 arm_timer_init();
 hexstring(0x100);
 
@@ -60,8 +63,9 @@ for(as=0;as<438;as++)
 };
 */
 
-for(int x=0;x < 209; x++) hexstring(arm_timer_tick());
-
+// sprawdzenie czy ARM Timer dziala ;)
+for(int x=0;x < 20; x++) hexstring(arm_timer_tick());
+wait(DELAY_1_s);
 
 BRANCHTO(0x8000);
 // Flash LED rapidly if complete
