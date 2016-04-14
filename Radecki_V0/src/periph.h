@@ -29,19 +29,19 @@ extern void dummy ( unsigned int );
 
 #define GPPUD           (PBASE+0x00200094)
 #define GPPUDCLK0       (PBASE+0x00200098)
-
+// BCM2835 Arm Peripheral Manual - Section 2.1
 #define AUX_ENABLES     (PBASE+0x00215004)
-#define AUX_MU_IO_REG   (PBASE+0x00215040)
-#define AUX_MU_IER_REG  (PBASE+0x00215044)
-#define AUX_MU_IIR_REG  (PBASE+0x00215048)
-#define AUX_MU_LCR_REG  (PBASE+0x0021504C)
-#define AUX_MU_MCR_REG  (PBASE+0x00215050)
-#define AUX_MU_LSR_REG  (PBASE+0x00215054)
-#define AUX_MU_MSR_REG  (PBASE+0x00215058)
-#define AUX_MU_SCRATCH  (PBASE+0x0021505C)
-#define AUX_MU_CNTL_REG (PBASE+0x00215060)
-#define AUX_MU_STAT_REG (PBASE+0x00215064)
-#define AUX_MU_BAUD_REG (PBASE+0x00215068)
+#define AUX_MU_IO_REG   (PBASE+0x00215040) //Mini uart I/O Data
+#define AUX_MU_IER_REG  (PBASE+0x00215044) // Interrupt Enable
+#define AUX_MU_IIR_REG  (PBASE+0x00215048) // Interrupt Identify
+#define AUX_MU_LCR_REG  (PBASE+0x0021504C) // Line Control
+#define AUX_MU_MCR_REG  (PBASE+0x00215050) // Modem Control
+#define AUX_MU_LSR_REG  (PBASE+0x00215054) // Line Status
+#define AUX_MU_MSR_REG  (PBASE+0x00215058) // Modem Status
+#define AUX_MU_SCRATCH  (PBASE+0x0021505C) // Uart Scratch
+#define AUX_MU_CNTL_REG (PBASE+0x00215060) // Extra Control
+#define AUX_MU_STAT_REG (PBASE+0x00215064) // Extra Status
+#define AUX_MU_BAUD_REG (PBASE+0x00215068) // Baudrate
 
 //GPIO14  TXD0 and TXD1
 //GPIO15  RXD0 and RXD1
@@ -129,6 +129,5 @@ typedef struct {
 
 unsigned int arm_timer_tick(void);
 void arm_timer_init(void);
-extern rpi_irq_controller_t;
 rpi_irq_controller_t* RPI_GetIrqController(void);
 #endif /* PERIPH_H_ */

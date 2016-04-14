@@ -18,9 +18,9 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	  unsigned int ra;
 	    unsigned int rb;
 	    long as;
-	    ra=GET32(GPFSEL4);
-	    ra&=~(7<<21);
-	    ra|=1<<21;
+	    ra=GET32(GPFSEL4); // GPIO Function Select 4
+	    ra&=~(7<<21); // wyzerowanie 21-23 bitow
+	    ra|=1<<21; // output na 21 bicie odpowiedzialnym za GPIO47 ( LED_OK )
 	    PUT32(GPFSEL4,ra);
 	    uart_init();
 	    hexstring(0x1);

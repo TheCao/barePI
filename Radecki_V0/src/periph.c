@@ -60,7 +60,7 @@ void hexstrings ( unsigned int d )
 void hexstring ( unsigned int d )
 {
     hexstrings(d);
-    uart_send(0x0D);
+    uart_send(0x0D); // New Line
     uart_send(0x0A);
 }
 //------------------------------------------------------------------------
@@ -68,7 +68,7 @@ void uart_init ( void )
 {
     unsigned int ra;
 
-    PUT32(AUX_ENABLES,1);
+    PUT32(AUX_ENABLES,1); //Mini UART Enable
     PUT32(AUX_MU_IER_REG,0);
     PUT32(AUX_MU_CNTL_REG,0);
     PUT32(AUX_MU_LCR_REG,3);
@@ -82,12 +82,12 @@ void uart_init ( void )
     ra&=~(7<<15); //gpio15
     ra|=2<<15;    //alt5
     PUT32(GPFSEL1,ra);
-    PUT32(GPPUD,0);
+    PUT32(GPPUD,0); // disable pull-up/down reg.
     for(ra=0;ra<150;ra++) dummy(ra);
     PUT32(GPPUDCLK0,(1<<14)|(1<<15));
     for(ra=0;ra<150;ra++) dummy(ra);
-    PUT32(GPPUDCLK0,0);
-    PUT32(AUX_MU_CNTL_REG,3);
+    PUT32(GPPUDCLK0,0); // No effect for pull-up down Clock Reg
+    PUT32(AUX_MU_CNTL_REG,3); //Transmiter and Receiver enabled
 }
 //------------------------------------------------------------------------
 void  arm_timer_freerun_init ( void )
