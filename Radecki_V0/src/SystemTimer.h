@@ -15,6 +15,7 @@
 #define DELAY_500_ms		 500000
 #define DELAY_250_ms		 250000
 #define DELAY_100_ms		 100000
+#define DELAY_10_ms		 	  10000
 
 // Function prototypes
 VOID wait(UINT32 microseconds);

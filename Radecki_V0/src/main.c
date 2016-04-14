@@ -11,37 +11,48 @@ extern struct FrameBufferInfo fb_info;
 extern void BRANCHTO();
 extern void rand();
 extern void _enable_interrupts();
+
 __attribute__((no_instrument_function))  VOID not_main(VOID)
 {
-	UINT32 result;
 
-	  unsigned int ra;
-	    unsigned int rb;
+
 	    long as;
-	    ra=GET32(GPFSEL4); // GPIO Function Select 4
-	    ra&=~(7<<21); // wyzerowanie 21-23 bitow
-	    ra|=1<<21; // output na 21 bicie odpowiedzialnym za GPIO47 ( LED_OK )
-	    PUT32(GPFSEL4,ra);
+	    prepare_led_ok();
+	    wait(DELAY_10_ms); // wymagane ze wzgledu na uart_sendC, ktore nie wyrabia po wyjsciu z funkcji
 	    uart_init();
-	    hexstring(0x1);
 do{
 		as=InitialiseFrameBuffer();
-		hexstring(0x2);
+		//hexstring(0x2);
 hexstring(as);
 }
 while (as!=0);
-
+uart_sendC("FrameBuffer_Ready:");
 hexstring(fb_info.Pitch);
 hexstring(fb_info.Pointer);
 hexstring(fb_info.Height);
 
 
 //inicjalizacja timera
-//arm_timer_freerun_init();
-_enable_interrupts();
+_enable_interrupts;
 RPI_GetIrqController() -> Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
-arm_timer_init();
-hexstring(0x100);
+/*arm_timer_init();
+
+uart_sendC("ARM Timer & Timer Interrupts Ready");
+uart_sendC("LED Test");*/
+for(UINT32 i = 0; i < 10; i++)
+{
+	PUT32(GPSET1,1<<15);
+	hexstring(0x0002);
+	wait(DELAY_100_ms);
+	hexstring(0x0003);
+	PUT32(GPCLR1,1<<15);
+	hexstring(0x0004);
+	wait(DELAY_100_ms);
+	hexstring(0x0005);
+}
+
+
+uart_sendC("All ready Ready");
 
 /*	//TestPattern();
 //	DrawPixel(121, 160, 0xFFFF);
@@ -63,18 +74,8 @@ for(as=0;as<438;as++)
 };
 */
 
-// sprawdzenie czy ARM Timer dziala ;)
-for(int x=0;x < 20; x++) hexstring(arm_timer_tick());
-wait(DELAY_1_s);
 
 BRANCHTO(0x8000);
-// Flash LED rapidly if complete
 
-while(1){
-	      PUT32(GPSET1,1<<15);
 
-		wait(DELAY_100_ms);
-		  PUT32(GPCLR1,1<<15);
-		wait(DELAY_100_ms);
-	}
 }

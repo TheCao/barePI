@@ -54,7 +54,7 @@ void hexstrings ( unsigned int d )
         uart_send(rc);
         if(rb==0) break;
     }
-    uart_send(0x20);
+    uart_send(0x20); //space
 }
 //------------------------------------------------------------------------
 void hexstring ( unsigned int d )
@@ -62,6 +62,16 @@ void hexstring ( unsigned int d )
     hexstrings(d);
     uart_send(0x0D); // New Line
     uart_send(0x0A);
+}
+void uart_sendC(char *buff)
+{
+	while(* buff)
+	{
+		uart_send(*buff);
+		buff++;
+	}
+	uart_send(0x0D);
+	uart_send(0x0A);
 }
 //------------------------------------------------------------------------
 void uart_init ( void )
@@ -146,6 +156,16 @@ void __attribute__ ((interrupt("IRQ"))) interrupt_vector(void)
 	RPI_GetArmTimer()->IRQClear = 1;
 	hexstring(0x100000);
 }
+void prepare_led_ok(void)
+{
+	UINT32 ra;
+	ra=GET32(GPFSEL4); // GPIO Function Select 4
+	ra&=~(7<<21); // wyzerowanie 21-23 bitow
+    ra|=1<<21; // output na 21 bicie odpowiedzialnym za GPIO47 ( LED_OK )
+    PUT32(GPFSEL4,ra);
+    uart_sendC("LED_OK_Ready");
+}
+
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 

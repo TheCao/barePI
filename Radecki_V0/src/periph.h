@@ -130,4 +130,7 @@ typedef struct {
 unsigned int arm_timer_tick(void);
 void arm_timer_init(void);
 rpi_irq_controller_t* RPI_GetIrqController(void);
+
+void uart_sendC(char *buff);
+void prepare_led_ok(void);
 #endif /* PERIPH_H_ */

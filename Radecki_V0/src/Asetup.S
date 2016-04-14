@@ -69,6 +69,7 @@ exc_stack:
 supervisor_sp:
    .space 4
 
+#dodane do obslugi przerwan od Arm Timer
  .globl _enable_interrupts
  _enable_interrupts:
  	mrs r0,cpsr

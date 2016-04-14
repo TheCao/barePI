@@ -20,7 +20,7 @@ static VUINT32 *MAILBOX0_WRITE	= (UINT32 *) 0x3f00B8A0;	//0x20
 
 // function prototypes
 VOID 	MailboxWrite(UINT32 message, UINT8 channel);
-UINT32  mbox_read(UINT32 channel);
+UINT32  mbox_read(UINT32 channel); // TO DELETE
 UINT32	MailboxRead(UINT32 channel);
 
 #endif
