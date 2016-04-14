@@ -10,7 +10,7 @@
 extern void BRANCHTO();
 extern void rand();
 extern void _enable_interrupts();
-
+extern void takasobiefunkcjadlatest();
 __attribute__((no_instrument_function))  VOID not_main(VOID)
 {
 
