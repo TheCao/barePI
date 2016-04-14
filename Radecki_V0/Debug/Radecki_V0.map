@@ -32,9 +32,13 @@ Discarded input sections
  .debug_macro   0x00000000      0x862 ./src/SystemTimer.o
  .debug_macro   0x00000000       0x4c ./src/SystemTimer.o
  .debug_macro   0x00000000       0x76 ./src/SystemTimer.o
+ .group         0x00000000        0x8 ./src/armtimer.o
+ .group         0x00000000        0x8 ./src/armtimer.o
+ .debug_macro   0x00000000      0x862 ./src/armtimer.o
  .group         0x00000000        0x8 ./src/bcm2835.o
  .group         0x00000000        0x8 ./src/bcm2835.o
  .debug_macro   0x00000000      0x862 ./src/bcm2835.o
+ .group         0x00000000        0x8 ./src/main.o
  .group         0x00000000        0x8 ./src/main.o
  .group         0x00000000        0x8 ./src/main.o
  .group         0x00000000        0x8 ./src/main.o
@@ -90,6 +94,7 @@ LOAD ./src/FrameBuffer.o
 LOAD ./src/GPIO.o
 LOAD ./src/Mailbox.o
 LOAD ./src/SystemTimer.o
+LOAD ./src/armtimer.o
 LOAD ./src/bcm2835.o
 LOAD ./src/main.o
 LOAD ./src/periph.o
@@ -108,7 +113,7 @@ LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm
 LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib\librdimon.a
 END GROUP
 
-.text           0x00010000     0x2b30
+.text           0x00010000     0x2b20
  *(.text*)
  .text          0x00010000      0x590 ./src/Asetup.o
                 0x00010000                asm_start
@@ -159,396 +164,401 @@ END GROUP
  .text          0x00010ac0        0x0 ./src/SystemTimer.o
  .text.wait     0x00010ac0       0x4c ./src/SystemTimer.o
                 0x00010ac0                wait
- .text          0x00010b0c        0x0 ./src/bcm2835.o
- .text.bcm2835_set_debug
-                0x00010b0c       0x10 ./src/bcm2835.o
-                0x00010b0c                bcm2835_set_debug
- .text.bcm2835_peri_read
-                0x00010b1c       0x10 ./src/bcm2835.o
-                0x00010b1c                bcm2835_peri_read
- .text.bcm2835_peri_read_nb
-                0x00010b2c        0x8 ./src/bcm2835.o
-                0x00010b2c                bcm2835_peri_read_nb
- .text.bcm2835_peri_write
-                0x00010b34        0xc ./src/bcm2835.o
-                0x00010b34                bcm2835_peri_write
- .text.bcm2835_peri_write_nb
-                0x00010b40        0x8 ./src/bcm2835.o
-                0x00010b40                bcm2835_peri_write_nb
- .text.bcm2835_peri_set_bits
-                0x00010b48       0x20 ./src/bcm2835.o
-                0x00010b48                bcm2835_peri_set_bits
- .text.bcm2835_gpio_fsel
-                0x00010b68       0x60 ./src/bcm2835.o
-                0x00010b68                bcm2835_gpio_fsel
- .text.bcm2835_gpio_set
-                0x00010bc8       0x2c ./src/bcm2835.o
-                0x00010bc8                bcm2835_gpio_set
- .text.bcm2835_gpio_clr
-                0x00010bf4       0x2c ./src/bcm2835.o
-                0x00010bf4                bcm2835_gpio_clr
- .text.bcm2835_gpio_set_multi
-                0x00010c20       0x18 ./src/bcm2835.o
-                0x00010c20                bcm2835_gpio_set_multi
- .text.bcm2835_gpio_clr_multi
-                0x00010c38       0x18 ./src/bcm2835.o
-                0x00010c38                bcm2835_gpio_clr_multi
- .text.bcm2835_gpio_lev
-                0x00010c50       0x34 ./src/bcm2835.o
-                0x00010c50                bcm2835_gpio_lev
- .text.bcm2835_gpio_eds
-                0x00010c84       0x34 ./src/bcm2835.o
-                0x00010c84                bcm2835_gpio_eds
- .text.bcm2835_gpio_set_eds
-                0x00010cb8       0x2c ./src/bcm2835.o
-                0x00010cb8                bcm2835_gpio_set_eds
- .text.bcm2835_gpio_ren
-                0x00010ce4       0x38 ./src/bcm2835.o
-                0x00010ce4                bcm2835_gpio_ren
- .text.bcm2835_gpio_clr_ren
-                0x00010d1c       0x38 ./src/bcm2835.o
-                0x00010d1c                bcm2835_gpio_clr_ren
- .text.bcm2835_gpio_fen
-                0x00010d54       0x38 ./src/bcm2835.o
-                0x00010d54                bcm2835_gpio_fen
- .text.bcm2835_gpio_clr_fen
-                0x00010d8c       0x38 ./src/bcm2835.o
-                0x00010d8c                bcm2835_gpio_clr_fen
- .text.bcm2835_gpio_hen
-                0x00010dc4       0x38 ./src/bcm2835.o
-                0x00010dc4                bcm2835_gpio_hen
- .text.bcm2835_gpio_clr_hen
-                0x00010dfc       0x38 ./src/bcm2835.o
-                0x00010dfc                bcm2835_gpio_clr_hen
- .text.bcm2835_gpio_len
-                0x00010e34       0x38 ./src/bcm2835.o
-                0x00010e34                bcm2835_gpio_len
- .text.bcm2835_gpio_clr_len
-                0x00010e6c       0x38 ./src/bcm2835.o
-                0x00010e6c                bcm2835_gpio_clr_len
- .text.bcm2835_gpio_aren
-                0x00010ea4       0x38 ./src/bcm2835.o
-                0x00010ea4                bcm2835_gpio_aren
- .text.bcm2835_gpio_clr_aren
-                0x00010edc       0x38 ./src/bcm2835.o
-                0x00010edc                bcm2835_gpio_clr_aren
- .text.bcm2835_gpio_afen
-                0x00010f14       0x38 ./src/bcm2835.o
-                0x00010f14                bcm2835_gpio_afen
- .text.bcm2835_gpio_clr_afen
-                0x00010f4c       0x38 ./src/bcm2835.o
-                0x00010f4c                bcm2835_gpio_clr_afen
- .text.bcm2835_gpio_pud
-                0x00010f84       0x18 ./src/bcm2835.o
-                0x00010f84                bcm2835_gpio_pud
- .text.bcm2835_gpio_pudclk
-                0x00010f9c       0x30 ./src/bcm2835.o
-                0x00010f9c                bcm2835_gpio_pudclk
- .text.bcm2835_gpio_pad
-                0x00010fcc       0x20 ./src/bcm2835.o
-                0x00010fcc                bcm2835_gpio_pad
- .text.bcm2835_gpio_set_pad
-                0x00010fec       0x24 ./src/bcm2835.o
-                0x00010fec                bcm2835_gpio_set_pad
- .text.bcm2835_delay
-                0x00011010       0x74 ./src/bcm2835.o
-                0x00011010                bcm2835_delay
- .text.bcm2835_delayMicroseconds
-                0x00011084       0x6c ./src/bcm2835.o
-                0x00011084                bcm2835_delayMicroseconds
- .text.bcm2835_gpio_write
-                0x000110f0       0x34 ./src/bcm2835.o
-                0x000110f0                bcm2835_gpio_write
- .text.bcm2835_gpio_write_multi
-                0x00011124       0x24 ./src/bcm2835.o
-                0x00011124                bcm2835_gpio_write_multi
- .text.bcm2835_gpio_write_mask
-                0x00011148       0x28 ./src/bcm2835.o
-                0x00011148                bcm2835_gpio_write_mask
- .text.bcm2835_gpio_set_pud
-                0x00011170      0x108 ./src/bcm2835.o
-                0x00011170                bcm2835_gpio_set_pud
- .text.bcm2835_spi_begin
-                0x00011278       0xac ./src/bcm2835.o
-                0x00011278                bcm2835_spi_begin
- .text.bcm2835_spi_end
-                0x00011324       0x74 ./src/bcm2835.o
-                0x00011324                bcm2835_spi_end
- .text.bcm2835_spi_setBitOrder
-                0x00011398        0x4 ./src/bcm2835.o
-                0x00011398                bcm2835_spi_setBitOrder
- .text.bcm2835_spi_setClockDivider
-                0x0001139c       0x18 ./src/bcm2835.o
-                0x0001139c                bcm2835_spi_setClockDivider
- .text.bcm2835_spi_setDataMode
-                0x000113b4       0x30 ./src/bcm2835.o
-                0x000113b4                bcm2835_spi_setDataMode
- .text.bcm2835_spi_transfer
-                0x000113e4       0x74 ./src/bcm2835.o
-                0x000113e4                bcm2835_spi_transfer
- .text.bcm2835_spi_transfernb
-                0x00011458      0x108 ./src/bcm2835.o
-                0x00011458                bcm2835_spi_transfernb
- .text.bcm2835_spi_writenb
-                0x00011560       0xc0 ./src/bcm2835.o
-                0x00011560                bcm2835_spi_writenb
- .text.bcm2835_spi_transfern
-                0x00011620        0xc ./src/bcm2835.o
-                0x00011620                bcm2835_spi_transfern
- .text.bcm2835_spi_chipSelect
-                0x0001162c       0x2c ./src/bcm2835.o
-                0x0001162c                bcm2835_spi_chipSelect
- .text.bcm2835_spi_setChipSelectPolarity
-                0x00011658       0x3c ./src/bcm2835.o
-                0x00011658                bcm2835_spi_setChipSelectPolarity
- .text.bcm2835_i2c_begin
-                0x00011694       0x94 ./src/bcm2835.o
-                0x00011694                bcm2835_i2c_begin
- .text.bcm2835_i2c_end
-                0x00011728       0x38 ./src/bcm2835.o
-                0x00011728                bcm2835_i2c_end
- .text.bcm2835_i2c_setSlaveAddress
-                0x00011760       0x18 ./src/bcm2835.o
-                0x00011760                bcm2835_i2c_setSlaveAddress
- .text.bcm2835_i2c_setClockDivider
-                0x00011778       0x54 ./src/bcm2835.o
-                0x00011778                bcm2835_i2c_setClockDivider
- .text.bcm2835_i2c_set_baudrate
-                0x000117cc       0x68 ./src/bcm2835.o
-                0x000117cc                bcm2835_i2c_set_baudrate
- .text.bcm2835_i2c_write
-                0x00011834      0x11c ./src/bcm2835.o
-                0x00011834                bcm2835_i2c_write
- .text.bcm2835_i2c_read
-                0x00011950      0x10c ./src/bcm2835.o
-                0x00011950                bcm2835_i2c_read
- .text.bcm2835_i2c_read_register_rs
-                0x00011a5c      0x1c8 ./src/bcm2835.o
-                0x00011a5c                bcm2835_i2c_read_register_rs
- .text.bcm2835_i2c_write_read_rs
-                0x00011c24      0x1e8 ./src/bcm2835.o
-                0x00011c24                bcm2835_i2c_write_read_rs
- .text.bcm2835_st_read
-                0x00011e0c       0x2c ./src/bcm2835.o
-                0x00011e0c                bcm2835_st_read
- .text.bcm2835_st_delay
-                0x00011e38       0x48 ./src/bcm2835.o
-                0x00011e38                bcm2835_st_delay
- .text.bcm2835_pwm_set_clock
-                0x00011e80      0x12c ./src/bcm2835.o
-                0x00011e80                bcm2835_pwm_set_clock
- .text.bcm2835_pwm_set_mode
-                0x00011fac       0x68 ./src/bcm2835.o
-                0x00011fac                bcm2835_pwm_set_mode
- .text.bcm2835_pwm_set_range
-                0x00012014       0x34 ./src/bcm2835.o
-                0x00012014                bcm2835_pwm_set_range
- .text.bcm2835_pwm_set_data
-                0x00012048       0x34 ./src/bcm2835.o
-                0x00012048                bcm2835_pwm_set_data
- .text.bcm2835_aux_muart_init
-                0x0001207c       0x9c ./src/bcm2835.o
-                0x0001207c                bcm2835_aux_muart_init
- .text.bcm2835_aux_muart_transfer
-                0x00012118       0x24 ./src/bcm2835.o
-                0x00012118                bcm2835_aux_muart_transfer
- .text.bcm2835_aux_muart_transfernb
-                0x0001213c       0x70 ./src/bcm2835.o
-                0x0001213c                bcm2835_aux_muart_transfernb
- .text.bcm2835_aux_muart_transfer_hex
-                0x000121ac       0x68 ./src/bcm2835.o
-                0x000121ac                bcm2835_aux_muart_transfer_hex
- .text.bcm2835_aux_muart_transfer_hexnl
-                0x00012214       0x98 ./src/bcm2835.o
-                0x00012214                bcm2835_aux_muart_transfer_hexnl
- .text.bcm2835_mail_write
-                0x000122ac       0x30 ./src/bcm2835.o
-                0x000122ac                bcm2835_mail_write
- .text.bcm2835_mail_read
-                0x000122dc       0x30 ./src/bcm2835.o
-                0x000122dc                bcm2835_mail_read
- .text.bcm2835_fb_init
-                0x0001230c      0x164 ./src/bcm2835.o
-                0x0001230c                bcm2835_fb_init
- .text.bcm2835_init
-                0x00012470       0xd4 ./src/bcm2835.o
-                0x00012470                bcm2835_init
- .text.bcm2835_close
-                0x00012544        0x8 ./src/bcm2835.o
-                0x00012544                bcm2835_close
- .text          0x0001254c        0x0 ./src/main.o
- .text.not_main
-                0x0001254c       0x64 ./src/main.o
-                0x0001254c                not_main
- .text          0x000125b0        0x0 ./src/periph.o
- .text.uart_lcr
-                0x000125b0        0xc ./src/periph.o
-                0x000125b0                uart_lcr
- .text.uart_recv
-                0x000125bc       0x2c ./src/periph.o
-                0x000125bc                uart_recv
- .text.uart_check
-                0x000125e8       0x18 ./src/periph.o
-                0x000125e8                uart_check
- .text.uart_send
-                0x00012600       0x30 ./src/periph.o
-                0x00012600                uart_send
- .text.uart_flush
-                0x00012630       0x1c ./src/periph.o
-                0x00012630                uart_flush
- .text.hexstrings
-                0x0001264c       0x78 ./src/periph.o
-                0x0001264c                hexstrings
- .text.hexstring
-                0x000126c4       0xc0 ./src/periph.o
-                0x000126c4                hexstring
- .text.uart_sendC
-                0x00012784       0x94 ./src/periph.o
-                0x00012784                uart_sendC
- .text.uart_init
-                0x00012818      0x118 ./src/periph.o
-                0x00012818                uart_init
+ .text          0x00010b0c        0x0 ./src/armtimer.o
  .text.arm_timer_freerun_init
-                0x00012930       0x2c ./src/periph.o
-                0x00012930                arm_timer_freerun_init
+                0x00010b0c       0x2c ./src/armtimer.o
+                0x00010b0c                arm_timer_freerun_init
  .text.arm_timer_freerun_tick
-                0x0001295c        0xc ./src/periph.o
-                0x0001295c                arm_timer_freerun_tick
+                0x00010b38        0xc ./src/armtimer.o
+                0x00010b38                arm_timer_freerun_tick
  .text.RPI_GetIrqController
-                0x00012968        0xc ./src/periph.o
-                0x00012968                RPI_GetIrqController
+                0x00010b44        0xc ./src/armtimer.o
+                0x00010b44                RPI_GetIrqController
  .text.RPI_GetArmTimer
-                0x00012974        0xc ./src/periph.o
-                0x00012974                RPI_GetArmTimer
+                0x00010b50        0xc ./src/armtimer.o
+                0x00010b50                RPI_GetArmTimer
  .text.arm_timer_init
-                0x00012980       0x1c ./src/periph.o
-                0x00012980                arm_timer_init
+                0x00010b5c       0x1c ./src/armtimer.o
+                0x00010b5c                arm_timer_init
  .text.arm_timer_tick
-                0x0001299c       0x10 ./src/periph.o
-                0x0001299c                arm_timer_tick
+                0x00010b78       0x10 ./src/armtimer.o
+                0x00010b78                arm_timer_tick
  .text.interrupt_vector
-                0x000129ac       0xd4 ./src/periph.o
-                0x000129ac                interrupt_vector
+                0x00010b88       0x24 ./src/armtimer.o
+                0x00010b88                interrupt_vector
+ .text          0x00010bac        0x0 ./src/bcm2835.o
+ .text.bcm2835_set_debug
+                0x00010bac       0x10 ./src/bcm2835.o
+                0x00010bac                bcm2835_set_debug
+ .text.bcm2835_peri_read
+                0x00010bbc       0x10 ./src/bcm2835.o
+                0x00010bbc                bcm2835_peri_read
+ .text.bcm2835_peri_read_nb
+                0x00010bcc        0x8 ./src/bcm2835.o
+                0x00010bcc                bcm2835_peri_read_nb
+ .text.bcm2835_peri_write
+                0x00010bd4        0xc ./src/bcm2835.o
+                0x00010bd4                bcm2835_peri_write
+ .text.bcm2835_peri_write_nb
+                0x00010be0        0x8 ./src/bcm2835.o
+                0x00010be0                bcm2835_peri_write_nb
+ .text.bcm2835_peri_set_bits
+                0x00010be8       0x20 ./src/bcm2835.o
+                0x00010be8                bcm2835_peri_set_bits
+ .text.bcm2835_gpio_fsel
+                0x00010c08       0x60 ./src/bcm2835.o
+                0x00010c08                bcm2835_gpio_fsel
+ .text.bcm2835_gpio_set
+                0x00010c68       0x2c ./src/bcm2835.o
+                0x00010c68                bcm2835_gpio_set
+ .text.bcm2835_gpio_clr
+                0x00010c94       0x2c ./src/bcm2835.o
+                0x00010c94                bcm2835_gpio_clr
+ .text.bcm2835_gpio_set_multi
+                0x00010cc0       0x18 ./src/bcm2835.o
+                0x00010cc0                bcm2835_gpio_set_multi
+ .text.bcm2835_gpio_clr_multi
+                0x00010cd8       0x18 ./src/bcm2835.o
+                0x00010cd8                bcm2835_gpio_clr_multi
+ .text.bcm2835_gpio_lev
+                0x00010cf0       0x34 ./src/bcm2835.o
+                0x00010cf0                bcm2835_gpio_lev
+ .text.bcm2835_gpio_eds
+                0x00010d24       0x34 ./src/bcm2835.o
+                0x00010d24                bcm2835_gpio_eds
+ .text.bcm2835_gpio_set_eds
+                0x00010d58       0x2c ./src/bcm2835.o
+                0x00010d58                bcm2835_gpio_set_eds
+ .text.bcm2835_gpio_ren
+                0x00010d84       0x38 ./src/bcm2835.o
+                0x00010d84                bcm2835_gpio_ren
+ .text.bcm2835_gpio_clr_ren
+                0x00010dbc       0x38 ./src/bcm2835.o
+                0x00010dbc                bcm2835_gpio_clr_ren
+ .text.bcm2835_gpio_fen
+                0x00010df4       0x38 ./src/bcm2835.o
+                0x00010df4                bcm2835_gpio_fen
+ .text.bcm2835_gpio_clr_fen
+                0x00010e2c       0x38 ./src/bcm2835.o
+                0x00010e2c                bcm2835_gpio_clr_fen
+ .text.bcm2835_gpio_hen
+                0x00010e64       0x38 ./src/bcm2835.o
+                0x00010e64                bcm2835_gpio_hen
+ .text.bcm2835_gpio_clr_hen
+                0x00010e9c       0x38 ./src/bcm2835.o
+                0x00010e9c                bcm2835_gpio_clr_hen
+ .text.bcm2835_gpio_len
+                0x00010ed4       0x38 ./src/bcm2835.o
+                0x00010ed4                bcm2835_gpio_len
+ .text.bcm2835_gpio_clr_len
+                0x00010f0c       0x38 ./src/bcm2835.o
+                0x00010f0c                bcm2835_gpio_clr_len
+ .text.bcm2835_gpio_aren
+                0x00010f44       0x38 ./src/bcm2835.o
+                0x00010f44                bcm2835_gpio_aren
+ .text.bcm2835_gpio_clr_aren
+                0x00010f7c       0x38 ./src/bcm2835.o
+                0x00010f7c                bcm2835_gpio_clr_aren
+ .text.bcm2835_gpio_afen
+                0x00010fb4       0x38 ./src/bcm2835.o
+                0x00010fb4                bcm2835_gpio_afen
+ .text.bcm2835_gpio_clr_afen
+                0x00010fec       0x38 ./src/bcm2835.o
+                0x00010fec                bcm2835_gpio_clr_afen
+ .text.bcm2835_gpio_pud
+                0x00011024       0x18 ./src/bcm2835.o
+                0x00011024                bcm2835_gpio_pud
+ .text.bcm2835_gpio_pudclk
+                0x0001103c       0x30 ./src/bcm2835.o
+                0x0001103c                bcm2835_gpio_pudclk
+ .text.bcm2835_gpio_pad
+                0x0001106c       0x20 ./src/bcm2835.o
+                0x0001106c                bcm2835_gpio_pad
+ .text.bcm2835_gpio_set_pad
+                0x0001108c       0x24 ./src/bcm2835.o
+                0x0001108c                bcm2835_gpio_set_pad
+ .text.bcm2835_delay
+                0x000110b0       0x74 ./src/bcm2835.o
+                0x000110b0                bcm2835_delay
+ .text.bcm2835_delayMicroseconds
+                0x00011124       0x6c ./src/bcm2835.o
+                0x00011124                bcm2835_delayMicroseconds
+ .text.bcm2835_gpio_write
+                0x00011190       0x34 ./src/bcm2835.o
+                0x00011190                bcm2835_gpio_write
+ .text.bcm2835_gpio_write_multi
+                0x000111c4       0x24 ./src/bcm2835.o
+                0x000111c4                bcm2835_gpio_write_multi
+ .text.bcm2835_gpio_write_mask
+                0x000111e8       0x28 ./src/bcm2835.o
+                0x000111e8                bcm2835_gpio_write_mask
+ .text.bcm2835_gpio_set_pud
+                0x00011210      0x108 ./src/bcm2835.o
+                0x00011210                bcm2835_gpio_set_pud
+ .text.bcm2835_spi_begin
+                0x00011318       0xac ./src/bcm2835.o
+                0x00011318                bcm2835_spi_begin
+ .text.bcm2835_spi_end
+                0x000113c4       0x74 ./src/bcm2835.o
+                0x000113c4                bcm2835_spi_end
+ .text.bcm2835_spi_setBitOrder
+                0x00011438        0x4 ./src/bcm2835.o
+                0x00011438                bcm2835_spi_setBitOrder
+ .text.bcm2835_spi_setClockDivider
+                0x0001143c       0x18 ./src/bcm2835.o
+                0x0001143c                bcm2835_spi_setClockDivider
+ .text.bcm2835_spi_setDataMode
+                0x00011454       0x30 ./src/bcm2835.o
+                0x00011454                bcm2835_spi_setDataMode
+ .text.bcm2835_spi_transfer
+                0x00011484       0x74 ./src/bcm2835.o
+                0x00011484                bcm2835_spi_transfer
+ .text.bcm2835_spi_transfernb
+                0x000114f8      0x108 ./src/bcm2835.o
+                0x000114f8                bcm2835_spi_transfernb
+ .text.bcm2835_spi_writenb
+                0x00011600       0xc0 ./src/bcm2835.o
+                0x00011600                bcm2835_spi_writenb
+ .text.bcm2835_spi_transfern
+                0x000116c0        0xc ./src/bcm2835.o
+                0x000116c0                bcm2835_spi_transfern
+ .text.bcm2835_spi_chipSelect
+                0x000116cc       0x2c ./src/bcm2835.o
+                0x000116cc                bcm2835_spi_chipSelect
+ .text.bcm2835_spi_setChipSelectPolarity
+                0x000116f8       0x3c ./src/bcm2835.o
+                0x000116f8                bcm2835_spi_setChipSelectPolarity
+ .text.bcm2835_i2c_begin
+                0x00011734       0x94 ./src/bcm2835.o
+                0x00011734                bcm2835_i2c_begin
+ .text.bcm2835_i2c_end
+                0x000117c8       0x38 ./src/bcm2835.o
+                0x000117c8                bcm2835_i2c_end
+ .text.bcm2835_i2c_setSlaveAddress
+                0x00011800       0x18 ./src/bcm2835.o
+                0x00011800                bcm2835_i2c_setSlaveAddress
+ .text.bcm2835_i2c_setClockDivider
+                0x00011818       0x54 ./src/bcm2835.o
+                0x00011818                bcm2835_i2c_setClockDivider
+ .text.bcm2835_i2c_set_baudrate
+                0x0001186c       0x68 ./src/bcm2835.o
+                0x0001186c                bcm2835_i2c_set_baudrate
+ .text.bcm2835_i2c_write
+                0x000118d4      0x11c ./src/bcm2835.o
+                0x000118d4                bcm2835_i2c_write
+ .text.bcm2835_i2c_read
+                0x000119f0      0x10c ./src/bcm2835.o
+                0x000119f0                bcm2835_i2c_read
+ .text.bcm2835_i2c_read_register_rs
+                0x00011afc      0x1c8 ./src/bcm2835.o
+                0x00011afc                bcm2835_i2c_read_register_rs
+ .text.bcm2835_i2c_write_read_rs
+                0x00011cc4      0x1e8 ./src/bcm2835.o
+                0x00011cc4                bcm2835_i2c_write_read_rs
+ .text.bcm2835_st_read
+                0x00011eac       0x2c ./src/bcm2835.o
+                0x00011eac                bcm2835_st_read
+ .text.bcm2835_st_delay
+                0x00011ed8       0x48 ./src/bcm2835.o
+                0x00011ed8                bcm2835_st_delay
+ .text.bcm2835_pwm_set_clock
+                0x00011f20      0x12c ./src/bcm2835.o
+                0x00011f20                bcm2835_pwm_set_clock
+ .text.bcm2835_pwm_set_mode
+                0x0001204c       0x68 ./src/bcm2835.o
+                0x0001204c                bcm2835_pwm_set_mode
+ .text.bcm2835_pwm_set_range
+                0x000120b4       0x34 ./src/bcm2835.o
+                0x000120b4                bcm2835_pwm_set_range
+ .text.bcm2835_pwm_set_data
+                0x000120e8       0x34 ./src/bcm2835.o
+                0x000120e8                bcm2835_pwm_set_data
+ .text.bcm2835_aux_muart_init
+                0x0001211c       0x9c ./src/bcm2835.o
+                0x0001211c                bcm2835_aux_muart_init
+ .text.bcm2835_aux_muart_transfer
+                0x000121b8       0x24 ./src/bcm2835.o
+                0x000121b8                bcm2835_aux_muart_transfer
+ .text.bcm2835_aux_muart_transfernb
+                0x000121dc       0x70 ./src/bcm2835.o
+                0x000121dc                bcm2835_aux_muart_transfernb
+ .text.bcm2835_aux_muart_transfer_hex
+                0x0001224c       0x68 ./src/bcm2835.o
+                0x0001224c                bcm2835_aux_muart_transfer_hex
+ .text.bcm2835_aux_muart_transfer_hexnl
+                0x000122b4       0x98 ./src/bcm2835.o
+                0x000122b4                bcm2835_aux_muart_transfer_hexnl
+ .text.bcm2835_mail_write
+                0x0001234c       0x30 ./src/bcm2835.o
+                0x0001234c                bcm2835_mail_write
+ .text.bcm2835_mail_read
+                0x0001237c       0x30 ./src/bcm2835.o
+                0x0001237c                bcm2835_mail_read
+ .text.bcm2835_fb_init
+                0x000123ac      0x164 ./src/bcm2835.o
+                0x000123ac                bcm2835_fb_init
+ .text.bcm2835_init
+                0x00012510       0xd4 ./src/bcm2835.o
+                0x00012510                bcm2835_init
+ .text.bcm2835_close
+                0x000125e4        0x8 ./src/bcm2835.o
+                0x000125e4                bcm2835_close
+ .text          0x000125ec        0x0 ./src/main.o
+ .text.not_main
+                0x000125ec      0x104 ./src/main.o
+                0x000125ec                not_main
+ .text          0x000126f0        0x0 ./src/periph.o
+ .text.uart_lcr
+                0x000126f0        0xc ./src/periph.o
+                0x000126f0                uart_lcr
+ .text.uart_recv
+                0x000126fc       0x2c ./src/periph.o
+                0x000126fc                uart_recv
+ .text.uart_check
+                0x00012728       0x18 ./src/periph.o
+                0x00012728                uart_check
+ .text.uart_send
+                0x00012740       0x30 ./src/periph.o
+                0x00012740                uart_send
+ .text.uart_flush
+                0x00012770       0x1c ./src/periph.o
+                0x00012770                uart_flush
+ .text.hexstrings
+                0x0001278c       0x78 ./src/periph.o
+                0x0001278c                hexstrings
+ .text.hexstring
+                0x00012804       0xc0 ./src/periph.o
+                0x00012804                hexstring
+ .text.uart_sendC
+                0x000128c4       0x94 ./src/periph.o
+                0x000128c4                uart_sendC
+ .text.uart_init
+                0x00012958      0x118 ./src/periph.o
+                0x00012958                uart_init
  .text.prepare_led_ok
-                0x00012a80       0xb0 ./src/periph.o
-                0x00012a80                prepare_led_ok
- .text          0x00012b30        0x0 ./src/raspi.o
+                0x00012a70       0xb0 ./src/periph.o
+                0x00012a70                prepare_led_ok
+ .text          0x00012b20        0x0 ./src/raspi.o
 
-.rodata.str1.4  0x00012b30       0x10
+.rodata.str1.4  0x00012b20       0x48
  .rodata.str1.4
-                0x00012b30       0x10 ./src/periph.o
+                0x00012b20       0x38 ./src/main.o
+ .rodata.str1.4
+                0x00012b58       0x10 ./src/periph.o
 
-.data           0x00012b40        0x0
- .data          0x00012b40        0x0 ./src/Asetup.o
- .data          0x00012b40        0x0 ./src/Avectors.o
- .data          0x00012b40        0x0 ./src/FrameBuffer.o
- .data          0x00012b40        0x0 ./src/GPIO.o
- .data          0x00012b40        0x0 ./src/Mailbox.o
- .data          0x00012b40        0x0 ./src/SystemTimer.o
- .data          0x00012b40        0x0 ./src/bcm2835.o
- .data          0x00012b40        0x0 ./src/main.o
- .data          0x00012b40        0x0 ./src/periph.o
- .data          0x00012b40        0x0 ./src/raspi.o
+.data           0x00012b68        0x0
+ .data          0x00012b68        0x0 ./src/Asetup.o
+ .data          0x00012b68        0x0 ./src/Avectors.o
+ .data          0x00012b68        0x0 ./src/FrameBuffer.o
+ .data          0x00012b68        0x0 ./src/GPIO.o
+ .data          0x00012b68        0x0 ./src/Mailbox.o
+ .data          0x00012b68        0x0 ./src/SystemTimer.o
+ .data          0x00012b68        0x0 ./src/armtimer.o
+ .data          0x00012b68        0x0 ./src/bcm2835.o
+ .data          0x00012b68        0x0 ./src/main.o
+ .data          0x00012b68        0x0 ./src/periph.o
+ .data          0x00012b68        0x0 ./src/raspi.o
 
-.igot.plt       0x00012b40        0x0
+.igot.plt       0x00012b68        0x0
  .igot.plt      0x00000000        0x0 ./src/Asetup.o
 
 .data.bcm2835_pads
-                0x00012b40        0x4
+                0x00012b68        0x4
  .data.bcm2835_pads
-                0x00012b40        0x4 ./src/bcm2835.o
-                0x00012b40                bcm2835_pads
+                0x00012b68        0x4 ./src/bcm2835.o
+                0x00012b68                bcm2835_pads
 
 .data.bcm2835_aux
-                0x00012b44        0x4
+                0x00012b6c        0x4
  .data.bcm2835_aux
-                0x00012b44        0x4 ./src/bcm2835.o
-                0x00012b44                bcm2835_aux
+                0x00012b6c        0x4 ./src/bcm2835.o
+                0x00012b6c                bcm2835_aux
 
 .data.bcm2835_mail
-                0x00012b48        0x4
+                0x00012b70        0x4
  .data.bcm2835_mail
-                0x00012b48        0x4 ./src/bcm2835.o
-                0x00012b48                bcm2835_mail
+                0x00012b70        0x4 ./src/bcm2835.o
+                0x00012b70                bcm2835_mail
 
 .data.bcm2835_st
-                0x00012b4c        0x4
+                0x00012b74        0x4
  .data.bcm2835_st
-                0x00012b4c        0x4 ./src/bcm2835.o
-                0x00012b4c                bcm2835_st
+                0x00012b74        0x4 ./src/bcm2835.o
+                0x00012b74                bcm2835_st
 
 .data.bcm2835_gpio
-                0x00012b50        0x4
+                0x00012b78        0x4
  .data.bcm2835_gpio
-                0x00012b50        0x4 ./src/bcm2835.o
-                0x00012b50                bcm2835_gpio
+                0x00012b78        0x4 ./src/bcm2835.o
+                0x00012b78                bcm2835_gpio
 
 .data.bcm2835_clk
-                0x00012b54        0x4
+                0x00012b7c        0x4
  .data.bcm2835_clk
-                0x00012b54        0x4 ./src/bcm2835.o
-                0x00012b54                bcm2835_clk
+                0x00012b7c        0x4 ./src/bcm2835.o
+                0x00012b7c                bcm2835_clk
 
 .data.bcm2835_bsc0
-                0x00012b58        0x4
+                0x00012b80        0x4
  .data.bcm2835_bsc0
-                0x00012b58        0x4 ./src/bcm2835.o
-                0x00012b58                bcm2835_bsc0
+                0x00012b80        0x4 ./src/bcm2835.o
+                0x00012b80                bcm2835_bsc0
 
 .data.bcm2835_bsc1
-                0x00012b5c        0x4
+                0x00012b84        0x4
  .data.bcm2835_bsc1
-                0x00012b5c        0x4 ./src/bcm2835.o
-                0x00012b5c                bcm2835_bsc1
+                0x00012b84        0x4 ./src/bcm2835.o
+                0x00012b84                bcm2835_bsc1
 
 .data.bcm2835_spi0
-                0x00012b60        0x4
+                0x00012b88        0x4
  .data.bcm2835_spi0
-                0x00012b60        0x4 ./src/bcm2835.o
-                0x00012b60                bcm2835_spi0
+                0x00012b88        0x4 ./src/bcm2835.o
+                0x00012b88                bcm2835_spi0
 
 .data.bcm2835_pwm
-                0x00012b64        0x4
+                0x00012b8c        0x4
  .data.bcm2835_pwm
-                0x00012b64        0x4 ./src/bcm2835.o
-                0x00012b64                bcm2835_pwm
+                0x00012b8c        0x4 ./src/bcm2835.o
+                0x00012b8c                bcm2835_pwm
 
-.glue_7         0x00012b68        0x0
+.glue_7         0x00012b90        0x0
  .glue_7        0x00000000        0x0 linker stubs
 
-.glue_7t        0x00012b68        0x0
+.glue_7t        0x00012b90        0x0
  .glue_7t       0x00000000        0x0 linker stubs
 
-.vfp11_veneer   0x00012b68        0x0
+.vfp11_veneer   0x00012b90        0x0
  .vfp11_veneer  0x00000000        0x0 linker stubs
 
-.v4_bx          0x00012b68        0x0
+.v4_bx          0x00012b90        0x0
  .v4_bx         0x00000000        0x0 linker stubs
 
-.iplt           0x00012b68        0x0
+.iplt           0x00012b90        0x0
  .iplt          0x00000000        0x0 ./src/Asetup.o
 
-.rel.dyn        0x00012b68        0x0
+.rel.dyn        0x00012b90        0x0
  .rel.iplt      0x00000000        0x0 ./src/Asetup.o
 
-.bss            0x00012b68       0x20
+.bss            0x00012b90       0x20
  *(.bss*)
- .bss           0x00012b68        0x0 ./src/Asetup.o
- .bss           0x00012b68        0x0 ./src/Avectors.o
- .bss           0x00012b68        0x0 ./src/FrameBuffer.o
- .bss           0x00012b68        0x0 ./src/GPIO.o
- .bss           0x00012b68        0x0 ./src/Mailbox.o
- .bss           0x00012b68        0x0 ./src/SystemTimer.o
- .bss           0x00012b68        0x0 ./src/bcm2835.o
+ .bss           0x00012b90        0x0 ./src/Asetup.o
+ .bss           0x00012b90        0x0 ./src/Avectors.o
+ .bss           0x00012b90        0x0 ./src/FrameBuffer.o
+ .bss           0x00012b90        0x0 ./src/GPIO.o
+ .bss           0x00012b90        0x0 ./src/Mailbox.o
+ .bss           0x00012b90        0x0 ./src/SystemTimer.o
+ .bss           0x00012b90        0x0 ./src/armtimer.o
+ .bss           0x00012b90        0x0 ./src/bcm2835.o
  .bss.i2c_byte_wait_us
-                0x00012b68        0x4 ./src/bcm2835.o
- .bss.debug     0x00012b6c        0x1 ./src/bcm2835.o
- .bss           0x00012b6d        0x0 ./src/main.o
- .bss           0x00012b6d        0x0 ./src/periph.o
- .bss           0x00012b6d        0x0 ./src/raspi.o
- *fill*         0x00012b6d        0x3 
- COMMON         0x00012b70       0x18 ./src/FrameBuffer.o
-                0x00012b70                fb_info
+                0x00012b90        0x4 ./src/bcm2835.o
+ .bss.debug     0x00012b94        0x1 ./src/bcm2835.o
+ .bss           0x00012b95        0x0 ./src/main.o
+ .bss           0x00012b95        0x0 ./src/periph.o
+ .bss           0x00012b95        0x0 ./src/raspi.o
+ *fill*         0x00012b95        0x3 
+ COMMON         0x00012b98       0x18 ./src/FrameBuffer.o
+                0x00012b98                fb_info
 OUTPUT(Radecki_V0.elf elf32-littlearm)
 
 .ARM.attributes
@@ -566,13 +576,15 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
  .ARM.attributes
                 0x00000109       0x3d ./src/SystemTimer.o
  .ARM.attributes
-                0x00000146       0x3d ./src/bcm2835.o
+                0x00000146       0x3d ./src/armtimer.o
  .ARM.attributes
-                0x00000183       0x3d ./src/main.o
+                0x00000183       0x3d ./src/bcm2835.o
  .ARM.attributes
-                0x000001c0       0x3d ./src/periph.o
+                0x000001c0       0x3d ./src/main.o
  .ARM.attributes
-                0x000001fd       0x3d ./src/raspi.o
+                0x000001fd       0x3d ./src/periph.o
+ .ARM.attributes
+                0x0000023a       0x3d ./src/raspi.o
 
 .comment        0x00000000       0x70
  .comment       0x00000000       0x70 ./src/FrameBuffer.o
@@ -580,48 +592,52 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
  .comment       0x00000000       0x71 ./src/GPIO.o
  .comment       0x00000000       0x71 ./src/Mailbox.o
  .comment       0x00000000       0x71 ./src/SystemTimer.o
+ .comment       0x00000000       0x71 ./src/armtimer.o
  .comment       0x00000000       0x71 ./src/bcm2835.o
  .comment       0x00000000       0x71 ./src/main.o
  .comment       0x00000000       0x71 ./src/periph.o
  .comment       0x00000000       0x71 ./src/raspi.o
 
-.debug_line     0x00000000     0x1a6f
+.debug_line     0x00000000     0x1ae3
  .debug_line    0x00000000       0x6a ./src/Asetup.o
  .debug_line    0x0000006a       0x49 ./src/Avectors.o
  .debug_line    0x000000b3      0x1ce ./src/FrameBuffer.o
  .debug_line    0x00000281       0xcf ./src/GPIO.o
  .debug_line    0x00000350       0xaf ./src/Mailbox.o
  .debug_line    0x000003ff       0x73 ./src/SystemTimer.o
- .debug_line    0x00000472     0x10b6 ./src/bcm2835.o
- .debug_line    0x00001528      0x2dd ./src/main.o
- .debug_line    0x00001805      0x221 ./src/periph.o
- .debug_line    0x00001a26       0x49 ./src/raspi.o
+ .debug_line    0x00000472       0xc9 ./src/armtimer.o
+ .debug_line    0x0000053b     0x10b6 ./src/bcm2835.o
+ .debug_line    0x000015f1      0x325 ./src/main.o
+ .debug_line    0x00001916      0x184 ./src/periph.o
+ .debug_line    0x00001a9a       0x49 ./src/raspi.o
 
-.debug_info     0x00000000     0x758a
+.debug_info     0x00000000     0x772a
  .debug_info    0x00000000       0x7c ./src/Asetup.o
  .debug_info    0x0000007c       0x7e ./src/Avectors.o
  .debug_info    0x000000fa      0x42f ./src/FrameBuffer.o
  .debug_info    0x00000529      0x276 ./src/GPIO.o
  .debug_info    0x0000079f      0x18a ./src/Mailbox.o
  .debug_info    0x00000929       0xf9 ./src/SystemTimer.o
- .debug_info    0x00000a22     0x5f6b ./src/bcm2835.o
- .debug_info    0x0000698d      0x1f7 ./src/main.o
- .debug_info    0x00006b84      0x99e ./src/periph.o
- .debug_info    0x00007522       0x68 ./src/raspi.o
+ .debug_info    0x00000a22      0x2fd ./src/armtimer.o
+ .debug_info    0x00000d1f     0x5f6b ./src/bcm2835.o
+ .debug_info    0x00006c8a      0x3c3 ./src/main.o
+ .debug_info    0x0000704d      0x675 ./src/periph.o
+ .debug_info    0x000076c2       0x68 ./src/raspi.o
 
-.debug_abbrev   0x00000000      0xc74
+.debug_abbrev   0x00000000      0xd64
  .debug_abbrev  0x00000000       0x14 ./src/Asetup.o
  .debug_abbrev  0x00000014       0x14 ./src/Avectors.o
  .debug_abbrev  0x00000028      0x214 ./src/FrameBuffer.o
  .debug_abbrev  0x0000023c      0x16b ./src/GPIO.o
  .debug_abbrev  0x000003a7       0xe2 ./src/Mailbox.o
  .debug_abbrev  0x00000489       0x97 ./src/SystemTimer.o
- .debug_abbrev  0x00000520      0x3b5 ./src/bcm2835.o
- .debug_abbrev  0x000008d5       0xfc ./src/main.o
- .debug_abbrev  0x000009d1      0x27a ./src/periph.o
- .debug_abbrev  0x00000c4b       0x29 ./src/raspi.o
+ .debug_abbrev  0x00000520      0x162 ./src/armtimer.o
+ .debug_abbrev  0x00000682      0x3b5 ./src/bcm2835.o
+ .debug_abbrev  0x00000a37      0x12b ./src/main.o
+ .debug_abbrev  0x00000b62      0x1d9 ./src/periph.o
+ .debug_abbrev  0x00000d3b       0x29 ./src/raspi.o
 
-.debug_aranges  0x00000000      0x428
+.debug_aranges  0x00000000      0x440
  .debug_aranges
                 0x00000000       0x20 ./src/Asetup.o
  .debug_aranges
@@ -635,32 +651,35 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
  .debug_aranges
                 0x000000d8       0x20 ./src/SystemTimer.o
  .debug_aranges
-                0x000000f8      0x258 ./src/bcm2835.o
+                0x000000f8       0x50 ./src/armtimer.o
  .debug_aranges
-                0x00000350       0x20 ./src/main.o
+                0x00000148      0x258 ./src/bcm2835.o
  .debug_aranges
-                0x00000370       0xa0 ./src/periph.o
+                0x000003a0       0x20 ./src/main.o
  .debug_aranges
-                0x00000410       0x18 ./src/raspi.o
+                0x000003c0       0x68 ./src/periph.o
+ .debug_aranges
+                0x00000428       0x18 ./src/raspi.o
 
-.debug_loc      0x00000000     0x35f6
+.debug_loc      0x00000000     0x35d8
  .debug_loc     0x00000000      0x510 ./src/FrameBuffer.o
  .debug_loc     0x00000510      0x17a ./src/GPIO.o
  .debug_loc     0x0000068a       0x83 ./src/Mailbox.o
  .debug_loc     0x0000070d       0x7a ./src/SystemTimer.o
  .debug_loc     0x00000787     0x2bbc ./src/bcm2835.o
- .debug_loc     0x00003343      0x2b3 ./src/periph.o
+ .debug_loc     0x00003343      0x295 ./src/periph.o
 
-.debug_ranges   0x00000000      0xfb8
+.debug_ranges   0x00000000      0xf90
  .debug_ranges  0x00000000       0x60 ./src/FrameBuffer.o
  .debug_ranges  0x00000060       0x40 ./src/GPIO.o
  .debug_ranges  0x000000a0       0x18 ./src/Mailbox.o
  .debug_ranges  0x000000b8       0x10 ./src/SystemTimer.o
- .debug_ranges  0x000000c8      0xda8 ./src/bcm2835.o
- .debug_ranges  0x00000e70       0x10 ./src/main.o
- .debug_ranges  0x00000e80      0x138 ./src/periph.o
+ .debug_ranges  0x000000c8       0x40 ./src/armtimer.o
+ .debug_ranges  0x00000108      0xda8 ./src/bcm2835.o
+ .debug_ranges  0x00000eb0       0x10 ./src/main.o
+ .debug_ranges  0x00000ec0       0xd0 ./src/periph.o
 
-.debug_macro    0x00000000     0x1ddb
+.debug_macro    0x00000000     0x1e28
  .debug_macro   0x00000000       0x49 ./src/FrameBuffer.o
  .debug_macro   0x00000049      0x862 ./src/FrameBuffer.o
  .debug_macro   0x000008ab       0x76 ./src/FrameBuffer.o
@@ -673,28 +692,31 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
  .debug_macro   0x00000d6d       0x45 ./src/Mailbox.o
  .debug_macro   0x00000db2       0x1c ./src/Mailbox.o
  .debug_macro   0x00000dce       0x2d ./src/SystemTimer.o
- .debug_macro   0x00000dfb       0x1a ./src/bcm2835.o
- .debug_macro   0x00000e15      0x4b8 ./src/bcm2835.o
- .debug_macro   0x000012cd      0x119 ./src/main.o
- .debug_macro   0x000013e6       0x58 ./src/main.o
- .debug_macro   0x0000143e       0x22 ./src/main.o
- .debug_macro   0x00001460       0x35 ./src/main.o
- .debug_macro   0x00001495       0x9c ./src/main.o
- .debug_macro   0x00001531      0x16d ./src/main.o
- .debug_macro   0x0000169e       0x4a ./src/main.o
- .debug_macro   0x000016e8       0x52 ./src/main.o
- .debug_macro   0x0000173a       0x16 ./src/main.o
- .debug_macro   0x00001750       0x43 ./src/main.o
- .debug_macro   0x00001793      0x180 ./src/main.o
- .debug_macro   0x00001913      0x27a ./src/main.o
- .debug_macro   0x00001b8d       0x10 ./src/main.o
- .debug_macro   0x00001b9d       0x35 ./src/main.o
- .debug_macro   0x00001bd2       0xdc ./src/main.o
- .debug_macro   0x00001cae       0x33 ./src/periph.o
- .debug_macro   0x00001ce1       0xd6 ./src/periph.o
- .debug_macro   0x00001db7       0x24 ./src/raspi.o
+ .debug_macro   0x00000dfb       0x2a ./src/armtimer.o
+ .debug_macro   0x00000e25       0x82 ./src/armtimer.o
+ .debug_macro   0x00000ea7       0x1a ./src/bcm2835.o
+ .debug_macro   0x00000ec1      0x4b8 ./src/bcm2835.o
+ .debug_macro   0x00001379      0x122 ./src/main.o
+ .debug_macro   0x0000149b       0x58 ./src/main.o
+ .debug_macro   0x000014f3       0x22 ./src/main.o
+ .debug_macro   0x00001515       0x35 ./src/main.o
+ .debug_macro   0x0000154a       0x9c ./src/main.o
+ .debug_macro   0x000015e6      0x16d ./src/main.o
+ .debug_macro   0x00001753       0x4a ./src/main.o
+ .debug_macro   0x0000179d       0x52 ./src/main.o
+ .debug_macro   0x000017ef       0x16 ./src/main.o
+ .debug_macro   0x00001805       0x43 ./src/main.o
+ .debug_macro   0x00001848      0x180 ./src/main.o
+ .debug_macro   0x000019c8      0x27a ./src/main.o
+ .debug_macro   0x00001c42       0x10 ./src/main.o
+ .debug_macro   0x00001c52       0x35 ./src/main.o
+ .debug_macro   0x00001c87       0x64 ./src/main.o
+ .debug_macro   0x00001ceb       0x88 ./src/main.o
+ .debug_macro   0x00001d73       0x33 ./src/periph.o
+ .debug_macro   0x00001da6       0x5e ./src/periph.o
+ .debug_macro   0x00001e04       0x24 ./src/raspi.o
 
-.debug_str      0x00000000     0x7b61
+.debug_str      0x00000000     0x7b80
  .debug_str     0x00000000     0x2ddc ./src/FrameBuffer.o
                                0x2e68 (size before relaxing)
  .debug_str     0x00002ddc      0x149 ./src/GPIO.o
@@ -703,20 +725,23 @@ OUTPUT(Radecki_V0.elf elf32-littlearm)
                                0x2e08 (size before relaxing)
  .debug_str     0x00002f54       0x3b ./src/SystemTimer.o
                                0x28d1 (size before relaxing)
- .debug_str     0x00002f8f     0x1f65 ./src/bcm2835.o
+ .debug_str     0x00002f8f      0x4dd ./src/armtimer.o
+                               0x2a0c (size before relaxing)
+ .debug_str     0x0000346c     0x1f65 ./src/bcm2835.o
                                0x44b0 (size before relaxing)
- .debug_str     0x00004ef4     0x2a45 ./src/main.o
-                               0x592d (size before relaxing)
- .debug_str     0x00007939      0x219 ./src/periph.o
-                               0x30aa (size before relaxing)
- .debug_str     0x00007b52        0xf ./src/raspi.o
+ .debug_str     0x000053d1     0x2747 ./src/main.o
+                               0x59db (size before relaxing)
+ .debug_str     0x00007b18       0x59 ./src/periph.o
+                               0x2c07 (size before relaxing)
+ .debug_str     0x00007b71        0xf ./src/raspi.o
                                0x27ba (size before relaxing)
 
-.debug_frame    0x00000000      0x95c
+.debug_frame    0x00000000      0x968
  .debug_frame   0x00000000       0x94 ./src/FrameBuffer.o
  .debug_frame   0x00000094       0x70 ./src/GPIO.o
  .debug_frame   0x00000104       0x48 ./src/Mailbox.o
  .debug_frame   0x0000014c       0x2c ./src/SystemTimer.o
- .debug_frame   0x00000178      0x5f0 ./src/bcm2835.o
- .debug_frame   0x00000768       0x2c ./src/main.o
- .debug_frame   0x00000794      0x1c8 ./src/periph.o
+ .debug_frame   0x00000178       0x9c ./src/armtimer.o
+ .debug_frame   0x00000214      0x5f0 ./src/bcm2835.o
+ .debug_frame   0x00000804       0x30 ./src/main.o
+ .debug_frame   0x00000834      0x134 ./src/periph.o
