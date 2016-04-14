@@ -6,11 +6,12 @@
 #include "string.h"
 #include "Mailbox.h"
 #include "periph.h"
+#include "armtimer.h"
 
 extern void BRANCHTO();
 extern void rand();
 extern void _enable_interrupts();
-extern void takasobiefunkcjadlatest();
+
 __attribute__((no_instrument_function))  VOID not_main(VOID)
 {
 
@@ -33,9 +34,16 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 		wait(DELAY_100_ms);
 
 	}
-
-
-
+	uart_sendC("Testuje arm_timer");
+	arm_timer_init();
+	for(UINT32 i = 0; i <= 10; i++){
+		hexstring(arm_timer_tick());
+	}
+	uart_sendC("Reload Arm Timera");
+	RPI_GetArmTimer()->Reload = 0x10000;
+	for(UINT32 i = 0; i <= 10; i++){
+			hexstring(arm_timer_tick());
+		}
 
 	BRANCHTO(0x8000);
 

@@ -8,6 +8,7 @@ C_SRCS += \
 ../src/GPIO.c \
 ../src/Mailbox.c \
 ../src/SystemTimer.c \
+../src/armtimer.c \
 ../src/bcm2835.c \
 ../src/main.c \
 ../src/periph.c \
@@ -24,6 +25,7 @@ OBJS += \
 ./src/GPIO.o \
 ./src/Mailbox.o \
 ./src/SystemTimer.o \
+./src/armtimer.o \
 ./src/bcm2835.o \
 ./src/main.o \
 ./src/periph.o \
@@ -38,6 +40,7 @@ C_DEPS += \
 ./src/GPIO.d \
 ./src/Mailbox.d \
 ./src/SystemTimer.d \
+./src/armtimer.d \
 ./src/bcm2835.d \
 ./src/main.d \
 ./src/periph.d \
