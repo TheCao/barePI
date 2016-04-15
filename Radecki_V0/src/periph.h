@@ -56,8 +56,11 @@ void uart_init ( void );
 
 
 // moje definicje
-
-
 void uart_sendC(char *buff);
-void prepare_led_ok(void);
+void prepare_led_act(void);
+void prepare_led_pwr(void);
+void led_act_ON(void);
+void led_act_OFF(void);
+void led_pwr_ON(void);
+void led_pwr_OFF(void);
 #endif /* PERIPH_H_ */

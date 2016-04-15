@@ -101,7 +101,7 @@ void uart_init ( void )
 }
 //------------------------------------------------------------------------
 
-void prepare_led_ok(void)
+void prepare_led_act(void)
 {
 	UINT32 ra;
 	ra=GET32(GPFSEL4); // GPIO Function Select 4
@@ -110,7 +110,33 @@ void prepare_led_ok(void)
     PUT32(GPFSEL4,ra);
     uart_sendC("LED_OK_Ready");
 }
+void prepare_led_pwr(void)
+{
+	UINT32 ra;
+	ra= GET32(GPFSEL3);
+	ra&=~(7<<15);
+	ra|=1<<15;
+	PUT32(GPFSEL3,ra);
+	uart_sendC("LED_PWR Ready");
+}
 
+void led_act_ON(void)
+{
+	PUT32(GPSET1,1<<15);
+}
+void led_act_OFF(void)
+{
+	PUT32(GPCLR1,1<<15);
+}
+void led_pwr_ON(void)
+{
+	PUT32(GPSET1,1<<(3));
+}
+
+void led_pwr_OFF(void)
+{
+	PUT32(GPCLR1,1<<(35-32));
+}
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 

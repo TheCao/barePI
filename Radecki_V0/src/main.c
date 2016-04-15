@@ -17,7 +17,8 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 
 
 	long as;
-	prepare_led_ok();
+	prepare_led_act();
+	prepare_led_pwr();
 	wait(DELAY_10_ms); // wymagane ze wzgledu na uart_sendC, ktore nie wyrabia po wyjsciu z funkcji
 	uart_init();
 
@@ -25,37 +26,20 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 
 	for(UINT32 i = 0; i < 10; i++)
 	{
-		PUT32(GPSET1,1<<15);
-
+		led_act_ON();
+		led_pwr_ON();
 		wait(DELAY_100_ms);
 
-		PUT32(GPCLR1,1<<15);
+		led_act_OFF();
+		led_pwr_OFF();
 
 		wait(DELAY_100_ms);
 
 	}
-	uart_sendC("Testuje arm_timer");
+	uart_sendC("ARM Timer interrupts");
+	_enable_interrupts;
 	arm_timer_init();
-	for(UINT32 i = 0; i <= 10; i++){
-		hexstring(arm_timer_tick());
-	}
-	uart_sendC("Reload Arm Timera");
-	RPI_GetArmTimer()->Reload = 0x10000;
-	for(UINT32 i = 0; i <= 10; i++){
-			hexstring(arm_timer_tick());
-		}
-	uart_sendC("Check wait func");
-	for(UINT32 i = 0; i < 10; i++)
-	{
-		PUT32(GPSET1,1<<15);
 
-		wait(DELAY_500_ms);
-
-		PUT32(GPCLR1,1<<15);
-
-		wait(DELAY_100_ms);
-
-	}
 	BRANCHTO(0x8000);
 
 
