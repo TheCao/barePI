@@ -5,46 +5,44 @@
 .global supervisor_sp
 
 asm_start:
+# Przygotowanie tablicy vektorow przerwan, nastepnie jest przeskok do resetu!!
+   ldr pc,reset_handler
+    ldr pc,undefined_handler
+    ldr pc,swi_handler
+    ldr pc,prefetch_handler
+    ldr pc,data_handler
+    ldr pc,hyp_handler
+    ldr pc,irq_handler
+    ldr pc,fiq_handler
+reset_handler:      .word reset
+undefined_handler:  .word hang
+swi_handler:        .word hang
+prefetch_handler:   .word hang
+data_handler:       .word hang
+hyp_handler:        .word hang
+irq_handler:        .word interrupt_vector
+fiq_handler:        .word hang
 
-   # initialize Stack pointer for exception modes
-   mrs r4, cpsr
-   bic r4, r4, #0x1f
+   #bl not_main
 
-   #FIQ Mode
-   orr r3, r4, #0x11
-   msr cpsr_c, r3
-   ldr sp, =exc_stack
+reset:
+    mov r0, $0x0000
+    mov r1, $0x10000
+    ldmia r1!, {r2,r3,r4,r5,r6,r7,r8,r9}
+    stmia r0!, {r2,r3,r4,r5,r6,r7,r8,r9}
+    ldmia r1!, {r2,r3,r4,r5,r6,r7,r8,r9}
+    stmia r0!, {r2,r3,r4,r5,r6,r7,r8,r9}
 
-   #IRQ Mode
-   orr r3, r4, #0x12
-   msr cpsr_c, r3
-   ldr sp, =exc_stack
+    mov sp, $0x10000
+    bl not_main
 
-   #ABORT Mode
-   orr r3, r4, #0x17
-   msr cpsr_c, r3
-   ldr sp, =exc_stack
+irq:
+    push {r0-r7, lr}
+    bl c_irq_handler
+    pop {r0-r7, lr}
+    subs pc,lr,#4
 
-   #UNDEFINED Mode
-   orr r3, r4, #0x1b
-   msr cpsr_c, r3
-   ldr sp, =exc_stack
 
-   # switch to supervisor mode
-   orr r3, r4, #0x13
-   msr cpsr_c, r3
-   
-   ldr sp, =temp_stack
-   
-   #
-   # Create the first stack frame.
-   #
-   mov fp, #0
-   mov ip, sp
-   push {fp, ip, lr, pc}
-   sub fp, ip, #4
-
-   bl not_main
 hang: b hang
 
 .globl MemoryBarrier

@@ -11,7 +11,10 @@
 extern void BRANCHTO();
 extern void rand();
 extern void _enable_interrupts();
-
+void c_irq_handler(void)
+{
+	uart_sendC("Interrupt");
+}
 __attribute__((no_instrument_function))  VOID not_main(VOID)
 {
 
@@ -37,9 +40,23 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 
 	}
 	uart_sendC("ARM Timer interrupts");
-	_enable_interrupts;
-	arm_timer_init();
+	for(volatile UINT32 i = 0; i < 4 ; i++)
+		{
+			uart_sendC("W petli for");
+			hexstring(i);
+			wait(DELAY_1_s);
+		}
 
+	RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
+	arm_timer_init();
+	_enable_interrupts();
+	uart_sendC("Wejscie w petle");
+	for(UINT32 i = 0; i < 10 ; i++)
+	{
+		uart_sendC("W petli for2");
+					hexstring(i);
+					wait(DELAY_1_s);
+	}
 	BRANCHTO(0x8000);
 
 

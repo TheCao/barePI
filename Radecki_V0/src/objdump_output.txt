@@ -1,0 +1,139 @@
+
+Asetup.o:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <asm_start>:
+.global exc_stack
+.global supervisor_sp
+
+asm_start:
+# Przygotowanie tablicy vektorow przerwan, nastepnie jest przeskok do resetu!!
+   ldr pc,reset_handler
+   0:	e59ff018 	ldr	pc, [pc, #24]	; 20 <reset_handler>
+    ldr pc,undefined_handler
+   4:	e59ff018 	ldr	pc, [pc, #24]	; 24 <undefined_handler>
+    ldr pc,swi_handler
+   8:	e59ff018 	ldr	pc, [pc, #24]	; 28 <swi_handler>
+    ldr pc,prefetch_handler
+   c:	e59ff018 	ldr	pc, [pc, #24]	; 2c <prefetch_handler>
+    ldr pc,data_handler
+  10:	e59ff018 	ldr	pc, [pc, #24]	; 30 <data_handler>
+    ldr pc,hyp_handler
+  14:	e59ff018 	ldr	pc, [pc, #24]	; 34 <hyp_handler>
+    ldr pc,irq_handler
+  18:	e59ff018 	ldr	pc, [pc, #24]	; 38 <irq_handler>
+    ldr pc,fiq_handler
+  1c:	e59ff018 	ldr	pc, [pc, #24]	; 3c <fiq_handler>
+
+00000020 <reset_handler>:
+  20:	00000040 	.word	0x00000040
+
+00000024 <undefined_handler>:
+  24:	00000070 	.word	0x00000070
+
+00000028 <swi_handler>:
+  28:	00000070 	.word	0x00000070
+
+0000002c <prefetch_handler>:
+  2c:	00000070 	.word	0x00000070
+
+00000030 <data_handler>:
+  30:	00000070 	.word	0x00000070
+
+00000034 <hyp_handler>:
+  34:	00000070 	.word	0x00000070
+
+00000038 <irq_handler>:
+  38:	00000000 	.word	0x00000000
+
+0000003c <fiq_handler>:
+  3c:	00000070 	.word	0x00000070
+
+00000040 <reset>:
+fiq_handler:        .word hang
+
+   #bl not_main
+
+reset:
+    mov r0, $0x0000
+  40:	e3a00000 	mov	r0, #0
+    mov r1, $0x10000
+  44:	e3a01801 	mov	r1, #65536	; 0x10000
+    ldmia r1!, {r2,r3,r4,r5,r6,r7,r8,r9}
+  48:	e8b103fc 	ldm	r1!, {r2, r3, r4, r5, r6, r7, r8, r9}
+    stmia r0!, {r2,r3,r4,r5,r6,r7,r8,r9}
+  4c:	e8a003fc 	stmia	r0!, {r2, r3, r4, r5, r6, r7, r8, r9}
+    ldmia r1!, {r2,r3,r4,r5,r6,r7,r8,r9}
+  50:	e8b103fc 	ldm	r1!, {r2, r3, r4, r5, r6, r7, r8, r9}
+    stmia r0!, {r2,r3,r4,r5,r6,r7,r8,r9}
+  54:	e8a003fc 	stmia	r0!, {r2, r3, r4, r5, r6, r7, r8, r9}
+
+    mov sp, $0x10000
+  58:	e3a0d801 	mov	sp, #65536	; 0x10000
+    bl not_main
+  5c:	ebfffffe 	bl	0 <not_main>
+
+00000060 <irq>:
+
+irq:
+    push {r0-r7, lr}
+  60:	e92d40ff 	push	{r0, r1, r2, r3, r4, r5, r6, r7, lr}
+    bl c_irq_handler
+  64:	ebfffffe 	bl	0 <c_irq_handler>
+    pop {r0-r7, lr}
+  68:	e8bd40ff 	pop	{r0, r1, r2, r3, r4, r5, r6, r7, lr}
+    subs pc,lr,#4
+  6c:	e25ef004 	subs	pc, lr, #4
+
+00000070 <hang>:
+
+
+hang: b hang
+  70:	eafffffe 	b	70 <hang>
+
+00000074 <MemoryBarrier>:
+
+.globl MemoryBarrier
+MemoryBarrier:
+	mcr	p15, 0, ip, c7, c5, 0		@ invalidate I cache
+  74:	ee07cf15 	mcr	15, 0, ip, cr7, cr5, {0}
+	mcr	p15, 0, ip, c7, c5, 6		@ invalidate BTB
+  78:	ee07cfd5 	mcr	15, 0, ip, cr7, cr5, {6}
+	mcr	p15, 0, ip, c7, c10, 4		@ drain write buffer
+  7c:	ee07cf9a 	mcr	15, 0, ip, cr7, cr10, {4}
+	mcr	p15, 0, ip, c7, c5, 4		@ prefetch flush
+  80:	ee07cf95 	mcr	15, 0, ip, cr7, cr5, {4}
+	mov	pc, lr
+  84:	e1a0f00e 	mov	pc, lr
+
+00000088 <dummy>:
+
+.globl dummy
+dummy:
+    bx lr
+  88:	e12fff1e 	bx	lr
+	...
+
+0000018c <temp_stack>:
+	...
+
+0000058c <exc_stack>:
+ 58c:	00000000 	.word	0x00000000
+
+00000590 <_enable_interrupts>:
+   .space 4
+
+#dodane do obslugi przerwan od Arm Timer
+ .globl _enable_interrupts
+ _enable_interrupts:
+ 	mrs r0,cpsr
+ 590:	e10f0000 	mrs	r0, CPSR
+ 	bic r0, r0, #0x80
+ 594:	e3c00080 	bic	r0, r0, #128	; 0x80
+ 	msr cpsr_c, r0
+ 598:	e121f000 	msr	CPSR_c, r0
+
+ 	mov pc, lr
+ 59c:	e1a0f00e 	mov	pc, lr
