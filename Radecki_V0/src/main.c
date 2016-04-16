@@ -57,6 +57,8 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 					hexstring(i);
 					wait(DELAY_1_s);
 	}
+	
+	//Test dla gita!
 	BRANCHTO(0x8000);
 
 
