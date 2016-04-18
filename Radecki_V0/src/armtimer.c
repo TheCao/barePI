@@ -78,7 +78,7 @@ unsigned int arm_timer_tick(void)
 void __attribute__ ((interrupt("IRQ"))) interrupt_vector(void)
 {
 	RPI_GetArmTimer()->IRQClear = 1;
-	hexstring(0x100000);
+	uart_sendC("ARM Timer Interrupt :) ");
 }
 
 

@@ -72,11 +72,6 @@ msr cpsr, r0
     mov sp, $0x10000
     bl not_main
 
-irq:
-    push {r0-r7, lr}
-    bl c_irq_handler
-    pop {r0-r7, lr}
-    subs pc,lr,#4
 
 
 hang: b hang
