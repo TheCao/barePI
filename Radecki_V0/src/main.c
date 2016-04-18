@@ -24,9 +24,13 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	/*RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
 	arm_timer_init();
 	_enable_interrupts();
+	RPI_GetArmTimer()->Load = 0x3000;
+
+	//na koniec potrzeba zatrzymac timer
+	arm_timer_stop();
 */
 
-	/*do{
+	do{
 			as=InitialiseFrameBuffer();
 	}
 	while (as!=0);
@@ -45,19 +49,8 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	*((long*)(fb_info.Pointer+(fb_info.Pitch*as)+(as+rand()%30)*4))=0x00000ff;
 	*((long*)(fb_info.Pointer+(fb_info.Pitch*as)+(as+rand()%130)*4))=0x0ff0000;
 	};
-*/
-	RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
-		arm_timer_init();
-		_enable_interrupts();
-		RPI_GetArmTimer()->Load = 0x3000;
-		uart_sendC("Wejscie w petle");
-		for(UINT32 i = 0; i < 10 ; i++)
-		{
-			uart_sendC("W petli for2");
-						hexstring(i);
-						wait(DELAY_1_s);
-		}
-		arm_timer_stop();
+
+
 
 	BRANCHTO(0x8000);
 

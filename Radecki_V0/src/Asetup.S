@@ -37,7 +37,7 @@ reset:
 	// switch to IRQ mode
 	mov r0, #(0x12 | 0x80 | 0x40)
 	msr cpsr_c, r0
-
+/*
 	// FIQ, ABORT, UNDEFINED modes nie wykorzystywane ale zdefiniowane
 	// switch to FIQ mode
 	mov r0, #(0x11 | 0x80 | 0x40)
@@ -50,7 +50,7 @@ reset:
 	//UNDEFINED mode
 	mov r0, #(0x1b | 0x80 | 0x40)
 	msr cpsr_c, r0
-
+*/
 	// set stack
 	mov sp, #0x7000
 
