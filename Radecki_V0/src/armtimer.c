@@ -46,7 +46,7 @@ void arm_timer_init(void)
 	/* Setup the system timer interrupt */
     /* Timer frequency = Clk/256 */
 	// Timer zlicza do zera, a potem leci od nowa
-	RPI_GetArmTimer()->Load = 0x5000;
+	//RPI_GetArmTimer()->Load = 0x5000;
 
 	// Setup ARM Timer
 	RPI_GetArmTimer()->Control =
@@ -54,6 +54,20 @@ void arm_timer_init(void)
 			RPI_ARM_TIMER_CTRL_ENABLE |
 			RPI_ARM_TIMER_CTRL_INT_ENABLE |
 			RPI_ARM_TIMER_CTRL_PRESCALE_256;
+}
+
+void arm_timer_stop(void)
+{
+	RPI_GetArmTimer()->Control =
+			RPI_ARM_TIMER_CTRL_DISABLE |
+			RPI_ARM_TIMER_CTRL_INT_DISABLE;
+}
+
+void arm_timer_restart(void)
+{
+	RPI_GetArmTimer()->Control =
+				RPI_ARM_TIMER_CTRL_ENABLE |
+				RPI_ARM_TIMER_CTRL_INT_ENABLE;
 }
 
 unsigned int arm_timer_tick(void)

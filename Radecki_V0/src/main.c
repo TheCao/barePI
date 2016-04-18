@@ -52,6 +52,7 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
 	arm_timer_init();
 	_enable_interrupts();
+	RPI_GetArmTimer()->Load = 0x3000;
 	uart_sendC("Wejscie w petle");
 	for(UINT32 i = 0; i < 10 ; i++)
 	{
@@ -59,6 +60,7 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 					hexstring(i);
 					wait(DELAY_1_s);
 	}
+	arm_timer_stop();
 	//TODO: Sprawdziæ czy kompilacja dzia³a tak jak dzia³a ostatnio.
 	BRANCHTO(0x8000);
 

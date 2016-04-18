@@ -94,6 +94,8 @@ typedef struct {
 
 unsigned int arm_timer_tick(void);
 void arm_timer_init(void);
+void arm_timer_stop(void);
+void arm_timer_restart(void);
 rpi_irq_controller_t* RPI_GetIrqController(void);
 rpi_arm_timer_t* RPI_GetArmTimer(void);
 

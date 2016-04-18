@@ -38,12 +38,36 @@ reset:
 	mov r0, #(0x12 | 0x80 | 0x40)
 	msr cpsr_c, r0
 
+	// FIQ, ABORT, UNDEFINED modes nie wykorzystywane ale zdefiniowane
+	// switch to FIQ mode
+	mov r0, #(0x11 | 0x80 | 0x40)
+	msr cpsr_c, r0
+
+	//ABORT mode
+	mov r0, #(0x17 | 0x80 | 0x40)
+	msr cpsr_c, r0
+
+	//UNDEFINED mode
+	mov r0, #(0x1b | 0x80 | 0x40)
+	msr cpsr_c, r0
+
 	// set stack
 	mov sp, #0x7000
 
 	// go back to supervisor mode
 	mov r0, #(0x13 | 0x80 | 0x40)
 	msr cpsr_c, r0
+
+	/* Wyzej to samo co V
+	mrs r0, cpsr
+bic r0, $0b11111111
+orr r0, $0b11010010
+msr cpsr, r0
+mov sp, $0x4000
+bic r0, $0b11111111
+orr r0, $0b11010011
+msr cpsr, r0
+	*/
 
     mov sp, $0x10000
     bl not_main
