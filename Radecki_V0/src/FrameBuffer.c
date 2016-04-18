@@ -195,6 +195,17 @@ VOID DrawLine(struct pixel Start,struct pixel End)
 	return;
 }
 
+void DrawRect(struct FrameBufferInfo fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, UINT32 colour)
+{
+	for(long as=0;as<dx;as++) //szerokosc
+		{
+			for(long bs=0;bs<500;bs++) // wysokosc
+				{
+				*((long*)(fb_info.Pointer+(x0*4)+(4*y0*fb_info.Width)+(as*4)+(dy*4*fb_info.Width)))=colour;
+				}
+		}
+}
+
 // Primitives to add...
 // DrawPixel
 // DrawLine

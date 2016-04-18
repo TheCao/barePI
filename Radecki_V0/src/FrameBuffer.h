@@ -43,5 +43,6 @@ UINT32	InitialiseFrameBuffer(VOID);
 VOID	TestPattern();
 VOID	DrawPixel(UINT32 x, UINT32 y, UINT16 colour);
 VOID	DrawLine(struct pixel Start, struct pixel End);
+void DrawRect(struct FrameBufferInfo fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, UINT32 colour);
 
 #endif
