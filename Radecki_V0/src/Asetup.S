@@ -33,6 +33,18 @@ reset:
     ldmia r1!, {r2,r3,r4,r5,r6,r7,r8,r9}
     stmia r0!, {r2,r3,r4,r5,r6,r7,r8,r9}
 
+	// Set stack pointer to 0x7000 for IRQ mode
+	// switch to IRQ mode
+	mov r0, #(0x12 | 0x80 | 0x40)
+	msr cpsr_c, r0
+
+	// set stack
+	mov sp, #0x7000
+
+	// go back to supervisor mode
+	mov r0, #(0x13 | 0x80 | 0x40)
+	msr cpsr_c, r0
+
     mov sp, $0x10000
     bl not_main
 

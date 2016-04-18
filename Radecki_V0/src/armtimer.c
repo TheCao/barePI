@@ -6,6 +6,8 @@
  */
 
 #include "armtimer.h"
+#include "raspi.h"
+#include "periph.h"
 
 void  arm_timer_freerun_init ( void )
 {

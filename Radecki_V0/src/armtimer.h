@@ -7,7 +7,16 @@
 
 #ifndef ARMTIMER_H_
 #define ARMTIMER_H_
-
+/*
+ *
+ * 1) set interrupt vector table - it will tell "where to go" after interrupt is triggered, connect it with your interrupt handler
+2) set stack in IRQ mode (it has separate stack pointer)
+3) create function enabling interrupts in CPSR
+example for these steps: http://pastebin.com/xLeNFDxj , then:
+3) set your controller, as described in SoC manual (in my case it was enabling event detection on GPIO pin) - here you have to set your timer
+4) set IRQ enable registers as described in SoC manual (page 112, "Enable IRQs 1/2" register)
+5) call CPSR enabling function finally.
+ */
 #include "DataTypes.h"
 
 #define PBASE 0x3F000000

@@ -13,7 +13,9 @@ extern void rand();
 extern void _enable_interrupts();
 void c_irq_handler(void)
 {
+	RPI_GetArmTimer()->IRQClear = 1;
 	uart_sendC("Interrupt");
+	hexstring(0x9999);
 }
 __attribute__((no_instrument_function))  VOID not_main(VOID)
 {
@@ -57,8 +59,7 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 					hexstring(i);
 					wait(DELAY_1_s);
 	}
-	
-	//Test dla gita!
+	//TODO: Sprawdziæ czy kompilacja dzia³a tak jak dzia³a ostatnio.
 	BRANCHTO(0x8000);
 
 
