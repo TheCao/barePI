@@ -49,9 +49,8 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	memset ( (void*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*1);
 
 
-	DrawPixelK(&fb_info, 299,0, COLOUR_WHITE);
-	DrawPixelK(&fb_info, 300,100, COLOUR_WHITE);
-	DrawRectK( &fb_info, 301,300,50,1,COLOUR_GREEN);
+
+	DrawRectK(&fb_info, 300,300,100,200,COLOUR_GREEN);
 	//for(as=0;as<500;as++) //szerokosc
 	//{
 		//for(long dy=0;dy<500;dy++) // wysokosc

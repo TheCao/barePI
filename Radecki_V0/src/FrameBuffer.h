@@ -3,6 +3,7 @@
 
 #include "Datatypes.h"
 #include "kolory.h"
+#include "periph.h"
 
 
 
@@ -41,11 +42,18 @@ struct pixel
 	UINT16 colour;
 };
 
+typedef enum lineDirection
+{
+	HORIZONTAL,
+	VERTICAL,
+} lineDirection_t;
+
 // function prototypes
 UINT32	InitialiseFrameBuffer(VOID);
 VOID	TestPattern();
 VOID	DrawPixel(UINT32 x, UINT32 y, UINT16 colour);
 VOID	DrawLine(struct pixel Start, struct pixel End);
-void DrawPixelK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, colour_t colour );
+void	DrawPixelK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, colour_t colour );
+void 	DrawLineK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, UINT32 lenght, lineDirection_t direction, colour_t colour );
 void 	DrawRectK(struct FrameBufferInfo *fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, colour_t colour);
 #endif
