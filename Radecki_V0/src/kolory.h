@@ -8,10 +8,12 @@
 #ifndef KOLORY_H_
 #define KOLORY_H_
 
-#define COLOUR_RED 0x000000ff;
-#define COLOUR_GREEN 0x0000ff00;
-#define COLOUR_BLUE 0x00ff0000;
-
+typedef enum colour {
+	COLOUR_RED = 0x000000ff,
+	COLOUR_GREEN = 0x0000ff00,
+	COLOUR_BLUE = 0x00ff0000,
+	COLOUR_WHITE = 0xffffff
+} colour_t;
 
 
 #endif /* KOLORY_H_ */

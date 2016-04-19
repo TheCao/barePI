@@ -47,5 +47,5 @@ UINT32 MailboxRead(UINT32 channel)
 										 // find channel message is on
 	} while((message & 0xF) != channel); // check against wanted channel
 
-	return (message & 0xFFFFFFF0);
+	return (message & 0xFFFFFFF0); //the upper 28-bits
 }

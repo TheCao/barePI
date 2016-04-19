@@ -47,9 +47,11 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 
 	//memset ( (void*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*fb_info.Depth); // w przypadku fb_info.Depth = 32 inicjalizacja bufora trwa strasznie dlugo
 	memset ( (void*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*1);
-	UINT32 x0 = 0x3C0;
-	UINT32 y0 = 0x90;
-	DrawRect(fb_info, x0,y0,500,300,0x000000ff);
+
+
+	DrawPixelK(&fb_info, 299,0, COLOUR_WHITE);
+	DrawPixelK(&fb_info, 300,100, COLOUR_WHITE);
+	DrawRectK( &fb_info, 301,300,50,1,COLOUR_GREEN);
 	//for(as=0;as<500;as++) //szerokosc
 	//{
 		//for(long dy=0;dy<500;dy++) // wysokosc

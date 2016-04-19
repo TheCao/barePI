@@ -144,6 +144,7 @@ VOID TestPattern()
 
 VOID DrawPixel(UINT32 x, UINT32 y, UINT16 colour)
 {
+	//U mnie na monitorze wyswietla blednie - przesuniecie w X
 	VUINT16 *ptr;
 	UINT32 offset;
 	
@@ -152,6 +153,16 @@ VOID DrawPixel(UINT32 x, UINT32 y, UINT16 colour)
 	*ptr = colour;
 	
 	return;
+}
+void DrawPixelK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, colour_t colour )
+{
+	VUINT16 *pointer;
+	UINT32 offset;
+
+	offset = (y*4*fb_info->Width + x *4);
+	pointer = (UINT16 *)(fb_info->Pointer + offset);
+	*pointer = colour;
+
 }
 
 VOID DrawLine(struct pixel Start,struct pixel End)
@@ -195,13 +206,13 @@ VOID DrawLine(struct pixel Start,struct pixel End)
 	return;
 }
 
-void DrawRect(struct FrameBufferInfo fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, UINT32 colour)
+void DrawRectK(struct FrameBufferInfo *fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, colour_t colour)
 {
 	for(long as=0;as<dx;as++) //szerokosc
 		{
-			for(long bs=0;bs<500;bs++) // wysokosc
+			for(long bs=0;bs<dy;bs++) // wysokosc
 				{
-				*((long*)(fb_info.Pointer+(x0*4)+(4*y0*fb_info.Width)+(as*4)+(dy*4*fb_info.Width)))=colour;
+				*((long*)(fb_info->Pointer+(x0*4)+(4*y0*fb_info->Width)+(as*4)+(bs*4*fb_info->Width)))=colour;
 				}
 		}
 }

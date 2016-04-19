@@ -12,7 +12,9 @@ C_SRCS += \
 ../src/bcm2835.c \
 ../src/main.c \
 ../src/periph.c \
-../src/raspi.c 
+../src/raspi.c \
+../src/rpi-mailbox-interface.c \
+../src/rpi-mailbox.c 
 
 S_UPPER_SRCS += \
 ../src/Asetup.S \
@@ -29,7 +31,9 @@ OBJS += \
 ./src/bcm2835.o \
 ./src/main.o \
 ./src/periph.o \
-./src/raspi.o 
+./src/raspi.o \
+./src/rpi-mailbox-interface.o \
+./src/rpi-mailbox.o 
 
 S_UPPER_DEPS += \
 ./src/Asetup.d \
@@ -44,7 +48,9 @@ C_DEPS += \
 ./src/bcm2835.d \
 ./src/main.d \
 ./src/periph.d \
-./src/raspi.d 
+./src/raspi.d \
+./src/rpi-mailbox-interface.d \
+./src/rpi-mailbox.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
