@@ -197,18 +197,20 @@ VOID DrawLine(struct pixel Start,struct pixel End)
 	return;
 }
 
-void DrawPixelK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, colour_t colour )
+int DrawPixelK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, colour_t colour )
 {
-	VUINT16 *pointer;
-	UINT32 offset;
+	//long *pointer;
+	//UINT32 offset;
 
-	offset = (y*4*fb_info->Width + x *4);
-	pointer = (UINT16 *)(fb_info->Pointer + offset);
-	*pointer = colour;
+	//offset = (y*4*fb_info->Width + x *4);
+	//pointer = (long *)(fb_info->Pointer + offset);
+	//*pointer = colour;
+	*((long*)(fb_info->Pointer +(y*4*fb_info->Width)+(x*4))) = colour; // dziala
+	return 0;
 
 }
 
-void DrawLineK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, UINT32 lenght, lineDirection_t direction, colour_t colour )
+int DrawLineK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, UINT32 lenght, lineDirection_t direction, colour_t colour )
 {
 	switch(direction)
 	{
@@ -227,28 +229,40 @@ void DrawLineK(struct FrameBufferInfo *fb_info,UINT32 x, UINT32 y, UINT32 lenght
 	default:
 		uart_sendC("B≥πd: èle okreúlony kierunek rysowania linii!");
 	}
+	return 0;
 }
-void DrawRectK(struct FrameBufferInfo *fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, colour_t colour)
+int DrawRectK(struct FrameBufferInfo *fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, colour_t colour)
 {
-	/*for(long as=0;as<dx;as++) //szerokosc
+	for(long i=0;i<dy;i++)
+	{
+		DrawLineK(fb_info,x0,(y0+i),dx,HORIZONTAL,colour);
+	}
+	return 0;
+}
+
+int DrawRectKTesting(struct FrameBufferInfo *fb_info, UINT32 x0, UINT32 y0, UINT32 dx, UINT32 dy, colour_t colour)
+{
+	// Nie powodowala zadnych bledow w ponownym zapisie, ale jest mniej czytelna
+	// Do ewentualnego usuniecia
+	for(long as=0;as<dx;as++) //szerokosc
 		{
 			for(long bs=0;bs<dy;bs++) // wysokosc
 				{
 				*((long*)(fb_info->Pointer+(x0*4)+(4*y0*fb_info->Width)+(as*4)+(bs*4*fb_info->Width)))=colour;
 				}
-		}*/
-	for(long i=0;i<dy;i++)
-	{
-		DrawLineK(fb_info,x0,(y0+i),dx,HORIZONTAL,colour);
-	}
+		}
 }
 
-// Primitives to add...
-// DrawPixel
-// DrawLine
-// DrawRect
-// DrawTriangle
-// DrawCircle
+int ClearScreen(struct FrameBufferInfo *fb_info)
+{
+	DrawRectK(fb_info,0,0,fb_info->Width, fb_info->Height,COLOUR_BLACK);
+	return 0;
+}
 
-// Features to add...
-// FloodFill
+int FillScreen(struct FrameBufferInfo *fb_info,colour_t colour)
+{
+	DrawRectK(fb_info,0,0,fb_info->Width, fb_info->Height,colour);
+	return 0;
+}
+
+

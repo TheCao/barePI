@@ -46,25 +46,30 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	hexstring(fb_info.Width);
 
 	//memset ( (void*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*fb_info.Depth); // w przypadku fb_info.Depth = 32 inicjalizacja bufora trwa strasznie dlugo
-	memset ( (void*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*1);
+	memset ( (UINT32*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*4);
 
 
 
+	wait(DELAY_100_ms);
 	DrawRectK(&fb_info, 300,300,100,200,COLOUR_GREEN);
-	//for(as=0;as<500;as++) //szerokosc
-	//{
-		//for(long dy=0;dy<500;dy++) // wysokosc
-			//{
-			//*((long*)(fb_info.Pointer+x*4+(as*4)+(4*bs*fb_info.Width)))=COLOUR_BLUE;
-			//*((long*)(fb_info.Pointer+(x0*4)+(4*y0*fb_info.Width)+(as*4)+(dy*4*fb_info.Width)))=COLOUR_GREEN;
-			//}
-	//*((long*)(fb_info.Pointer+(fb_info.Pitch*as)+(as+8)*4))=0x0000ff00;
-	//*((long*)(fb_info.Pointer+(fb_info.Pitch*as)+(as+rand()%30)*4))=0x00000ff;
-	//*((long*)(fb_info.Pointer+(fb_info.Pitch*as)+(as+rand()%130)*4))=0x0ff0000;
-	//};
-
+	FillScreen(&fb_info,COLOUR_RED);
+	DrawRectK(&fb_info, 1000,1000,100,200,COLOUR_WHITE);
+	DrawLineK(&fb_info,100,100,300,VERTICAL,COLOUR_BLUE);
+	wait(DELAY_100_ms);
+	ClearScreen(&fb_info);
+	DrawRectK(&fb_info, 300,300,100,200,COLOUR_GREEN);
 	uart_sendC("Zakonczono rysowanie");
 	wait(DELAY_10_ms);
+	FillScreen(&fb_info,COLOUR_BLUE);
+	DrawRectK(&fb_info,300,300,300,300,COLOUR_RED);
+	DrawLineK(&fb_info,1000,1000,200,HORIZONTAL,COLOUR_WHITE);
+	DrawLineK(&fb_info,1000,1000,200,VERTICAL,COLOUR_WHITE);
+	ClearScreen(&fb_info);
+	FillScreen(&fb_info,COLOUR_RED);
+	DrawRectK(&fb_info,200,150,300,300,COLOUR_BLACK);
+	ClearScreen(&fb_info);
+	FillScreen(&fb_info,COLOUR_YELLOW);
+	DrawRectK(&fb_info,200,150,300,300,COLOUR_ORANGE);
 
 
 	BRANCHTO(0x8000);
