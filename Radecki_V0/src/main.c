@@ -13,7 +13,7 @@
 extern void BRANCHTO();
 extern void _enable_interrupts();
 extern struct FrameBufferInfo fb_info;
-
+extern VUINT16 globalCounter;
 __attribute__((no_instrument_function))  VOID not_main(VOID)
 {
 	long as;
@@ -22,15 +22,14 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	wait(DELAY_10_ms); // wymagane ze wzgledu na uart_sendC, ktore nie wyrabia po wyjsciu z funkcji
 	uart_init();
 
-// ARM Timer Interrupt Controller
-	/*RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
+	//ARM Timer Interrupt Controller
+	RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
 	arm_timer_init();
 	_enable_interrupts();
-	RPI_GetArmTimer()->Load = 0x3000;
 
-	//na koniec potrzeba zatrzymac timer
-	arm_timer_stop();
-*/
+
+
+
 
 	do{
 			as=InitialiseFrameBuffer();
@@ -50,28 +49,18 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 
 
 
-	wait(DELAY_100_ms);
-	DrawRectK(&fb_info, 300,300,100,200,COLOUR_GREEN);
-	FillScreen(&fb_info,COLOUR_RED);
-	DrawRectK(&fb_info, 1000,1000,100,200,COLOUR_WHITE);
-	DrawLineK(&fb_info,100,100,300,VERTICAL,COLOUR_BLUE);
-	wait(DELAY_100_ms);
-	ClearScreen(&fb_info);
-	DrawRectK(&fb_info, 300,300,100,200,COLOUR_GREEN);
-	uart_sendC("Zakonczono rysowanie");
-	wait(DELAY_10_ms);
-	FillScreen(&fb_info,COLOUR_BLUE);
-	DrawRectK(&fb_info,300,300,300,300,COLOUR_RED);
-	DrawLineK(&fb_info,1000,1000,200,HORIZONTAL,COLOUR_WHITE);
-	DrawLineK(&fb_info,1000,1000,200,VERTICAL,COLOUR_WHITE);
-	ClearScreen(&fb_info);
-	FillScreen(&fb_info,COLOUR_RED);
-	DrawRectK(&fb_info,200,150,300,300,COLOUR_BLACK);
-	ClearScreen(&fb_info);
-	FillScreen(&fb_info,COLOUR_YELLOW);
-	DrawRectK(&fb_info,200,150,300,300,COLOUR_ORANGE);
+	FillScreen(&fb_info,COLOUR_WHITE);
+	RPI_GetArmTimer()->Load = 0x800;
 
+	globalCounter = 0 ;
+	while(globalCounter < 15)
+	{
+		//pass
+	}
 
+	//na koniec potrzeba zatrzymac timer
+	arm_timer_stop();
+	ClearScreen(&fb_info);
 	BRANCHTO(0x8000);
 
 
