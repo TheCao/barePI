@@ -8,7 +8,11 @@
 #include "armtimer.h"
 #include "raspi.h"
 #include "periph.h"
+#include "kolory.h"
+#include "FrameBuffer.h"
+extern struct FrameBufferInfo fb_info;
 
+VUINT16 globalCounter;
 void  arm_timer_freerun_init ( void )
 {
     //0xF9+1 = 250
@@ -75,10 +79,13 @@ unsigned int arm_timer_tick(void)
 	return(RPI_GetArmTimer()->Value);
 }
 
+//Random pain in timer interrupt
 void __attribute__ ((interrupt("IRQ"))) interrupt_vector(void)
 {
 	RPI_GetArmTimer()->IRQClear = 1;
-	uart_sendC("ARM Timer Interrupt :) ");
+	DrawRectK(&fb_info, rand()%1900,rand()%1000,rand()%200,rand()%200,rand()%4294967295);
+	globalCounter++;
+	hexstring(globalCounter);
 }
 
 
