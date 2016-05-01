@@ -1,7 +1,7 @@
 #ifndef FrameBuffer_h
 #define FrameBuffer_h
 
-#include "Datatypes.h"
+#include "DataTypes.h"
 #include "kolory.h"
 #include "periph.h"
 

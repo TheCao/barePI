@@ -9,12 +9,19 @@
 #include "armtimer.h"
 #include "kolory.h"
 ////////////////////////////////
-
+//USPI//
+#define USPI 0
+#if USPI !=0
+#include "uspienv.h"
+#include "uspi.h"
+#include "uspios.h"
+#endif
+///////////////////////////////
 extern void BRANCHTO();
 extern void _enable_interrupts();
 extern struct FrameBufferInfo fb_info;
 extern VUINT16 globalCounter;
-__attribute__((no_instrument_function))  VOID not_main(VOID)
+__attribute__((no_instrument_function))  int not_main(VOID)
 {
 	long as;
 	prepare_led_act();
@@ -28,9 +35,25 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	_enable_interrupts();
 
 
+	/*// USPi init
+	uart_sendC("USPi initialization 1");
+	if (!USPiEnvInitialize ())
+		{
+			uart_sendC("USPi initialization 1 EXIT_HALT");
+			return EXIT_HALT;
+		}
 
-
-
+	uart_sendC("USPi initialization 2");
+	if (!USPiInitialize ())
+		{
+			//LogWrite (FromSample, LOG_ERROR, "Cannot initialize USPi");
+		uart_sendC("USPi initialization 2 Close");
+			USPiEnvClose ();
+			uart_sendC("USPi initialization 2 EXIT_HALT");
+			return EXIT_HALT;
+		}
+	uart_sendC("USPi initialization Done");
+*/
 	do{
 			as=InitialiseFrameBuffer();
 	}
@@ -63,5 +86,5 @@ __attribute__((no_instrument_function))  VOID not_main(VOID)
 	ClearScreen(&fb_info);
 	BRANCHTO(0x8000);
 
-
+	return 0;
 }

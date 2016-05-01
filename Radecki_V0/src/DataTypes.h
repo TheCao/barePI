@@ -14,6 +14,7 @@ typedef unsigned short					UINT16;
 typedef unsigned int					UINT32;
 typedef unsigned long long int			UINT64;
 
+
 typedef float							FLOAT;
 typedef	double							DOUBLE;
 
@@ -32,5 +33,20 @@ typedef UINT32							UINTPTR;
 typedef unsigned int					IPTR;
 typedef unsigned char*					STRPTR;
 typedef unsigned int					BOOL;
+
+
+// USPi types
+typedef unsigned long					size_t_r; //redefinied in case of size_t_r override error
+typedef long							ssize_t;
+
+typedef unsigned char		u8;
+typedef unsigned short		u16;
+typedef unsigned int		u32;
+typedef unsigned long long	u64;
+
+typedef int		boolean;
+#define FALSE		0
+#define TRUE		1
+
 
 #endif
