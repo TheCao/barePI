@@ -46,13 +46,13 @@
 
 	.endm
 
-	.text
+/*	.text
 
 	.globl	_start
 _start:
 	safe_svcmode_maskall r0
 
-	cps	#0x1F				/* set system mode */
+	cps	#0x1F				// set system mode //
 	mov	sp, #MEM_KERNEL_STACK
 	b	sysinit
 
@@ -65,5 +65,5 @@ _start_secondary:
 	b	1b
 
 #endif
-
+*/
 /* End */

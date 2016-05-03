@@ -9,19 +9,12 @@
 #include "armtimer.h"
 #include "kolory.h"
 ////////////////////////////////
-//USPI//
-#define USPI 0
-#if USPI !=0
-#include "uspienv.h"
-#include "uspi.h"
-#include "uspios.h"
-#endif
-///////////////////////////////
+
 extern void BRANCHTO();
 extern void _enable_interrupts();
 extern struct FrameBufferInfo fb_info;
 extern VUINT16 globalCounter;
-__attribute__((no_instrument_function))  int not_main(VOID)
+__attribute__((no_instrument_function))  VOID not_main(VOID)
 {
 	long as;
 	prepare_led_act();
@@ -35,25 +28,9 @@ __attribute__((no_instrument_function))  int not_main(VOID)
 	_enable_interrupts();
 
 
-	/*// USPi init
-	uart_sendC("USPi initialization 1");
-	if (!USPiEnvInitialize ())
-		{
-			uart_sendC("USPi initialization 1 EXIT_HALT");
-			return EXIT_HALT;
-		}
 
-	uart_sendC("USPi initialization 2");
-	if (!USPiInitialize ())
-		{
-			//LogWrite (FromSample, LOG_ERROR, "Cannot initialize USPi");
-		uart_sendC("USPi initialization 2 Close");
-			USPiEnvClose ();
-			uart_sendC("USPi initialization 2 EXIT_HALT");
-			return EXIT_HALT;
-		}
-	uart_sendC("USPi initialization Done");
-*/
+
+
 	do{
 			as=InitialiseFrameBuffer();
 	}
@@ -66,15 +43,18 @@ __attribute__((no_instrument_function))  int not_main(VOID)
 	hexstring(fb_info.Pointer);
 	hexstring(fb_info.Height);
 	hexstring(fb_info.Width);
-
+	uart_sendC("Breakpoint 1");
 	//memset ( (void*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*fb_info.Depth); // w przypadku fb_info.Depth = 32 inicjalizacja bufora trwa strasznie dlugo
-	memset ( (UINT32*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*4);
 
+	// usuniecie pozwolilo na ruszenie programu
+	//memset ( (UINT32*)fb_info.Pointer, 0, fb_info.Height*fb_info.Width*4);
+	uart_sendC("Breakpoint 2");
 
 
 	FillScreen(&fb_info,COLOUR_WHITE);
+	uart_sendC("Breakpoint 3");
 	RPI_GetArmTimer()->Load = 0x800;
-
+	uart_sendC("Breakpoint 4");
 	globalCounter = 0 ;
 	while(globalCounter < 25)
 	{
@@ -82,9 +62,12 @@ __attribute__((no_instrument_function))  int not_main(VOID)
 	}
 
 	//na koniec potrzeba zatrzymac timer
+	uart_sendC("Breakpoint 5");
 	arm_timer_stop();
-	ClearScreen(&fb_info);
+	uart_sendC("Breakpoint 6");
+	FillScreen(&fb_info,COLOUR_BLACK); // poniewaz ClearScreen zawiesza program
+
 	BRANCHTO(0x8000);
 
-	return 0;
+
 }

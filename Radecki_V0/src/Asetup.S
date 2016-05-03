@@ -106,3 +106,62 @@ supervisor_sp:
  	msr cpsr_c, r0
 
  	mov pc, lr
+
+#Dodatki
+#include "uspienv/sysconfig.h"
+	.align	3
+
+	.globl	DelayLoop
+DelayLoop:
+	subs	r0, r0, #1
+	bhi	DelayLoop
+	mov	pc, lr
+
+.macro safe_svcmode_maskall reg:req
+
+	mrs	\reg , cpsr
+	eor	\reg, \reg, #0x1A		/* test for HYP mode */
+	tst	\reg, #0x1F
+	bic	\reg , \reg , #0x1F		/* clear mode bits */
+	orr	\reg , \reg , #0xC0 | 0x13	/* mask IRQ/FIQ bits and set SVC mode */
+	bne	1f				/* branch if not HYP mode */
+	orr	\reg, \reg, #0x100		/* mask Abort bit */
+	adr	lr, 2f
+	msr	spsr_cxsf, \reg
+	.word	0xE12EF30E			/* msr ELR_hyp, lr */
+	.word	0xE160006E			/* eret */
+1:	msr	cpsr_c, \reg
+2:
+
+	.endm
+
+	.text
+
+	.globl	_start
+_start:
+	safe_svcmode_maskall r0
+
+	cps	#0x1F				/* set system mode */
+	mov	sp, #MEM_KERNEL_STACK
+	b	sysinit
+
+#if RASPPI != 1
+
+	.globl	_start_secondary
+_start_secondary:
+	dsb
+1:	wfi
+	b	1b
+
+#endif
+
+	.globl	memcpyblk
+memcpyblk:
+	push	{r0, r3-r6}
+1:	ldmia	r1!, {r3-r6}
+	subs	r2, #4*4
+	stmia	r0!, {r3-r6}
+	pld	[r1, #4*4*4]
+	bne	1b
+	pop	{r0, r3-r6}
+	bx	lr
