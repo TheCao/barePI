@@ -119,18 +119,18 @@ DelayLoop:
 
 .macro safe_svcmode_maskall reg:req
 
-	mrs	\reg , cpsr
-	eor	\reg, \reg, #0x1A		/* test for HYP mode */
+	/*mrs	\reg , cpsr
+	eor	\reg, \reg, #0x1A		// test for HYP mode //
 	tst	\reg, #0x1F
-	bic	\reg , \reg , #0x1F		/* clear mode bits */
-	orr	\reg , \reg , #0xC0 | 0x13	/* mask IRQ/FIQ bits and set SVC mode */
-	bne	1f				/* branch if not HYP mode */
-	orr	\reg, \reg, #0x100		/* mask Abort bit */
+	bic	\reg , \reg , #0x1F		// clear mode bits //
+	orr	\reg , \reg , #0xC0 | 0x13	// mask IRQ/FIQ bits and set SVC mode //
+	bne	1f				// branch if not HYP mode //
+	orr	\reg, \reg, #0x100		// mask Abort bit //
 	adr	lr, 2f
 	msr	spsr_cxsf, \reg
-	.word	0xE12EF30E			/* msr ELR_hyp, lr */
-	.word	0xE160006E			/* eret */
-1:	msr	cpsr_c, \reg
+	.word	0xE12EF30E			// msr ELR_hyp, lr //
+	.word	0xE160006E			// eret /
+1:	msr	cpsr_c, \reg   */
 2:
 
 	.endm
@@ -141,7 +141,7 @@ DelayLoop:
 _start:
 	safe_svcmode_maskall r0
 
-	cps	#0x1F				/* set system mode */
+	cps	#0x1F				// set system mode //
 	mov	sp, #MEM_KERNEL_STACK
 	b	sysinit
 
