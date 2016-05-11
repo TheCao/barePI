@@ -16,6 +16,7 @@ boolean isMouseConnected = FALSE;
 boolean isKeyboardConnected = FALSE;
 boolean isGamepadConnected = FALSE;
 
+
 static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState)
 {
 	// do obs³ugi przerwania od GamePad'a
@@ -62,19 +63,24 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 	switch(pState->buttons){
 	case(START):
 		LogWrite(FromSample, LOG_WARNING, "Start!");
+
 		break;
 	case(SELECT):
 		LogWrite(FromSample, LOG_ERROR, "Select!!");
+
+		break;
+	case(START+SELECT):
+		reboot();
 		break;
 	}
 
 
 }
-/*static void KeyPressedHandler (const char *pString)
+static void KeyPressedHandler (const char *pString)
 {
 	ScreenDeviceWrite (USPiEnvGetScreen (), pString, strlen (pString));
 }
-
+/*
 static void MouseStatusHandler()
 {
 	//pass
@@ -160,25 +166,32 @@ int main (void)
 		isMouseConnected = TRUE;
 	}
 	
-	if(isMouseConnected == FALSE & isKeyboardConnected == FALSE & isGamepadConnected == FALSE)
+	if(isMouseConnected == FALSE && isKeyboardConnected == FALSE && isGamepadConnected == FALSE)
 	{
+		LogWrite (FromSample, LOG_ERROR, "USPiEnv Closing and Exit!");
 		USPiEnvClose();
 
 		return EXIT_HALT;
 	}
-
 	USPiGamePadRegisterStatusHandler (GamePadStatusHandler);
 	
-	//USPiKeyboardRegisterKeyPressedHandler (KeyPressedHandler);
+	USPiKeyboardRegisterKeyPressedHandler (KeyPressedHandler);
 	
 	//USPiMouseRegisterStatusHandler(MouseStatusHandler);
 
 	
 	// just wait and turn the rotor
-	for (int nCount = 0; 1; nCount++)
-	{
-		//ScreenDeviceRotor (USPiEnvGetScreen (), 0, nCount); //TODO: zorientowaæ siê co robi ta funkcja
-	}
 
+	/*for (int nCount = 0; nCount <=100000; nCount++)
+	{
+
+	}*/
+	while(1)
+	{
+		ScreenDeviceRotor (USPiEnvGetScreen (), 0, 0); //TODO: zorientowaæ siê co robi ta funkcja
+	}
+	//USPiEnvClose();
+
+	reboot();
 	return EXIT_HALT;
 }
