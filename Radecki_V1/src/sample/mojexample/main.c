@@ -15,8 +15,14 @@ static const char FromSample[] = "Message";
 boolean isMouseConnected = FALSE;
 boolean isKeyboardConnected = FALSE;
 boolean isGamepadConnected = FALSE;
+int horizontalAxis = 0;
+int verticalAxis = 0;
 
 
+static void KeyPressedHandler (const char *pString)
+{
+	ScreenDeviceWrite (USPiEnvGetScreen (), pString, strlen (pString));
+}
 static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState)
 {
 	// do obs³ugi przerwania od GamePad'a
@@ -56,30 +62,57 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 	_String (&Msg);*/
 
 	//LogWrite(FromSample, LOG_WARNING, "Button : %x - %d" ,pState->buttons,pState->buttons);
-	/*if(pState->buttons == 0x20)
-		{
-			LogWrite(FromSample, LOG_WARNING, "Start!");
-		}*/
 	switch(pState->buttons){
 	case(START):
-		LogWrite(FromSample, LOG_WARNING, "Start!");
-
+		LogWrite("Przycisk: ", LOG_WARNING, "Start!");
 		break;
 	case(SELECT):
-		LogWrite(FromSample, LOG_ERROR, "Select!!");
-
+		LogWrite("Przycisk: ", LOG_ERROR, "Select!!");
 		break;
 	case(START+SELECT):
 		reboot();
 		break;
+	case(LEFT1):
+		LogWrite("Przycisk: ", LOG_ERROR, "Left 1");
+		break;
+	case(LEFT2):
+		LogWrite("Przycisk: ", LOG_ERROR, "Left 2");
+		break;
+	case(RIGHT1):
+		LogWrite("Przycisk: ", LOG_ERROR, "Right 1");
+		break;
+	case(RIGHT2):
+		LogWrite("Przycisk: ", LOG_ERROR, "Right 2");
+		break;
+	case(BUTTON1):
+		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
+		break;
+	case(BUTTON2):
+		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
+		break;
+	case(BUTTON3):
+		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 3");
+		break;
+	case(BUTTON4):
+		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 4");
+		TimerMsDelay(TimerGet(),1000);
+		break;
+
+	//obs³uga osi na lewym joyu
+	default:
+		horizontalAxis = pState->axes[0].value;
+		verticalAxis = pState->axes[1].value;
+		if( horizontalAxis != 127 || verticalAxis !=127 )
+		{
+			LogWrite("Joystick: ", LOG_ERROR, "%d / %d ", horizontalAxis, verticalAxis);
+			break;
+		}
+
 	}
 
 
 }
-static void KeyPressedHandler (const char *pString)
-{
-	ScreenDeviceWrite (USPiEnvGetScreen (), pString, strlen (pString));
-}
+
 /*
 static void MouseStatusHandler()
 {
@@ -179,18 +212,12 @@ int main (void)
 	
 	//USPiMouseRegisterStatusHandler(MouseStatusHandler);
 
-	
-	// just wait and turn the rotor
 
-	/*for (int nCount = 0; nCount <=100000; nCount++)
-	{
-
-	}*/
 	while(1)
 	{
 		ScreenDeviceRotor (USPiEnvGetScreen (), 0, 0); //TODO: zorientowaæ siê co robi ta funkcja
 	}
-	//USPiEnvClose();
+	//USPiEnvClose(); // Zamykanie powoduje crash.
 
 	reboot();
 	return EXIT_HALT;
