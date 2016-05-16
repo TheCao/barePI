@@ -85,13 +85,16 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		LogWrite("Przycisk: ", LOG_ERROR, "Right 2");
 		break;
 	case(BUTTON1):
-		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
+		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
+		ScreenDeviceDrawLine(USPiEnvGetScreen(),400,400,500,GREEN_COLOR,VERTICAL);
 		break;
 	case(BUTTON2):
 		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
 		break;
 	case(BUTTON3):
 		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 3");
+		ScreenDeviceFillDisplay(USPiEnvGetScreen(),YELLOW_COLOR);
 		break;
 	case(BUTTON4):
 		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 4");

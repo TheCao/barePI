@@ -22,6 +22,7 @@
 #include <uspienv/alloc.h>
 #include <uspienv/util.h>
 
+
 #define ROTORS		4
 
 typedef enum TScreenState
@@ -144,7 +145,7 @@ unsigned ScreenDeviceGetHeight (TScreenDevice *pThis)
 int ScreenDeviceWrite (TScreenDevice *pThis, const void *pBuffer, unsigned nCount)
 {
 	ScreenDeviceInvertCursor (pThis);
-	
+
 	const char *pChar = (const char *) pBuffer;
 	int nResult = 0;
 
@@ -718,4 +719,42 @@ void ScreenDeviceInvertCursor (TScreenDevice *pThis)
 			}
 		}
 	}
+}
+
+void ScreenDeviceDrawLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, unsigned lenght, TScreenColor color, lineDirection_t direction)
+{
+	switch(direction)
+		{
+		case HORIZONTAL:
+			for(unsigned i=0;i<lenght;i++)
+			{
+				ScreenDeviceSetPixel (pThis, nPosX + i, nPosY, color);
+			}
+			break;
+		case VERTICAL:
+			for(unsigned i=0;i<lenght;i++)
+				{
+				ScreenDeviceSetPixel (pThis, nPosX, nPosY+i, color);
+				}
+			break;
+		}
+
+}
+
+void ScreenDeviceDrawRect(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY,unsigned dx, unsigned dy, TScreenColor color)
+{
+	for(unsigned i = 0; i <dy;i++)
+	{
+		ScreenDeviceDrawLine(pThis,nPosX,nPosY+i,dx,color,HORIZONTAL);
+	}
+}
+
+void ScreenDeviceClearDisplay(TScreenDevice *pThis)
+{
+	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,BLACK_COLOR);
+}
+
+void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
+{
+	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
 }

@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#define DEPTH	8		// can be: 8, 16 or 32
+#define DEPTH	16		// can be: 8, 16 or 32
 
 // really ((green) & 0x3F) << 5, but to have a 0-31 range for all colors
 #define COLOR16(red, green, blue)	  (((red) & 0x1F) << 11 \
@@ -42,6 +42,7 @@ extern "C" {
 					| ((alpha) & 0xFF) << 24)
 
 #define BLACK_COLOR	0
+
 
 #if DEPTH == 8
 	typedef u8 TScreenColor;
@@ -56,9 +57,14 @@ extern "C" {
 #elif DEPTH == 16
 	typedef u16 TScreenColor;
 
-	#define NORMAL_COLOR			COLOR16 (31, 31, 31)
+	#define NORMAL_COLOR		COLOR16 (31, 31, 31)
 	#define HIGH_COLOR			COLOR16 (31, 0, 0)
 	#define HALF_COLOR			COLOR16 (0, 0, 31)
+	#define WHITE_COLOR			COLOR16(255,255,255)
+	#define RED_COLOR			COLOR16(255,0,0)
+	#define YELLOW_COLOR		COLOR16(255,255,0)
+	#define BLUE_COLOR			COLOR16(0,0,255)
+	#define GREEN_COLOR			COLOR16(0,255,0)
 #elif DEPTH == 32
 	typedef u32 TScreenColor;
 
@@ -90,6 +96,17 @@ typedef struct TScreenDevice
 	unsigned	 m_nParam2;
 }
 TScreenDevice;
+
+typedef enum lineDirection
+{
+	HORIZONTAL,
+	VERTICAL,
+} lineDirection_t;
+
+void ScreenDeviceDrawLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, unsigned lenght, TScreenColor Color, lineDirection_t direction);
+void ScreenDeviceDrawRect(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY,unsigned dx, unsigned dy, TScreenColor color);
+void ScreenDeviceClearDisplay(TScreenDevice *pThis);
+void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color);
 
 void ScreenDevice (TScreenDevice *pThis, unsigned nWidth, unsigned nHeight);
 void _ScreenDevice (TScreenDevice *pThis);
