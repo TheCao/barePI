@@ -31,5 +31,6 @@ kernel.img: $(OBJS) $(LIBS)
 	$(PREFIX)objdump -D kernel.elf > kernel.lst
 	$(PREFIX)objcopy kernel.elf -O binary kernel.img
 	wc -c kernel.img
+	$(PREFIX)objcopy -O ihex kernel.elf mojwsad.hex
 
 include ../Rules.mk
