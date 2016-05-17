@@ -22,11 +22,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-ifeq ($(strip $(USPIHOME)),)
-USPIHOME = ../..
-endif
 
-CFLAGS	+= -I $(USPIHOME)/env/include
+
+CFLAGS	+= -I ../env/include
 
 kernel.img: $(OBJS) $(LIBS)
 	$(LD) -o kernel.elf -Map kernel.map -T $(USPIHOME)/env/uspienv.ld $(USPIHOME)/env/lib/startup.o $(OBJS) $(LIBS)
@@ -34,4 +32,4 @@ kernel.img: $(OBJS) $(LIBS)
 	$(PREFIX)objcopy kernel.elf -O binary kernel.img
 	wc -c kernel.img
 
-include $(USPIHOME)/Rules.mk
+include ../Rules.mk
