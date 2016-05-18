@@ -732,9 +732,9 @@ void ScreenDeviceDrawLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, u
 			}
 			break;
 		case VERTICAL:
-			for(unsigned i=0;i<lenght;i++)
+			for(unsigned i=0;i<=lenght;i++)
 				{
-				ScreenDeviceSetPixel (pThis, nPosX, nPosY+i, color);
+				ScreenDeviceSetPixel (pThis, nPosX, nPosY-i, color);
 				}
 			break;
 		}
@@ -760,14 +760,18 @@ void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
 }
 
-unsigned ScreenDevicePrintChart(TScreenDevice *pThis, unsigned czas/*,float tlumienie,float okresOscylacji,TScreenColor color*/)
+unsigned ScreenDevicePrintChart(TScreenDevice *pThis, TScreenColor color)
 {
-	unsigned actTime = 0;
+	// Clear the screen
+	ScreenDeviceClearDisplay(pThis);
+	// draw chart axis
+	unsigned startPointX = ((pThis->m_nWidth)/10); //10% of whole Screen Width
+	unsigned startPointY = ((pThis->m_nHeight)*3)/4;//75% of whole screen Height
+	unsigned lenX = 8*startPointX;
+	unsigned lenY = (startPointY*4)/6;
+	ScreenDeviceDrawLine(pThis,startPointX,startPointY,lenX,color,HORIZONTAL);
+	ScreenDeviceDrawLine(pThis,startPointX,startPointY,lenY,color,VERTICAL);
 
-	actTime = TimerGetTime (TimerGet()) - czas; 	// aktualny czas - czas poczatkowy wejscia do funkcji
+	return 0;
 
-
-
-
-	return actTime;
 }
