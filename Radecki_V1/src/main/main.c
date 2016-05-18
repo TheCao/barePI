@@ -11,6 +11,8 @@
 #include <uspienv/types.h>
 #include "gamepad.h"
 
+
+
 static const char FromSample[] = "Message";
 boolean isMouseConnected = FALSE;
 boolean isKeyboardConnected = FALSE;
@@ -97,9 +99,15 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		LogWrite("Tajmer poczatkowy: ", LOG_ERROR, "%u",timerTesting);
 		break;
 	case(BUTTON3):
-		timerTest = ScreenDevicePrintChart(USPiEnvGetScreen(),timerTesting);
-		LogWrite("Tajmer poczatkowy: ", LOG_ERROR, "%u",timerTesting);
-		LogWrite("TimerTest: ", LOG_ERROR, "%u",timerTest);
+		if(ScreenDevicePrintChart(USPiEnvGetScreen(),GREEN_COLOR) != 0)
+		{
+			LogWrite("Chart Error ", LOG_ERROR, "Chart not printed ;C");
+		}
+		unsigned sinus = 300*__builtin_sin(2.32);
+
+
+		LogWrite("Chart", LOG_ERROR, "Sinus math = %u", sinus);
+
 		break;
 	case(BUTTON4):
 		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 4");

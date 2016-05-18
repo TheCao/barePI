@@ -40,9 +40,11 @@ else
 ARCH	?= -march=armv8-a -mtune=cortex-a53 -mfloat-abi=hard
 endif
 
+
 AFLAGS	+= $(ARCH) -DRASPPI=$(RASPPI)
-CFLAGS	+= $(ARCH) -Wall -Wno-psabi -fsigned-char -fno-builtin -nostdinc -nostdlib \
-	   -std=gnu99 -undef -DRASPPI=$(RASPPI) -I $(USPIHOME)/include -O #-DNDEBUG
+CFLAGS	+= $(ARCH) -Wall  -std=gnu99  -DRASPPI=$(RASPPI) -I $(USPIHOME)/include  -O -lm #-DNDEBUG 
+#CFLAGS	+= $(ARCH) -Wall -Wno-psabi -fsigned-char -fno-builtin -nostdinc -nostdlib  \
+	   -std=gnu99 -undef -DRASPPI=$(RASPPI) -I $(USPIHOME)/include  -O #-DNDEBUG 
 
 %.o: %.S
 	$(AS) $(AFLAGS) -c -o $@ $<

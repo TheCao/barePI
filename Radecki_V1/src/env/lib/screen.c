@@ -22,7 +22,6 @@
 #include <uspienv/alloc.h>
 #include <uspienv/util.h>
 
-
 #define ROTORS		4
 
 typedef enum TScreenState
@@ -772,6 +771,14 @@ unsigned ScreenDevicePrintChart(TScreenDevice *pThis, TScreenColor color)
 	ScreenDeviceDrawLine(pThis,startPointX,startPointY,lenX,color,HORIZONTAL);
 	ScreenDeviceDrawLine(pThis,startPointX,startPointY,lenY,color,VERTICAL);
 
+	// TODO:sine function
+	/*unsigned amplitude = 300;
+	for(unsigned x = 0; x<500;x++)
+	{
+		unsigned actualPosY = amplitude*__builtin_sin(6.28*x);
+		ScreenDeviceSetPixel(pThis,startPointX+x,startPointY+actualPosY,RED_COLOR);
+	}*/
 	return 0;
 
 }
+

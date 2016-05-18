@@ -21,7 +21,7 @@
 USPIHOME = ../..
 
 AFLAGS	+= -I ../include
-CFLAGS	+= -I ../include
+CFLAGS	+= -I ../include -lm
 
 OBJS	= alloc.o assert.o bcmmailbox.o bcmframebuffer.o bcmpropertytags.o chargenerator.o debug.o \
 	  delayloop.o exceptionstub.o interrupt.o libhelper.o libstub.o logger.o memio.o screen.o \
