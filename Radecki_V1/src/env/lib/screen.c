@@ -752,9 +752,22 @@ void ScreenDeviceDrawRect(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY,un
 void ScreenDeviceClearDisplay(TScreenDevice *pThis)
 {
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,BLACK_COLOR);
+	ScreenDeviceCursorHome (pThis);
 }
 
 void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
 {
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
+}
+
+unsigned ScreenDevicePrintChart(TScreenDevice *pThis, unsigned czas/*,float tlumienie,float okresOscylacji,TScreenColor color*/)
+{
+	unsigned actTime = 0;
+
+	actTime = TimerGetTime (TimerGet()) - czas; 	// aktualny czas - czas poczatkowy wejscia do funkcji
+
+
+
+
+	return actTime;
 }

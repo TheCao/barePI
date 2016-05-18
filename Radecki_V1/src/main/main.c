@@ -17,6 +17,8 @@ boolean isKeyboardConnected = FALSE;
 boolean isGamepadConnected = FALSE;
 int horizontalAxis = 0;
 int verticalAxis = 0;
+unsigned timerTest = 2; //TODO: Na potrzeby testu usunac potem
+unsigned timerTesting = 0;
 
 
 static void KeyPressedHandler (const char *pString)
@@ -89,12 +91,15 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		ScreenDeviceDrawLine(USPiEnvGetScreen(),400,400,500,GREEN_COLOR,VERTICAL);
 		break;
 	case(BUTTON2):
-		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
-		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
+		//ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		timerTesting = TimerGet()->m_nTime;
+		LogWrite("Tajmer poczatkowy: ", LOG_ERROR, "%u",timerTesting);
 		break;
 	case(BUTTON3):
-		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 3");
-		ScreenDeviceFillDisplay(USPiEnvGetScreen(),YELLOW_COLOR);
+		timerTest = ScreenDevicePrintChart(USPiEnvGetScreen(),timerTesting);
+		LogWrite("Tajmer poczatkowy: ", LOG_ERROR, "%u",timerTesting);
+		LogWrite("TimerTest: ", LOG_ERROR, "%u",timerTest);
 		break;
 	case(BUTTON4):
 		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 4");
@@ -221,6 +226,7 @@ int main (void)
 		ScreenDeviceRotor (USPiEnvGetScreen (), 0, 0); //TODO: zorientowaæ siê co robi ta funkcja
 	}
 	//USPiEnvClose(); // Zamykanie powoduje crash.
+
 
 	reboot();
 	return EXIT_HALT;
