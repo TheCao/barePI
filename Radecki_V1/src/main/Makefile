@@ -4,7 +4,7 @@
 
 USPIHOME   = ..
 
-OBJS	= main.o 
+OBJS	= main.o mymath.o
 
 LIBS	= ../lib/libuspi.a \
 	 ../env/lib/libuspienv.a

@@ -10,8 +10,10 @@
 
 #include <uspienv/types.h>
 #include "gamepad.h"
-
-
+//#include <uspienv/math.h>
+//#include <math.h>
+//extern double sine_taylor(double);
+#include "mymath.h"
 
 static const char FromSample[] = "Message";
 boolean isMouseConnected = FALSE;
@@ -19,9 +21,13 @@ boolean isKeyboardConnected = FALSE;
 boolean isGamepadConnected = FALSE;
 int horizontalAxis = 0;
 int verticalAxis = 0;
-unsigned timerTest = 2; //TODO: Na potrzeby testu usunac potem
+unsigned timerTest = 2; //TODO: Delete
 unsigned timerTesting = 0;
+double testowaLiczbaDouble = 0;
+int sinus = 0;
 
+int tablicaLiniowo[10] = {0,1,2,3,4,5,6,7,8,9};
+int tablicaSinusa[10] = {};
 
 static void KeyPressedHandler (const char *pString)
 {
@@ -90,7 +96,12 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		break;
 	case(BUTTON1):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
-		ScreenDeviceDrawLine(USPiEnvGetScreen(),400,400,500,GREEN_COLOR,VERTICAL);
+
+		for(unsigned x = 0; x <1000;x++)
+		{
+			LogWrite("Chart", LOG_ERROR, "Sinus lookup %d = %d", x%63, sinusLookup[x%63]);
+		}
+
 		break;
 	case(BUTTON2):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
@@ -103,11 +114,6 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		{
 			LogWrite("Chart Error ", LOG_ERROR, "Chart not printed ;C");
 		}
-		unsigned sinus = 300*__builtin_sin(2.32);
-
-
-		LogWrite("Chart", LOG_ERROR, "Sinus math = %u", sinus);
-
 		break;
 	case(BUTTON4):
 		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 4");
