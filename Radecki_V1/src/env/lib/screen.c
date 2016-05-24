@@ -22,7 +22,10 @@
 #include <uspienv/alloc.h>
 #include <uspienv/util.h>
 
+
 #define ROTORS		4
+//sinus lookup table
+#include "../main/mymath.h"
 
 typedef enum TScreenState
 {
@@ -759,7 +762,7 @@ void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
 }
 
-unsigned ScreenDevicePrintChart(TScreenDevice *pThis, TScreenColor color)
+unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color)
 {
 	// Clear the screen
 	ScreenDeviceClearDisplay(pThis);
@@ -772,13 +775,14 @@ unsigned ScreenDevicePrintChart(TScreenDevice *pThis, TScreenColor color)
 	ScreenDeviceDrawLine(pThis,startPointX,startPointY,lenY,color,VERTICAL);
 
 	// TODO:sine function
-	/*unsigned amplitude = 300;
-	for(unsigned x = 0; x<500;x++)
+	/*int amplitude = 2;
+	for(unsigned x = 0; x<1000;x++)
 	{
-		unsigned actualPosY = amplitude*__builtin_sin(6.28*x);
-		ScreenDeviceSetPixel(pThis,startPointX+x,startPointY+actualPosY,RED_COLOR);
+		int actualPosY = (int)(amplitude*sinusLookup[2*x%628]); //[odwrotnosc dzielnika okresu*x % liczba punktow
+		ScreenDeviceSetPixel(pThis,startPointX+x,startPointY-actualPosY,WHITE_COLOR);
 	}*/
 	return 0;
 
 }
+
 

@@ -7,7 +7,8 @@
 
 #ifndef SRC_MAIN_MYMATH_H_
 #define SRC_MAIN_MYMATH_H_
+#include <uspienv/screen.h>
+const int sinusLookup[628];
 
-int sinusLookup[63];
-
+unsigned ScreenDeviceDrawSine(TScreenDevice *pThis, unsigned startPosX, unsigned startPosY, unsigned amplitude, TScreenColor color);
 #endif /* SRC_MAIN_MYMATH_H_ */

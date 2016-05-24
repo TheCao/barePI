@@ -10,9 +10,6 @@
 
 #include <uspienv/types.h>
 #include "gamepad.h"
-//#include <uspienv/math.h>
-//#include <math.h>
-//extern double sine_taylor(double);
 #include "mymath.h"
 
 static const char FromSample[] = "Message";
@@ -23,11 +20,7 @@ int horizontalAxis = 0;
 int verticalAxis = 0;
 unsigned timerTest = 2; //TODO: Delete
 unsigned timerTesting = 0;
-double testowaLiczbaDouble = 0;
-int sinus = 0;
 
-int tablicaLiniowo[10] = {0,1,2,3,4,5,6,7,8,9};
-int tablicaSinusa[10] = {};
 
 static void KeyPressedHandler (const char *pString)
 {
@@ -96,12 +89,10 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		break;
 	case(BUTTON1):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
-
-		for(unsigned x = 0; x <1000;x++)
-		{
-			LogWrite("Chart", LOG_ERROR, "Sinus lookup %d = %d", x%63, sinusLookup[x%63]);
-		}
-
+		if(ScreenDeviceDrawSine(USPiEnvGetScreen(),400,400,2,WHITE_COLOR) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Sine function wasn't printed ;C");
+			}
 		break;
 	case(BUTTON2):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
@@ -110,7 +101,7 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		LogWrite("Tajmer poczatkowy: ", LOG_ERROR, "%u",timerTesting);
 		break;
 	case(BUTTON3):
-		if(ScreenDevicePrintChart(USPiEnvGetScreen(),GREEN_COLOR) != 0)
+		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR) != 0)
 		{
 			LogWrite("Chart Error ", LOG_ERROR, "Chart not printed ;C");
 		}

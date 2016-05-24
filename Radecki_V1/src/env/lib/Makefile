@@ -20,20 +20,20 @@
 
 USPIHOME = ../..
 
-AFLAGS	+= -I ../include
-CFLAGS	+= -I ../include -lm
+AFLAGS	+= -I ../include 
+CFLAGS	+= -I ../include 
 
 OBJS	= alloc.o assert.o bcmmailbox.o bcmframebuffer.o bcmpropertytags.o chargenerator.o debug.o \
-	  delayloop.o exceptionstub.o interrupt.o libhelper.o libstub.o logger.o memio.o screen.o \
+	  delayloop.o exceptionstub.o interrupt.o libhelper.o libstub.o logger.o math.o memio.o screen.o \
 	  string.o synchronize.o sysinit.o timer.o uspibind.o uspienv.o util.o util_fast.o \
 	  memory.o pagetable.o exceptionhandler.o
 
 all: startup.o libuspienv.a
-
+	@echo "Makefile env/lib all:" 
 startup.o: startup.S
 
 libuspienv.a: $(OBJS)
 	rm -f $@
-	$(AR) cr $@ $(OBJS)
+	$(AR) cr $@ $(OBJS) 
 
 include $(USPIHOME)/Rules.mk

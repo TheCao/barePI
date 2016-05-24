@@ -110,7 +110,7 @@ void ScreenDeviceDrawLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, u
 void ScreenDeviceDrawRect(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY,unsigned dx, unsigned dy, TScreenColor color);
 void ScreenDeviceClearDisplay(TScreenDevice *pThis);
 void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color);
-unsigned ScreenDevicePrintChart(TScreenDevice *pThis,TScreenColor color);
+unsigned ScreenDeviceDrawChart(TScreenDevice *pThis,TScreenColor color);
 
 void ScreenDevice (TScreenDevice *pThis, unsigned nWidth, unsigned nHeight);
 void _ScreenDevice (TScreenDevice *pThis);
