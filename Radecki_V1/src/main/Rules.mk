@@ -27,7 +27,7 @@
 CFLAGS	+= -I ../env/include
 
 kernel.img: $(OBJS) $(LIBS)
-	$(LD) -o kernel.elf -Map kernel.map -T $(USPIHOME)/env/uspienv.ld $(USPIHOME)/env/lib/startup.o $(OBJS) $(LIBS)
+	$(LD) -o kernel.elf -Map kernel.map  -T $(USPIHOME)/env/uspienv.ld $(USPIHOME)/env/lib/startup.o $(OBJS) $(LIBS)
 	$(PREFIX)objdump -D kernel.elf > kernel.lst
 	$(PREFIX)objcopy kernel.elf -O binary kernel.img
 	wc -c kernel.img

@@ -42,7 +42,7 @@ endif
 
 
 AFLAGS	+= $(ARCH) -DRASPPI=$(RASPPI)
-CFLAGS	+= $(ARCH) -Wall  -std=gnu99  -DRASPPI=$(RASPPI) -I $(USPIHOME)/include -lm -O  #-DNDEBUG 
+CFLAGS	+= $(ARCH) -Wall  -std=gnu99  -DRASPPI=$(RASPPI) -I $(USPIHOME)/include -lm -lc -lgcc  -O  #-DNDEBUG 
 #CFLAGS	+= $(ARCH) -Wall -Wno-psabi -fsigned-char -fno-builtin -nostdinc -nostdlib  \
 	   -std=gnu99 -undef -DRASPPI=$(RASPPI) -I $(USPIHOME)/include  -O #-DNDEBUG 
 

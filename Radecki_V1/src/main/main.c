@@ -20,7 +20,8 @@ int horizontalAxis = 0;
 int verticalAxis = 0;
 unsigned timerTest = 2; //TODO: Delete
 unsigned timerTesting = 0;
-
+double tempD = 15.1;
+int tempI = 0;
 
 static void KeyPressedHandler (const char *pString)
 {
@@ -89,10 +90,13 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		break;
 	case(BUTTON1):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
-		if(ScreenDeviceDrawSine(USPiEnvGetScreen(),400,400,2,WHITE_COLOR) != 0)
+		/*if(ScreenDeviceDrawSine(USPiEnvGetScreen(),400,400,2,WHITE_COLOR) != 0)
 			{
 				LogWrite("Chart Error ", LOG_ERROR, "Sine function wasn't printed ;C");
-			}
+			}*/
+
+		tempI = (int)tempD;
+		LogWrite("Test: ", LOG_ERROR,"Int = %d",tempI);
 		break;
 	case(BUTTON2):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
