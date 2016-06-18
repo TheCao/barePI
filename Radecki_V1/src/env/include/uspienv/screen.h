@@ -111,7 +111,7 @@ typedef enum chartAddLines
 	HORIZONTALLINES,
 	VERTICALLINES,
 	BOTH,
-	NONE
+	ADDNONE
 } chartAddLines_t;
 
 void ScreenDeviceDrawLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, unsigned lenght, TScreenColor Color, lineDirection_t direction);

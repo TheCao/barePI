@@ -21,7 +21,38 @@ int verticalAxis = 0;
 unsigned timerTest = 2; //TODO: Delete
 unsigned timerTesting = 0;
 
+motorParams_t basicMotor = {
+		.R = 			2,
+		.L =			0.1,
+		.Ke =			0.1,
+		.Km =			0.1,
+		.J =			0.1,
+		.B =			0.5,
+		.Mobc =			0.0,
+		.U = 			12.0
+};
 
+symulationParams_t basicSymulation ={
+		.actualTime = 	0,
+		.dt =			0.01,
+		.tempOmega = 	0,
+		.I = 			0.0,
+		.didt = 		0.0,
+		.d2thetadt =	0.0,
+		.dthetadt = 	0.0,
+		.tk = 			10.0
+};
+
+motorParams_t basicMotor2 = {
+		.R = 			4,
+		.L =			0.05,
+		.Ke =			0.1,
+		.Km =			0.1,
+		.J =			0.1,
+		.B =			0.3,
+		.Mobc =			0.4,
+		.U = 			40.0
+};
 
 static void KeyPressedHandler (const char *pString)
 {
@@ -29,49 +60,16 @@ static void KeyPressedHandler (const char *pString)
 }
 static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState)
 {
-	// do obs³ugi przerwania od GamePad'a
-	/*TString Msg;
-	String (&Msg); //tworzenie wskaznika
-	StringFormat (&Msg, "GamePad %u: Buttons 0x%X", nDeviceIndex + 1, pState->buttons);
-
-	TString Value;
-	String (&Value);
-
-	if (pState->naxes > 0)
-	{
-		StringAppend (&Msg, " Axes");
-
-		for (unsigned i = 0; i < pState->naxes; i++)
-		{
-			StringFormat (&Value, " %d", pState->axes[i].value);
-			StringAppend (&Msg, StringGet (&Value));
-		}
-	}
-
-	if (pState->nhats > 0)
-	{
-		StringAppend (&Msg, " Hats");
-
-		for (unsigned i = 0; i < pState->nhats; i++)
-		{
-			StringFormat (&Value, " %d", pState->hats[i]);
-			StringAppend (&Msg, StringGet (&Value));
-		}
-	}
-
-	//LogWrite (FromSample, LOG_NOTICE, StringGet (&Msg));
-
-	//"destruktory"
-	_String (&Value);
-	_String (&Msg);*/
-
-	//LogWrite(FromSample, LOG_WARNING, "Button : %x - %d" ,pState->buttons,pState->buttons);
+	//buttons handlers
 	switch(pState->buttons){
 	case(START):
-		LogWrite("Przycisk: ", LOG_WARNING, "Start!");
+		//LogWrite("Przycisk: ", LOG_WARNING, "Start!");
+		Simulation(USPiEnvGetScreen(),&basicMotor, basicSymulation,WHITE_COLOR);
+		Simulation(USPiEnvGetScreen(),&basicMotor2, basicSymulation,RED_COLOR);
 		break;
 	case(SELECT):
-		LogWrite("Przycisk: ", LOG_ERROR, "Select!!");
+		//LogWrite("Przycisk: ", LOG_ERROR, "Select!!");
+		actualEnabledMode = NONEENABLED;
 		break;
 	case(START+SELECT):
 		reboot();
@@ -88,39 +86,105 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 	case(RIGHT2):
 		LogWrite("Przycisk: ", LOG_ERROR, "Right 2");
 		break;
-	case(BUTTON1):
-		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
-		/*if(ScreenDeviceDrawSine(USPiEnvGetScreen(),100,850,2,WHITE_COLOR) != 0)
-			{
-				LogWrite("Chart Error ", LOG_ERROR, "Sine function wasn't printed ;C");
-			}*/
-		silnik(USPiEnvGetScreen(),128,768,WHITE_COLOR);
+	case(BUTTON1): //DC motor params change
+		actualEnabledMode = DCMOTOR;
+
 		break;
-	case(BUTTON2):
-		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
-		//ScreenDeviceClearDisplay(USPiEnvGetScreen());
-		timerTesting = TimerGet()->m_nTime;
-		LogWrite("Tajmer poczatkowy: ", LOG_ERROR, "%u",timerTesting);
+	case(BUTTON2): // simulation params change
+		actualEnabledMode = SIMULATION;
 		break;
-	case(BUTTON3):
+	case(BUTTON3): // draw/clear chart
 		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
 		{
-			LogWrite("Chart Error ", LOG_ERROR, "Chart not printed ;C");
+			LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
 		}
 		break;
-	case(BUTTON4):
-		LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 4");
-		TimerMsDelay(TimerGet(),1000);
+	case(BUTTON4): //recover last used chart
+
+
 		break;
 
-	//obs³uga osi na lewym joyu
+	//left joystick handling
 	default:
 		horizontalAxis = pState->axes[0].value;
 		verticalAxis = pState->axes[1].value;
 		if( horizontalAxis != 127 || verticalAxis !=127 )
 		{
-			LogWrite("Joystick: ", LOG_ERROR, "%d / %d ", horizontalAxis, verticalAxis);
-			break;
+			//LogWrite("Joystick: ", LOG_ERROR, "%d / %d ", horizontalAxis, verticalAxis);
+			//break;
+			switch(actualEnabledMode){
+						case(DCMOTOR):
+							if(verticalAxis > 127 && horizontalAxis == 127)
+							{
+								// next from list
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								if(actMenuPosition >=8) actMenuPosition = 1;
+								else actMenuPosition++;
+								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
+								TimerMsDelay(TimerGet(),500); // delay
+							}
+							else if(verticalAxis < 127 && horizontalAxis == 127)
+							{
+								// go backward
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								if(actMenuPosition <=1) actMenuPosition = 8;
+								else actMenuPosition--;
+								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
+								TimerMsDelay(TimerGet(),500); // delay
+							}
+							else if(horizontalAxis > 127 && verticalAxis == 127)
+							{
+								// increase
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
+								ChangeMotorParam(&basicMotor,actMenuPosition,1);
+								TimerMsDelay(TimerGet(),500); // delay
+							}
+							else if (horizontalAxis < 127 && verticalAxis == 127 )
+							{
+								//decrease
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
+								ChangeMotorParam(&basicMotor,actMenuPosition,-1);
+								TimerMsDelay(TimerGet(),500); // delay
+							}
+							else
+							{
+								// both axis are set
+							}
+							break;
+						case(SIMULATION):
+							if(verticalAxis > 127 && horizontalAxis == 127)
+								{
+									// next from list
+									LogWrite("Test:", LOG_ERROR, "SIMULATION switch next");
+								}
+							else if(verticalAxis < 127 && horizontalAxis == 127)
+								{
+									// go backward
+									LogWrite("Test:", LOG_ERROR, "SIMULATION switch backward");
+								}
+							else if(horizontalAxis > 127 && verticalAxis == 127)
+								{
+									// increase
+									LogWrite("Test:", LOG_ERROR, "SIMULATION switch increase");
+								}
+							else if (horizontalAxis < 127 && verticalAxis == 127 )
+								{
+									//decrease
+									LogWrite("Test:", LOG_ERROR, "SIMULATION switch decrease");
+								}
+							else
+								{
+									// both axis are set
+								}
+							break;
+						case(NONEENABLED):
+
+							break;
+
+
+					}
 		}
 
 	}
@@ -226,7 +290,8 @@ int main (void)
 	USPiKeyboardRegisterKeyPressedHandler (KeyPressedHandler);
 	
 	//USPiMouseRegisterStatusHandler(MouseStatusHandler);
-
+	basicSymulation.startPosX = (USPiEnvGetScreen()->m_nWidth)/10; 		//10% of whole Screen Width
+	basicSymulation.startPosY = ((USPiEnvGetScreen()->m_nHeight)*9)/10; 	//90% of whole screen Height
 
 	while(1)
 	{
