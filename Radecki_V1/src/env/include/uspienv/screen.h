@@ -106,11 +106,20 @@ typedef enum lineDirection
 	VERTICAL,
 } lineDirection_t;
 
+typedef enum chartAddLines
+{
+	HORIZONTALLINES,
+	VERTICALLINES,
+	BOTH,
+	NONE
+} chartAddLines_t;
+
 void ScreenDeviceDrawLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, unsigned lenght, TScreenColor Color, lineDirection_t direction);
+void ScreenDeviceDrawDottedLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, unsigned lenght, unsigned dotBreak, TScreenColor color, lineDirection_t direction);
 void ScreenDeviceDrawRect(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY,unsigned dx, unsigned dy, TScreenColor color);
 void ScreenDeviceClearDisplay(TScreenDevice *pThis);
 void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color);
-unsigned ScreenDeviceDrawChart(TScreenDevice *pThis,TScreenColor color);
+unsigned ScreenDeviceDrawChart(TScreenDevice *pThis,TScreenColor color, chartAddLines_t linesOption);
 
 void ScreenDevice (TScreenDevice *pThis, unsigned nWidth, unsigned nHeight);
 void _ScreenDevice (TScreenDevice *pThis);

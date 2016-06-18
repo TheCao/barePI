@@ -60,9 +60,9 @@ mcr p15, 0, r0, c1, c0, 2
 mov r0, #0x40000000
 fmxr fpexc,r0
 
-	cps	#0x1F				/* set system mode */
-	mov	sp, #MEM_KERNEL_STACK
-	b	sysinit
+cps	#0x1F				/* set system mode */
+mov	sp, #MEM_KERNEL_STACK
+b	sysinit
 
 #if RASPPI != 1
 	

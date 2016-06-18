@@ -26,4 +26,63 @@ unsigned ScreenDeviceDrawSine(TScreenDevice *pThis, unsigned startPosX, unsigned
 }
 
 
+float R = 2;
+float L = 0.1;
+float Ke = 0.1;
+float Km = 0.1;
+float J = 0.1;
+float B = 0.5;
+float Mobc = 0;
+float U = 12;
+float I = 0;
+float didt = 0.0;
+float d2thetadt = 0.0;
+float dthetadt = 0.0;
+float dt = 0.01;
+int testCzasu = 0;
+unsigned int omegaU = 0;
+unsigned int aktualnyCzas = 0;
+
+
+
+void silnik(TScreenDevice *pThis,unsigned startPosX, unsigned startPosY,TScreenColor color)
+{
+	omegaU = 0;
+	aktualnyCzas = 0;
+	Mobc = 0;
+	I = 0;
+	U = 12;
+	dthetadt = 0.0;
+	d2thetadt = 0.0;
+	didt = 0.0;
+	for(float i=0.0;i<10;i+=dt)
+		{
+			didt = (1/L)*(U-R*I-Ke*dthetadt);
+			d2thetadt = (1/J)*(Km*I-B*dthetadt-Mobc);
+			// elementy calkowane
+			dthetadt+= d2thetadt*dt;
+			I+=didt*dt;
+
+			//prints
+			//printf("W czasie dt = %f : di/dt = %f  d2theta/dt = %f  dtheta/dt = %f   I = %f \n",i,didt,d2thetadt,dthetadt,I);
+			//LogWrite("Wyniki symulacji:", LOG_ERROR,"W czasie dt = %d : di/dt = %d  d2theta/dt = %d  dtheta/dt = %d   I = %d \n",i,didt,d2thetadt,dthetadt,I );
+			/*if(dthetadt >= 1.0)
+				{
+				testCzasu = i*100;
+				LogWrite("", 1,"Dtheta/Dt wiêksze od 1.0 w czasie = %d", testCzasu );
+				}
+			*/
+			aktualnyCzas = i*100;
+			omegaU = dthetadt*200; // poniewaz ustalony zakres jest od 0 - 2 a mam dostêpne 512 px wysokosci to rozpinam wyniki na 0-400 px
+			// rysowanie wykresu o za³o¿onej gruboœci 5px
+			for(signed i = -2;i<=2;i++)
+			{
+				ScreenDeviceSetPixel(pThis, startPosX + aktualnyCzas, startPosY - omegaU+i, color);
+			}
+			if(i>=5) Mobc = 0.3;
+			if(i>=8) U = 24;
+		}
+}
+
+
 

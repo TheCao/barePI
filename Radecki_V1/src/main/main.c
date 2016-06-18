@@ -22,6 +22,7 @@ unsigned timerTest = 2; //TODO: Delete
 unsigned timerTesting = 0;
 
 
+
 static void KeyPressedHandler (const char *pString)
 {
 	ScreenDeviceWrite (USPiEnvGetScreen (), pString, strlen (pString));
@@ -89,12 +90,11 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		break;
 	case(BUTTON1):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 1");
-		if(ScreenDeviceDrawSine(USPiEnvGetScreen(),100,850,2,WHITE_COLOR) != 0)
+		/*if(ScreenDeviceDrawSine(USPiEnvGetScreen(),100,850,2,WHITE_COLOR) != 0)
 			{
 				LogWrite("Chart Error ", LOG_ERROR, "Sine function wasn't printed ;C");
-			}
-
-
+			}*/
+		silnik(USPiEnvGetScreen(),128,768,WHITE_COLOR);
 		break;
 	case(BUTTON2):
 		//LogWrite("Przycisk: ", LOG_ERROR, "Przycisk 2");
@@ -103,7 +103,7 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		LogWrite("Tajmer poczatkowy: ", LOG_ERROR, "%u",timerTesting);
 		break;
 	case(BUTTON3):
-		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR) != 0)
+		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
 		{
 			LogWrite("Chart Error ", LOG_ERROR, "Chart not printed ;C");
 		}

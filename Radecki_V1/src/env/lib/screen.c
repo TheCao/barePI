@@ -743,6 +743,27 @@ void ScreenDeviceDrawLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, u
 
 }
 
+void ScreenDeviceDrawDottedLine(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY, unsigned lenght, unsigned dotBreak, TScreenColor color, lineDirection_t direction)
+{
+	// draw Dotted Line with break in px specified by dotBreak
+	switch(direction)
+		{
+		case HORIZONTAL:
+			for(unsigned i=0;i<lenght;i+=dotBreak)
+			{
+				ScreenDeviceSetPixel (pThis, nPosX + i, nPosY, color);
+			}
+			break;
+		case VERTICAL:
+			for(unsigned i=0;i<=lenght;i+=dotBreak)
+				{
+				ScreenDeviceSetPixel (pThis, nPosX, nPosY-i, color);
+				}
+			break;
+		}
+
+}
+
 void ScreenDeviceDrawRect(TScreenDevice *pThis,unsigned nPosX, unsigned nPosY,unsigned dx, unsigned dy, TScreenColor color)
 {
 	for(unsigned i = 0; i <dy;i++)
@@ -762,25 +783,41 @@ void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
 }
 
-unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color)
+unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAddLines_t linesOption)
 {
 	// Clear the screen
 	ScreenDeviceClearDisplay(pThis);
 	// draw chart axis
 	unsigned startPointX = ((pThis->m_nWidth)/10); //10% of whole Screen Width
-	unsigned startPointY = ((pThis->m_nHeight)*3)/4;//75% of whole screen Height
-	unsigned lenX = 8*startPointX;
-	unsigned lenY = (startPointY*4)/6;
-	ScreenDeviceDrawLine(pThis,startPointX,startPointY,lenX,color,HORIZONTAL);
-	ScreenDeviceDrawLine(pThis,startPointX,startPointY,lenY,color,VERTICAL);
+	unsigned startPointY = ((pThis->m_nHeight)*9)/10;//90% of whole screen Height
+	unsigned lenX = (pThis->m_nWidth)-2*startPointX;
+	unsigned lenY = startPointY-(pThis->m_nHeight)/10;
 
-	// TODO:sine function
-	/*int amplitude = 2;
-	for(unsigned x = 0; x<1000;x++)
+	// chart lines drawing
+	for(unsigned i = 0;i<2;i++)
 	{
-		int actualPosY = (int)(amplitude*sinusLookup[2*x%628]); //[odwrotnosc dzielnika okresu*x % liczba punktow
-		ScreenDeviceSetPixel(pThis,startPointX+x,startPointY-actualPosY,WHITE_COLOR);
-	}*/
+		ScreenDeviceDrawLine(pThis,startPointX,startPointY+i,lenX,color,HORIZONTAL);
+	}
+	for(unsigned i = 0;i<2;i++)
+	{
+		ScreenDeviceDrawLine(pThis,startPointX-i,startPointY,lenY,color,VERTICAL);
+	}
+	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10)
+	{
+		if(linesOption == VERTICALLINES || linesOption == BOTH)
+			{
+				ScreenDeviceDrawDottedLine(pThis,i,startPointY,lenY,5,color,VERTICAL);
+			}
+		ScreenDeviceDrawLine(pThis,i,startPointY+10,10,color,VERTICAL);
+	}
+	for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10)
+	{
+		if(linesOption == HORIZONTALLINES || linesOption == BOTH)
+			{
+				ScreenDeviceDrawDottedLine(pThis,startPointX,j,lenX,3,color,HORIZONTAL);
+			}
+		ScreenDeviceDrawLine(pThis,startPointX-10,j,10,color,HORIZONTAL);
+	}
 	return 0;
 
 }
