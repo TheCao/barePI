@@ -234,6 +234,8 @@ void StringFormatV (TString *pThis, const char *pFormat, va_list Args)
 			char NumBuf[MAX_NUMBER_LEN+1];
 			boolean bMinus = FALSE;
 			long lArg;
+			double fArg;
+			unsigned uArg;
 
 			switch (*pFormat)
 			{
@@ -298,7 +300,49 @@ void StringFormatV (TString *pThis, const char *pFormat, va_list Args)
 					StringPutString (pThis, NumBuf);
 				}
 				break;
+			case 'f':
+				//eg. got 1,2345 > *10000 = 12345 > (int) /10000 = 1 > add "." > 12345 - 1*10000 = 2345 > add 2345
+				fArg = va_arg (Args, double);
+				if(fArg <0)
+				{
+					bMinus = TRUE;
+					fArg = -fArg;
+				}
+				uArg = (unsigned int)(fArg*10000);
+				ntoa (NumBuf, (unsigned long) uArg/10000, 10, FALSE); //zostaja liczby 10tysieczne
+				nLen = strlen (NumBuf) + (bMinus ? 1 : 0) + 1; //last 1 from character '.'
+				if (bLeft)
+				{
+					if (bMinus)
+					{
+						StringPutChar (pThis, '-', 1);
+					}
+					StringPutString (pThis, NumBuf);
+					if (nWidth > nLen)
+					{
+						StringPutChar (pThis, ' ', nWidth-nLen);
+					}
+				}
+				else
+				{
+					if (nWidth > nLen)
+					{
+						StringPutChar (pThis, ' ', nWidth-nLen);
+					}
+					if (bMinus)
+					{
+						StringPutChar (pThis, '-', 1);
+					}
+					StringPutString (pThis, NumBuf);
+				}
+				// czesc po przecinku
+				StringPutChar (pThis, '.', 1);
+				uArg = uArg - ((int)(uArg/10000))*10000;
+				ntoa (NumBuf, (unsigned long) uArg, 10, FALSE); //zostaja liczby 10tysieczne
+				nLen = strlen (NumBuf) + (bMinus ? 1 : 0) + 1; //last 1 from character '.'
+				StringPutString (pThis, NumBuf);
 
+				break;
 			case 'o':
 				nBase = 8;
 				goto FormatNumber;

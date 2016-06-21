@@ -25,7 +25,7 @@
 
 #define ROTORS		4
 //sinus lookup table
-#include "../main/mymath.h"
+#include "../../main/myfunc.h"
 
 typedef enum TScreenState
 {

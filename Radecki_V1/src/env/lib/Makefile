@@ -24,7 +24,7 @@ AFLAGS	+= -I ../include
 CFLAGS	+= -I ../include 
 
 OBJS	= alloc.o assert.o bcmmailbox.o bcmframebuffer.o bcmpropertytags.o chargenerator.o debug.o \
-	  delayloop.o exceptionstub.o interrupt.o libhelper.o libstub.o logger.o math.o memio.o screen.o \
+	  delayloop.o exceptionstub.o interrupt.o libhelper.o libstub.o logger.o memio.o screen.o \
 	  string.o synchronize.o sysinit.o timer.o uspibind.o uspienv.o util.o util_fast.o \
 	  memory.o pagetable.o exceptionhandler.o
 

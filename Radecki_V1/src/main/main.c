@@ -10,9 +10,9 @@
 
 #include <uspienv/types.h>
 #include "gamepad.h"
-#include "mymath.h"
+#include "myfunc.h"
 
-static const char FromSample[] = "Message";
+//static const char FromSample[] = "Message";
 boolean isMouseConnected = FALSE;
 boolean isKeyboardConnected = FALSE;
 boolean isGamepadConnected = FALSE;
@@ -20,39 +20,11 @@ int horizontalAxis = 0;
 int verticalAxis = 0;
 unsigned timerTest = 2; //TODO: Delete
 unsigned timerTesting = 0;
+extern motorParams_t basicMotor, basicMotor2;
+extern motorParams_t copyBasicMotor, copyBasicMotor2;
+extern simulationParams_t basicSimulation;
+boolean isChartPrinted = FALSE;
 
-motorParams_t basicMotor = {
-		.R = 			2,
-		.L =			0.1,
-		.Ke =			0.1,
-		.Km =			0.1,
-		.J =			0.1,
-		.B =			0.5,
-		.Mobc =			0.0,
-		.U = 			12.0
-};
-
-symulationParams_t basicSymulation ={
-		.actualTime = 	0,
-		.dt =			0.01,
-		.tempOmega = 	0,
-		.I = 			0.0,
-		.didt = 		0.0,
-		.d2thetadt =	0.0,
-		.dthetadt = 	0.0,
-		.tk = 			10.0
-};
-
-motorParams_t basicMotor2 = {
-		.R = 			4,
-		.L =			0.05,
-		.Ke =			0.1,
-		.Km =			0.1,
-		.J =			0.1,
-		.B =			0.3,
-		.Mobc =			0.4,
-		.U = 			40.0
-};
 
 static void KeyPressedHandler (const char *pString)
 {
@@ -63,45 +35,137 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 	//buttons handlers
 	switch(pState->buttons){
 	case(START):
-		//LogWrite("Przycisk: ", LOG_WARNING, "Start!");
-		Simulation(USPiEnvGetScreen(),&basicMotor, basicSymulation,WHITE_COLOR);
-		Simulation(USPiEnvGetScreen(),&basicMotor2, basicSymulation,RED_COLOR);
+		//plot motor symulation
+		if(isChartPrinted == FALSE){
+			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+				{
+					LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+				}
+			else isChartPrinted = TRUE;
+		}
+
+		switch(simulationMotor){
+		case(FIRSTMOTOR):
+			if(Simulation(USPiEnvGetScreen(),&basicMotor, basicSimulation,WHITE_COLOR) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+			}
+			break;
+		case(SECONDMOTOR):
+			if(Simulation(USPiEnvGetScreen(),&basicMotor2, basicSimulation,RED_COLOR) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+			}
+			break;
+		case(BOTHMOTORS):
+			if(Simulation(USPiEnvGetScreen(),&basicMotor, basicSimulation,WHITE_COLOR) !=0 ||
+			Simulation(USPiEnvGetScreen(),&basicMotor2, basicSimulation,RED_COLOR) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+			}
+			break;
+		}
+		//copy structures
+		copyBasicMotor = basicMotor;
+		copyBasicMotor2 = basicMotor2;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(SELECT):
-		//LogWrite("Przycisk: ", LOG_ERROR, "Select!!");
+		//default settings
 		actualEnabledMode = NONEENABLED;
+		actBasicMotor = 1;
+		actMenuPosition = 1;
+		simulationMotor = FIRSTMOTOR;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(START+SELECT):
 		reboot();
 		break;
 	case(LEFT1):
-		LogWrite("Przycisk: ", LOG_ERROR, "Left 1");
 		break;
 	case(LEFT2):
-		LogWrite("Przycisk: ", LOG_ERROR, "Left 2");
 		break;
 	case(RIGHT1):
-		LogWrite("Przycisk: ", LOG_ERROR, "Right 1");
+		//change actual basic motor
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		if(actBasicMotor == 1) actBasicMotor = 2;
+		else actBasicMotor = 1;
+		LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(RIGHT2):
-		LogWrite("Przycisk: ", LOG_ERROR, "Right 2");
+		// change simulationMotorMode for plotting purposes
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		switch(simulationMotor){
+		case(FIRSTMOTOR):
+			simulationMotor = SECONDMOTOR;
+			LogWrite("",LOG_WARNING,"Only second motor will be plotted");
+			break;
+		case(SECONDMOTOR):
+			simulationMotor = BOTH;
+			LogWrite("",LOG_WARNING,"First and second motor will be plotted");
+			break;
+		case(BOTH):
+			simulationMotor = FIRSTMOTOR;
+			LogWrite("",LOG_WARNING,"Only first motor will be plotted");
+			break;
+		}
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(BUTTON1): //DC motor params change
 		actualEnabledMode = DCMOTOR;
-
+		actMenuPosition = 1;
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		LogWrite("", LOG_WARNING, "Changing Basic Motor %u Parameters", actBasicMotor);
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(BUTTON2): // simulation params change
 		actualEnabledMode = SIMULATION;
+		actMenuPosition = 1;
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		LogWrite("", LOG_WARNING, "Changing Simulation Parameters");
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(BUTTON3): // draw/clear chart
 		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
 		{
 			LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
 		}
+		isChartPrinted = TRUE;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
-	case(BUTTON4): //recover last used chart
-
-
+	case(BUTTON4): //recover last simulation params
+		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+				{
+					LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+				}
+		switch(simulationMotor){
+		case(FIRSTMOTOR):
+					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, basicSimulation,WHITE_COLOR) != 0)
+					{
+						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
+					}
+					break;
+				case(SECONDMOTOR):
+					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor2, basicSimulation,RED_COLOR) != 0)
+					{
+						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
+					}
+					break;
+				case(BOTHMOTORS):
+					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, basicSimulation,WHITE_COLOR) !=0 ||
+					Simulation(USPiEnvGetScreen(),&copyBasicMotor2, basicSimulation,RED_COLOR) != 0)
+					{
+						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
+					}
+					break;
+			}
+		isChartPrinted = TRUE;
+		TimerMsDelay(TimerGet(),300); // delay
 		break;
 
 	//left joystick handling
@@ -110,8 +174,6 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 		verticalAxis = pState->axes[1].value;
 		if( horizontalAxis != 127 || verticalAxis !=127 )
 		{
-			//LogWrite("Joystick: ", LOG_ERROR, "%d / %d ", horizontalAxis, verticalAxis);
-			//break;
 			switch(actualEnabledMode){
 						case(DCMOTOR):
 							if(verticalAxis > 127 && horizontalAxis == 127)
@@ -120,8 +182,10 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 								ScreenDeviceClearDisplay(USPiEnvGetScreen());
 								if(actMenuPosition >=8) actMenuPosition = 1;
 								else actMenuPosition++;
-								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
-								TimerMsDelay(TimerGet(),500); // delay
+								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+								PrintActMotorParam(actMenuPosition);
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 							}
 							else if(verticalAxis < 127 && horizontalAxis == 127)
 							{
@@ -129,58 +193,96 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 								ScreenDeviceClearDisplay(USPiEnvGetScreen());
 								if(actMenuPosition <=1) actMenuPosition = 8;
 								else actMenuPosition--;
-								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
-								TimerMsDelay(TimerGet(),500); // delay
+								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+								PrintActMotorParam(actMenuPosition);
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 							}
 							else if(horizontalAxis > 127 && verticalAxis == 127)
 							{
 								// increase
 								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
-								ChangeMotorParam(&basicMotor,actMenuPosition,1);
-								TimerMsDelay(TimerGet(),500); // delay
+								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+								PrintActMotorParam(actMenuPosition);
+								switch(actBasicMotor){
+								case(1):
+									ChangeMotorParam(&basicMotor,actMenuPosition,1);
+								break;
+								case(2):
+									ChangeMotorParam(&basicMotor2,actMenuPosition,1);
+								break;
+								}
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 							}
 							else if (horizontalAxis < 127 && verticalAxis == 127 )
 							{
 								//decrease
 								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								LogWrite("Motor Params Changing Mode:", LOG_ERROR, "DCMOTOR actualMenuPosition = %u",actMenuPosition);
-								ChangeMotorParam(&basicMotor,actMenuPosition,-1);
-								TimerMsDelay(TimerGet(),500); // delay
+								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+								PrintActMotorParam(actMenuPosition);
+								switch(actBasicMotor){
+								case(1):
+									ChangeMotorParam(&basicMotor,actMenuPosition,-1);
+								break;
+								case(2):
+									ChangeMotorParam(&basicMotor2,actMenuPosition,-1);
+								break;
+								}
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 							}
 							else
 							{
-								// both axis are set
+								// both axis are set - do nothing
 							}
 							break;
 						case(SIMULATION):
 							if(verticalAxis > 127 && horizontalAxis == 127)
 								{
 									// next from list
-									LogWrite("Test:", LOG_ERROR, "SIMULATION switch next");
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								if(actMenuPosition >=2) actMenuPosition = 1;
+								else actMenuPosition++;
+								PrintActSimulationParam(actMenuPosition);
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 								}
 							else if(verticalAxis < 127 && horizontalAxis == 127)
 								{
 									// go backward
-									LogWrite("Test:", LOG_ERROR, "SIMULATION switch backward");
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								if(actMenuPosition <=1) actMenuPosition = 2;
+								else actMenuPosition--;
+								PrintActSimulationParam(actMenuPosition);
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 								}
 							else if(horizontalAxis > 127 && verticalAxis == 127)
 								{
 									// increase
-									LogWrite("Test:", LOG_ERROR, "SIMULATION switch increase");
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								PrintActSimulationParam(actMenuPosition);
+								ChangeSimulationParam(&basicSimulation,actMenuPosition,1);
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 								}
 							else if (horizontalAxis < 127 && verticalAxis == 127 )
 								{
 									//decrease
-									LogWrite("Test:", LOG_ERROR, "SIMULATION switch decrease");
+								ScreenDeviceClearDisplay(USPiEnvGetScreen());
+								PrintActSimulationParam(actMenuPosition);
+								ChangeSimulationParam(&basicSimulation,actMenuPosition,-1);
+								isChartPrinted = FALSE;
+								TimerMsDelay(TimerGet(),300); // delay
 								}
 							else
 								{
-									// both axis are set
+									// both axis are set - do nothing
 								}
 							break;
 						case(NONEENABLED):
-
+							//pass or error?
 							break;
 
 
@@ -195,7 +297,7 @@ static void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadSt
 /*
 static void MouseStatusHandler()
 {
-	//pass
+	//TODO:
 }
 */
 int main (void)
@@ -207,7 +309,7 @@ int main (void)
 	
 	if (!USPiInitialize ())
 	{
-		LogWrite (FromSample, LOG_ERROR, "Cannot initialize USPi");
+		LogWrite ("USPi Error", LOG_ERROR, "Cannot initialize USPi");
 
 		USPiEnvClose ();
 
@@ -216,7 +318,7 @@ int main (void)
 	
 	if (!USPiKeyboardAvailable ())
 	{
-		LogWrite (FromSample, LOG_ERROR, "Keyboard not found");
+		LogWrite ("USPi Error", LOG_ERROR, "Keyboard not found");
 	}
 	else
 	{
@@ -227,7 +329,7 @@ int main (void)
 	int nGamePads = USPiGamePadAvailable ();
 	if (nGamePads < 1)
 	{
-		LogWrite (FromSample, LOG_ERROR, "GamePad not found");
+		LogWrite ("USPi Error", LOG_ERROR, "GamePad not found");
 
 	}
 	else
@@ -239,28 +341,28 @@ int main (void)
 				TUSPiDeviceInformation Info;
 				if (!USPiDeviceGetInformation (GAMEPAD_CLASS, nGamePad, &Info))
 				{
-					LogWrite (FromSample, LOG_ERROR, "Cannot get device information");
+					LogWrite ("USPi Error", LOG_ERROR, "Cannot get device information");
 
 					USPiEnvClose ();
 
 					return EXIT_HALT;
 				}
 
-				LogWrite (FromSample, LOG_NOTICE, "GamePad %u: Vendor 0x%X Product 0x%X Version 0x%X",
+				LogWrite ("USPi Info", LOG_NOTICE, "GamePad %u: Vendor 0x%X Product 0x%X Version 0x%X",
 					  nGamePad+1, (unsigned) Info.idVendor, (unsigned) Info.idProduct, (unsigned) Info.bcdDevice);
 
-				LogWrite (FromSample, LOG_NOTICE, "GamePad %u: Manufacturer \"%s\" Product \"%s\"",
+				LogWrite ("USPi Info", LOG_NOTICE, "GamePad %u: Manufacturer \"%s\" Product \"%s\"",
 					  nGamePad+1, Info.pManufacturer, Info.pProduct);
 
 				const USPiGamePadState *pState = USPiGamePadGetStatus (nGamePad);
 				assert (pState != 0);
 
-				LogWrite (FromSample, LOG_NOTICE, "GamePad %u: %d Buttons %d Hats",
+				LogWrite ("USPi Info", LOG_NOTICE, "GamePad %u: %d Buttons %d Hats",
 					  nGamePad+1, pState->nbuttons, pState->nhats);
 
 				for (int i = 0; i < pState->naxes; i++)
 				{
-					LogWrite (FromSample, LOG_NOTICE, "GamePad %u: Axis %d: Minimum %d Maximum %d",
+					LogWrite ("USPi Info", LOG_NOTICE, "GamePad %u: Axis %d: Minimum %d Maximum %d",
 						  nGamePad+1, i+1, pState->axes[i].minimum, pState->axes[i].maximum);
 				}
 			}
@@ -271,7 +373,7 @@ int main (void)
 	int nMouses = USPiMouseAvailable();
 	if (nMouses < 1 )
 	{
-		LogWrite (FromSample, LOG_ERROR, "Mouse not found");
+		LogWrite ("USPi Warning", LOG_ERROR, "Mouse not found");
 	}
 	else
 	{
@@ -280,7 +382,7 @@ int main (void)
 	
 	if(isMouseConnected == FALSE && isKeyboardConnected == FALSE && isGamepadConnected == FALSE)
 	{
-		LogWrite (FromSample, LOG_ERROR, "USPiEnv Closing and Exit!");
+		LogWrite ("USPi Warning", LOG_ERROR, "USPiEnv Closing and Exit!");
 		USPiEnvClose();
 
 		return EXIT_HALT;
@@ -290,12 +392,12 @@ int main (void)
 	USPiKeyboardRegisterKeyPressedHandler (KeyPressedHandler);
 	
 	//USPiMouseRegisterStatusHandler(MouseStatusHandler);
-	basicSymulation.startPosX = (USPiEnvGetScreen()->m_nWidth)/10; 		//10% of whole Screen Width
-	basicSymulation.startPosY = ((USPiEnvGetScreen()->m_nHeight)*9)/10; 	//90% of whole screen Height
+	basicSimulation.startPosX = (USPiEnvGetScreen()->m_nWidth)/10; 		//10% of whole Screen Width
+	basicSimulation.startPosY = ((USPiEnvGetScreen()->m_nHeight)*9)/10; 	//90% of whole screen Height
 
 	while(1)
 	{
-		ScreenDeviceRotor (USPiEnvGetScreen (), 0, 0); //TODO: zorientowaæ siê co robi ta funkcja
+
 	}
 	//USPiEnvClose(); // Zamykanie powoduje crash.
 
