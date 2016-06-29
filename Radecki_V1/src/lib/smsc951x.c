@@ -307,7 +307,7 @@ boolean SMSC951xDeviceConfigure (TUSBDevice *pUSBDevice)
 		return FALSE;
 	}
 
-	// TODO: check if PHY is up (wait for it)
+	// TODOx: check if PHY is up (wait for it)
 
 	TString DeviceName;
 	String (&DeviceName);

@@ -23,6 +23,7 @@
 #include <uspienv/util.h>
 
 
+
 #define ROTORS		4
 //sinus lookup table
 #include "../../main/myfunc.h"
@@ -554,17 +555,17 @@ void ScreenDeviceCursorUp (TScreenDevice *pThis)
 	}
 }
 
-void ScreenDeviceDeleteChars (TScreenDevice *pThis, unsigned nCount)	// TODO
+void ScreenDeviceDeleteChars (TScreenDevice *pThis, unsigned nCount)	// TODOx
 {
 }
 
-void ScreenDeviceDeleteLines (TScreenDevice *pThis, unsigned nCount)	// TODO
+void ScreenDeviceDeleteLines (TScreenDevice *pThis, unsigned nCount)	// TODOx
 {
 }
 
 void ScreenDeviceDisplayChar (TScreenDevice *pThis, char chChar)
 {
-	// TODO: Insert mode
+	// TODOx: Insert mode
 	
 	if (' ' <= chChar && chChar <= '~')
 	{
@@ -593,7 +594,7 @@ void ScreenDeviceEraseChars (TScreenDevice *pThis, unsigned nCount)
 	}
 }
 
-void ScreenDeviceInsertLines (TScreenDevice *pThis, unsigned nCount)	// TODO
+void ScreenDeviceInsertLines (TScreenDevice *pThis, unsigned nCount)	// TODOx
 {
 }
 
@@ -623,7 +624,7 @@ void ScreenDeviceSetCursorMode (TScreenDevice *pThis, boolean bVisible)
 	pThis->m_bCursorOn = bVisible;
 }
 
-// TODO: standout mode should be useable together with one other mode
+
 void ScreenDeviceSetStandoutMode (TScreenDevice *pThis, unsigned nMode)
 {
 	switch (nMode)
@@ -641,7 +642,7 @@ void ScreenDeviceSetStandoutMode (TScreenDevice *pThis, unsigned nMode)
 		pThis->m_Color = HALF_COLOR;
 		break;
 
-	case 7:				// TODO: reverse mode
+	case 7:				// TODOx: reverse mode
 	default:
 		break;
 	}
@@ -787,6 +788,7 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 {
 	// Clear the screen
 	ScreenDeviceClearDisplay(pThis);
+
 	// draw chart axis
 	unsigned startPointX = ((pThis->m_nWidth)/10); //10% of whole Screen Width
 	unsigned startPointY = ((pThis->m_nHeight)*9)/10;//90% of whole screen Height

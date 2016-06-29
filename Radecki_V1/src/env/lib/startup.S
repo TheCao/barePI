@@ -43,7 +43,6 @@
 	.word	0xE160006E			/* eret */
 1:	msr	cpsr_c, \reg
 2:
-
 	.endm
 
 	.text
@@ -52,25 +51,25 @@
 _start:
 	safe_svcmode_maskall r0
 
-	@ enable the FPU
-mrc p15, 0, r0, c1, c0, 2
-orr r0, r0, #0x300000            /* single precision */
-orr r0, r0, #0xC00000            /* double precision */
-mcr p15, 0, r0, c1, c0, 2
-mov r0, #0x40000000
-fmxr fpexc,r0
+	@ enable the VFP
+	mrc p15, 0, r0, c1, c0, 2		 /* move from coprocessor to register(s) */
+	orr r0, r0, #0x300000            /* single precision */
+	orr r0, r0, #0xC00000            /* double precision */
+	mcr p15, 0, r0, c1, c0, 2		/* move to coprocessor from register */
+	mov r0, #0x40000000       		/* start address of mapped physical memory */
+	fmxr fpexc,r0					/* store all floating-point operation results from fpexc in physhical memory */
 
-cps	#0x1F				/* set system mode */
-mov	sp, #MEM_KERNEL_STACK
-b	sysinit
+	cps	#0x1F				/* set system mode */
+	mov	sp, #MEM_KERNEL_STACK
+	b	sysinit
 
 #if RASPPI != 1
 	
 	.globl	_start_secondary
 _start_secondary:
-	dsb
-1:	wfi
-	b	1b
+	dsb /* data synchronization barrier */
+1:	wfi /* wait for interrupt - suspend execution until IRQ/FIQ interrupt, Imprecise Data abort or Debug Entry request */
+	b	1b /* branch to label 1 behind  */
 
 #endif
 

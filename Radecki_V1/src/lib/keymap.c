@@ -175,7 +175,7 @@ u8 KeyMapTranslate (TKeyMap *pThis, u8 nPhyCode, u8 nModifiers)
 	
 	unsigned nTable = K_NORMTAB;
 
-	// TODO: hard-wired to keypad
+
 	if (KEYPAD_FIRST <= nPhyCode && nPhyCode <= KEYPAD_LAST)
 	{
 		if (pThis->m_bNumLock)

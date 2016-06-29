@@ -890,7 +890,7 @@ void DWHCIDeviceStartChannel (TDWHCIDevice *pThis, TDWHCITransferStageData *pSta
 	DWHCIRegisterOr (&Character, DWHCITransferStageDataGetMaxPacketSize (pStageData) & DWHCI_HOST_CHAN_CHARACTER_MAX_PKT_SIZ__MASK);
 
 	DWHCIRegisterAnd (&Character, ~DWHCI_HOST_CHAN_CHARACTER_MULTI_CNT__MASK);
-	DWHCIRegisterOr (&Character, 1 << DWHCI_HOST_CHAN_CHARACTER_MULTI_CNT__SHIFT);	// TODO: optimize
+	DWHCIRegisterOr (&Character, 1 << DWHCI_HOST_CHAN_CHARACTER_MULTI_CNT__SHIFT);
 
 	if (DWHCITransferStageDataIsDirectionIn (pStageData))
 	{

@@ -48,7 +48,7 @@ typedef struct TTimer
 	TInterruptSystem	*m_pInterruptSystem;
 	volatile unsigned	 m_nTicks;
 	volatile unsigned	 m_nTime;
-	volatile TKernelTimer	 m_KernelTimer[KERNEL_TIMERS];	// TODO: should be linked list
+	volatile TKernelTimer	 m_KernelTimer[KERNEL_TIMERS];
 	unsigned		 m_nMsDelay;
 	unsigned		 m_nusDelay;
 }

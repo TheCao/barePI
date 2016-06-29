@@ -25,7 +25,7 @@
 #include <uspi/macros.h>
 
 // Configuration
-#define USB_HUB_MAX_PORTS		8		// TODO
+#define USB_HUB_MAX_PORTS		8
 
 // Device Class
 #define USB_DEVICE_CLASS_HUB		9

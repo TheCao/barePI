@@ -164,7 +164,7 @@ void *malloc (unsigned long ulSize)
 		{
 			LeaveCritical ();
 
-			return 0;		// TODO: system should panic here
+			return 0;
 		}
 	
 		pBlockHeader->nMagic = BLOCK_MAGIC;
@@ -239,7 +239,7 @@ void *palloc (void)
 		{
 			LeaveCritical ();
 
-			return 0;		// TODO: system should panic here
+			return 0;
 		}
 	}
 
