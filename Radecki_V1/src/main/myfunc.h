@@ -19,7 +19,7 @@ boolean isGamepadConnected;
 boolean isChartPrinted;
 int horizontalAxis;
 int verticalAxis;
-const USPiGamePadState *pStatus;
+
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {
@@ -51,21 +51,7 @@ typedef enum simulationMotorMode {
 
 simulationMotorMode_t simulationMotor;
 
-typedef enum workingMode
-{
-	SIMULATIONMODE,
-	SETDEFAULT,
-	CHANGEMOTOR,
-	CHANGESIMULATION,
-	CHANGEMOTORPARAMS,
-	CHANGESIMULATIONPARAMS,
-	DRAWCHART,
-	RECOVERLAST,
-	LEFTJOYSTICK,
-	FREEMODE
-} workingMode_t;
 
-workingMode_t actWorkingMode;
 
 unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationParams_t symParams,TScreenColor color,const USPiGamePadState *pState);
 unsigned ChangeMotorParam(motorParams_t *structure,unsigned actMenuPosition,signed value);
