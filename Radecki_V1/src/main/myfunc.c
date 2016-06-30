@@ -30,6 +30,7 @@ boolean startFlag = FALSE;
 boolean readyFlag = FALSE;
 boolean clearFlag = FALSE;
 extern void LogWrite (const char *pSource, unsigned Severity, const char *pMessage, ...);
+extern void ScreenDeviceCursorHome (TScreenDevice *pThis);
 unsigned actMenuPosition = 1;
 unsigned actBasicMotor = 1;
 
@@ -56,7 +57,7 @@ motorParams_t basicMotor2 = {
 		.U = 			24.0
 };
 
-motorParams_t *basicMotor_p = &basicMotor;
+
 
 simulationParams_t basicSimulation ={
 		.actualTimeUI = 0,
@@ -643,25 +644,40 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 						case(NONEENABLED): //change U or Mobc durinig simulation for Motor1 ONLY
 							if(verticalAxis > 127 && horizontalAxis == 127)
 							{
-								UartSendString("Przed = %f", basicMotor.Mobc);
 								if(basicMotor.Mobc <=0.0) basicMotor.Mobc=0.0;
 								else basicMotor.Mobc-=0.1;
-								UartSendString("Po = %f", basicMotor.Mobc);
+								UartSendString("Mobc = %f", basicMotor.Mobc);
+								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+								ScreenDeviceCursorHome(USPiEnvGetScreen());
+								LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
 								TimerMsDelay(TimerGet(),150);
 							}
 							else if(verticalAxis < 127 && horizontalAxis == 127)
 							{
-								basicMotor_p->Mobc+=0.1;
+								basicMotor.Mobc+=0.1;
+								UartSendString("Mobc = %f", basicMotor.Mobc);
+								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+								ScreenDeviceCursorHome(USPiEnvGetScreen());
+								LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
 								TimerMsDelay(TimerGet(),150);
 							}
 							else if(verticalAxis == 127 && horizontalAxis > 127)
 							{
-								basicMotor_p->U+=0.1;
+								basicMotor.U+=0.1;
+								UartSendString("U = %f", basicMotor.U);
+								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+								ScreenDeviceCursorHome(USPiEnvGetScreen());
+								LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
 								TimerMsDelay(TimerGet(),150);
 							}
 							else if(verticalAxis == 127 && horizontalAxis < 127)
 							{
-								basicMotor_p->U-=0.1;
+								if(basicMotor.U <=0) basicMotor.U = 0.0;
+								else basicMotor.U-=0.1;
+								UartSendString("U = %f", basicMotor.U);
+								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+								ScreenDeviceCursorHome(USPiEnvGetScreen());
+								LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
 								TimerMsDelay(TimerGet(),150);
 							}
 							break;
