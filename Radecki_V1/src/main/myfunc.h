@@ -17,6 +17,7 @@ boolean isMouseConnected;
 boolean isKeyboardConnected;
 boolean isGamepadConnected;
 boolean isChartPrinted;
+boolean clearFlag;
 int horizontalAxis;
 int verticalAxis;
 
@@ -25,7 +26,9 @@ unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {
 	unsigned startPosX,startPosY;
 	unsigned int actualTimeUI,tempOmega; // for chart printing purposes;
-	double dt,I,didt,d2thetadt,dthetadt,tk,actualTimeD;
+	double I,didt,d2thetadt,dthetadt,tk,actualTimeD,stepEndTime;
+	const double dt;
+	double dtCopy, tkCopy;
 } simulationParams_t;
 
 typedef struct motorParams {
@@ -51,14 +54,17 @@ typedef enum simulationMotorMode {
 
 simulationMotorMode_t simulationMotor;
 
+boolean startFlag, readyFlag;
 
 
-unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationParams_t symParams,TScreenColor color,const USPiGamePadState *pState);
+unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationParams_t *symParams,TScreenColor color,const USPiGamePadState *pState);
+unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorParams_t *motorParams2, simulationParams_t *symParams, simulationParams_t *symParams2,TScreenColor color,TScreenColor color2,const USPiGamePadState *pState);
 unsigned ChangeMotorParam(motorParams_t *structure,unsigned actMenuPosition,signed value);
 unsigned ChangeSimulationParam(simulationParams_t *structure,unsigned MenuPosition,signed value);
 unsigned PrintActMotorParam(unsigned val);
 unsigned PrintActSimulationParam(unsigned val);
-void getDefaultValues();
+void setDefaultValues();
+void finishSimulation();
 unsigned UartSendString(const char *pMessage,...);
 void KeyPressedHandler (const char *pString);
 void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);

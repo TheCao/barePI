@@ -17,6 +17,7 @@ extern boolean isMouseConnected;
 extern boolean isKeyboardConnected;
 extern boolean isGamepadConnected;
 extern boolean isChartPrinted;
+extern boolean readyFlag;
 extern int horizontalAxis;
 extern int verticalAxis;
 extern motorParams_t basicMotor, basicMotor2;
@@ -123,7 +124,7 @@ int main (void)
 		basicSimulation.startPosY = ((USPiEnvGetScreen()->m_nHeight)*9)/10; 	//90% of whole screen Height
 	}
 	
-
+	readyFlag = TRUE;
 	while(1)
 	{
 

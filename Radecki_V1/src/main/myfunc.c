@@ -26,7 +26,9 @@ boolean isGamepadConnected = FALSE;
 int horizontalAxis = 0;
 int verticalAxis = 0;
 boolean isChartPrinted = FALSE;
-
+boolean startFlag = FALSE;
+boolean readyFlag = FALSE;
+boolean clearFlag = FALSE;
 extern void LogWrite (const char *pSource, unsigned Severity, const char *pMessage, ...);
 unsigned actMenuPosition = 1;
 unsigned actBasicMotor = 1;
@@ -54,11 +56,24 @@ motorParams_t basicMotor2 = {
 		.U = 			24.0
 };
 
+motorParams_t *basicMotor_p = &basicMotor;
 
 simulationParams_t basicSimulation ={
 		.actualTimeUI = 0,
 		.actualTimeD =	0.0,
-		.dt =			0.01, // value in seconds!
+		.dt =			0.01, // value in seconds! DO NOT CHANGE!
+		.tempOmega = 	0,
+		.I = 			0.0,
+		.didt = 		0.0,
+		.d2thetadt =	0.0,
+		.dthetadt = 	0.0,
+		.tk = 			100.0
+};
+
+simulationParams_t basicSimulation2 = {
+		.actualTimeUI = 0,
+		.actualTimeD =	0.0,
+		.dt =			0.01, // value in seconds! DO NOT CHANGE!
 		.tempOmega = 	0,
 		.I = 			0.0,
 		.didt = 		0.0,
@@ -70,8 +85,10 @@ simulationParams_t basicSimulation ={
 
 motorParams_t copyBasicMotor, copyBasicMotor2;
 
-void getDefaultValues()
+void setDefaultValues()
 {
+	startFlag = FALSE;
+	clearFlag = FALSE;
 	basicMotor.R = 2;
 	basicMotor.L = 0.1;
 	basicMotor.Ke = 0.1;
@@ -88,42 +105,141 @@ void getDefaultValues()
 	basicMotor2.B = 0.3;
 	basicMotor2.Mobc = 0.4;
 	basicMotor2.U = 24.0;
-	basicSimulation.dt =0.01;
-	basicSimulation.tk = 10.0;
+	//basicSimulation.dt =0.01;
+	basicSimulation.tk = 100.0;
+	basicSimulation.I = 0.0;
+	basicSimulation.actualTimeD = 0.0;
+	basicSimulation.actualTimeUI = 0;
+	basicSimulation.d2thetadt = 0.0;
+	basicSimulation.didt = 0;
+	basicSimulation.dthetadt = 0.0;
+	basicSimulation.stepEndTime = 0.0;
+	basicSimulation.tempOmega = 0.0;
+	basicSimulation.I = 0.0;
+	//second simulation
+	basicSimulation2.actualTimeD = 0.0;
+	basicSimulation2.actualTimeUI = 0;
+	basicSimulation2.d2thetadt = 0.0;
+	basicSimulation2.didt = 0;
+	basicSimulation2.dthetadt = 0.0;
+	basicSimulation2.stepEndTime = 0.0;
+	basicSimulation2.tempOmega = 0.0;
+
 }
 
-unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationParams_t symParams,TScreenColor color,const USPiGamePadState *pState)
+void finishSimulation()
 {
-	if(motorParams->number == 1) uart_sendC("Simulation 1 has been started");
-	else uart_sendC("Simulation 2 has been started");
-	for(symParams.actualTimeD=0.0;symParams.actualTimeD<symParams.tk;symParams.actualTimeD+=symParams.dt)
+	startFlag = FALSE;
+	clearFlag = FALSE;
+	//basicSimulation.dt = basicSimulation.dtCopy;
+	basicSimulation.tk = basicSimulation.tkCopy;
+	basicSimulation.I = 0.0;
+	basicSimulation.actualTimeD = 0.0;
+	basicSimulation.actualTimeUI = 0;
+	basicSimulation.d2thetadt = 0.0;
+	basicSimulation.didt = 0;
+	basicSimulation.dthetadt = 0.0;
+	basicSimulation.stepEndTime = 0.0;
+	basicSimulation.tempOmega = 0.0;
+	basicSimulation2.actualTimeD = 0.0;
+	basicSimulation2.actualTimeUI = 0;
+	basicSimulation2.d2thetadt = 0.0;
+	basicSimulation2.didt = 0;
+	basicSimulation2.dthetadt = 0.0;
+	basicSimulation2.stepEndTime = 0.0;
+	basicSimulation2.tempOmega = 0.0;
+
+}
+unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationParams_t *symParams,TScreenColor color,const USPiGamePadState *pState)
+{
+	if(symParams->actualTimeD < 0.01)
+	{
+		if(motorParams->number == 1) uart_sendC("Simulation for 1 motor has been started");
+		else uart_sendC("Simulation for 2 motor has been started");
+	}
+	symParams->stepEndTime = symParams->actualTimeD+5*symParams->dt; // set end time for for loop at 5 steps
+	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
 		{
-			symParams.didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams.I-motorParams->Ke*symParams.dthetadt);
-			symParams.d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams.I-motorParams->B*symParams.dthetadt
+			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
+			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
 					-motorParams->Mobc);
 			// integrals
-			symParams.dthetadt+= symParams.d2thetadt*symParams.dt;
-			symParams.I+=symParams.didt*symParams.dt;
+			symParams->dthetadt+= symParams->d2thetadt*symParams->dt;
+			symParams->I+=symParams->didt*symParams->dt;
 
-			symParams.actualTimeUI = symParams.actualTimeD*10; // for printing purposes
-			symParams.tempOmega = symParams.dthetadt*400;
+			symParams->actualTimeUI = symParams->actualTimeD*10; // for printing purposes
+			symParams->tempOmega = symParams->dthetadt*400;
 			// plotting function, width 5 px
 			for(signed i = -2;i<=2;i++)
 			{
-				ScreenDeviceSetPixel(pThis, symParams.startPosX + symParams.actualTimeUI, symParams.startPosY
-						- symParams.tempOmega+i, color);
+				ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualTimeUI, symParams->startPosY
+						- symParams->tempOmega+i, color);
 			}
 			// sending data to PC by UART
-			UartSendString("%f \t %f \t %f",symParams.actualTimeD, symParams.I, symParams.dthetadt);
-			if(symParams.actualTimeD>=5) motorParams->Mobc = 0.3;
-			if(symParams.actualTimeD>=8) motorParams->U = 24;
+			UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
+			//if(symParams->actualTimeD>=5) motorParams->Mobc = 0.3;
+			//if(symParams->actualTimeD>=8) motorParams->U = 24;
 
 			//delay
-			TimerMsDelay(TimerGet(),(unsigned int)symParams.dt*1000);
+			TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
 		}
+	// set startFlag to false and simulation values when simulation ends
+	if(symParams->actualTimeD >= symParams->tk)
+	{
+		finishSimulation();
+	}
 	return 0;
 }
 
+unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorParams_t *motorParams2, simulationParams_t *symParams, simulationParams_t *symParams2,TScreenColor color,TScreenColor color2,const USPiGamePadState *pState)
+{
+	if(symParams->actualTimeD < 0.01)
+	{
+		 uart_sendC("Simulation for both motors has been started");
+	}
+	symParams->stepEndTime = symParams->actualTimeD+5*symParams->dt; // set end time for for loop at 5 steps
+	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
+		{
+			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
+			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
+					-motorParams->Mobc);
+
+			symParams2->didt = (1/motorParams2->L)*(motorParams2->U-motorParams2->R*symParams2->I-motorParams->Ke*symParams2->dthetadt);
+			symParams2->d2thetadt = (1/motorParams2->J)*(motorParams2->Km*symParams2->I-motorParams2->B*symParams2->dthetadt
+					-motorParams2->Mobc);
+			// integrals
+			symParams->dthetadt+= symParams->d2thetadt*symParams->dt;
+			symParams->I+=symParams->didt*symParams->dt;
+
+			symParams2->dthetadt+= symParams2->d2thetadt*symParams->dt;
+			symParams2->I+=symParams2->didt*symParams->dt;
+
+			symParams->actualTimeUI = symParams->actualTimeD*10; // for printing purposes
+			symParams->tempOmega = symParams->dthetadt*400;
+
+			symParams2->tempOmega = symParams2->dthetadt*400;
+			// plotting function, width 5 px
+			for(signed i = -2;i<=2;i++)
+			{
+				ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualTimeUI, symParams->startPosY
+						- symParams->tempOmega+i, color);
+
+				ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualTimeUI, symParams->startPosY
+										- symParams2->tempOmega+i, color2);
+			}
+			// sending data to PC by UART
+			UartSendString("%f \t %f \t %f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt, symParams2->I, symParams2->dthetadt);
+
+			//delay
+			TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
+		}
+	// set startFlag to false and simulation values when simulation ends
+	if(symParams->actualTimeD >= symParams->tk)
+	{
+		finishSimulation();
+	}
+	return 0;
+}
 unsigned ChangeMotorParam(motorParams_t *structure,unsigned menuPosition,signed value)
 {
 	switch(menuPosition){
@@ -194,11 +310,11 @@ unsigned ChangeSimulationParam(simulationParams_t *structure,unsigned menuPositi
 {
 	switch(menuPosition){
 	case(1):
-		structure->dt+= value*0.1;
+		/*structure->dt+= value*0.1;
 		if(structure->dt <=0){
 			structure->dt = 0.0;
 		}
-		LogWrite("Simulation Params Setting Mode", 1, "dt = %f",(structure->dt));
+		LogWrite("Simulation Params Setting Mode", 1, "dt = %f",(structure->dt)); //TODO: Delete this possibility in case of wrong calculations*/
 		break;
 	case(2):
 		structure->tk+=value*1;
@@ -209,6 +325,7 @@ unsigned ChangeSimulationParam(simulationParams_t *structure,unsigned menuPositi
 		break;
 	default:
 		LogWrite("Simulation Params Setting Mode ERROR",0,"Wrong Parameter Number");
+		break;
 	}
 
 
@@ -278,51 +395,30 @@ void KeyPressedHandler (const char *pString)
 void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState)
 {
 	//buttons handlers
+	if(readyFlag != TRUE) return;
 	switch(pState->buttons){
 	case(START):
-		//plot motor symulation
-		if(isChartPrinted == FALSE){
-			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
-				{
-					LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
-				}
-			else isChartPrinted = TRUE;
-		}
-
-		switch(simulationMotor){
-		case(FIRSTMOTOR):
-			if(Simulation(USPiEnvGetScreen(),&basicMotor, basicSimulation,WHITE_COLOR,pState) != 0)
-			{
-				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
-			}
-			break;
-		case(SECONDMOTOR):
-			if(Simulation(USPiEnvGetScreen(),&basicMotor2, basicSimulation,RED_COLOR,pState) != 0)
-			{
-				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
-			}
-			break;
-		case(BOTHMOTORS):
-			if(Simulation(USPiEnvGetScreen(),&basicMotor, basicSimulation,WHITE_COLOR,pState) !=0 ||
-			Simulation(USPiEnvGetScreen(),&basicMotor2, basicSimulation,RED_COLOR,pState) != 0)
-			{
-				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
-			}
-			break;
-		}
-		//copy structures
-		copyBasicMotor = basicMotor;
-		copyBasicMotor2 = basicMotor2;
+		startFlag = TRUE;
+		clearFlag = FALSE;
+		//copy prev. simulation params
+		basicSimulation.dtCopy = basicSimulation.dt;
+		basicSimulation.tkCopy = basicSimulation.tk;
+		//set EnabledMode
+		actualEnabledMode = NONEENABLED; //left joystick used for change U or Mobc
 		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(SELECT):
-		//default settings
+		//clear screen and set default settings
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		isChartPrinted = FALSE;
 		actualEnabledMode = NONEENABLED;
 		actBasicMotor = 1;
 		actMenuPosition = 1;
 		simulationMotor = FIRSTMOTOR;
+		setDefaultValues();
+		LogWrite("", LOG_NOTICE, "Default values has been set!");
 		TimerMsDelay(TimerGet(),300); // delay
-		getDefaultValues();
+
 		break;
 	case(START+SELECT):
 		reboot();
@@ -333,6 +429,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		break;
 	case(RIGHT1):
 		//change actual basic motor
+		startFlag = FALSE; //stop simulation
 		ScreenDeviceClearDisplay(USPiEnvGetScreen());
 		if(actBasicMotor == 1) actBasicMotor = 2;
 		else actBasicMotor = 1;
@@ -342,6 +439,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		break;
 	case(RIGHT2):
 		// change simulationMotorMode for plotting purposes
+		startFlag = FALSE; //stop simulation
 		ScreenDeviceClearDisplay(USPiEnvGetScreen());
 		switch(simulationMotor){
 		case(FIRSTMOTOR):
@@ -363,6 +461,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 	case(BUTTON1): //DC motor params change
 		actualEnabledMode = DCMOTOR;
 		actMenuPosition = 1;
+		startFlag = FALSE; //stop simulation
 		ScreenDeviceClearDisplay(USPiEnvGetScreen());
 		LogWrite("", LOG_WARNING, "Changing Basic Motor %u Parameters", actBasicMotor);
 		isChartPrinted = FALSE;
@@ -371,47 +470,61 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 	case(BUTTON2): // simulation params change
 		actualEnabledMode = SIMULATION;
 		actMenuPosition = 1;
+		startFlag = FALSE; //stop simulation
 		ScreenDeviceClearDisplay(USPiEnvGetScreen());
 		LogWrite("", LOG_WARNING, "Changing Simulation Parameters");
 		isChartPrinted = FALSE;
 		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(BUTTON3): // draw/clear chart
-		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+		//check if simulation was stopped earlier
+		if(clearFlag == FALSE)
 		{
-			LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+			startFlag = FALSE; //stop simulation
+			clearFlag = TRUE;
 		}
-		isChartPrinted = TRUE;
+		else
+		{
+			setDefaultValues();
+			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+			}
+			isChartPrinted = TRUE;
+		}
+
+
+
 		TimerMsDelay(TimerGet(),300); // delay
 		break;
-	case(BUTTON4): //recover last simulation params
-		if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+	case(BUTTON4): //recover last simulation params :TODO sprawdz czy potrzebne w ogóle - jeœli tak to przenieœ do default a tutaj zostaw flage
+		/*if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
 				{
 					LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
 				}
 		switch(simulationMotor){
 		case(FIRSTMOTOR):
-					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, basicSimulation,WHITE_COLOR,pState) != 0)
+					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, &basicSimulation,WHITE_COLOR,pState) != 0)
 					{
 						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
 					}
 					break;
 				case(SECONDMOTOR):
-					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor2, basicSimulation,RED_COLOR,pState) != 0)
+					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor2, &basicSimulation,RED_COLOR,pState) != 0)
 					{
 						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
 					}
 					break;
 				case(BOTHMOTORS):
-					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, basicSimulation,WHITE_COLOR,pState) !=0 ||
-					Simulation(USPiEnvGetScreen(),&copyBasicMotor2, basicSimulation,RED_COLOR,pState) != 0)
+					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, &basicSimulation,WHITE_COLOR,pState) !=0 ||
+					Simulation(USPiEnvGetScreen(),&copyBasicMotor2, &basicSimulation,RED_COLOR,pState) != 0)
 					{
 						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
 					}
 					break;
 			}
 		isChartPrinted = TRUE;
-		TimerMsDelay(TimerGet(),300); // delay
+		TimerMsDelay(TimerGet(),300); // delay*/
 		break;
 
 	//left joystick handling
@@ -527,12 +640,69 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 									// both axis are set - do nothing
 								}
 							break;
-						case(NONEENABLED):
-							//pass or error?
+						case(NONEENABLED): //change U or Mobc durinig simulation for Motor1 ONLY
+							if(verticalAxis > 127 && horizontalAxis == 127)
+							{
+								UartSendString("Przed = %f", basicMotor.Mobc);
+								if(basicMotor.Mobc <=0.0) basicMotor.Mobc=0.0;
+								else basicMotor.Mobc-=0.1;
+								UartSendString("Po = %f", basicMotor.Mobc);
+								TimerMsDelay(TimerGet(),150);
+							}
+							else if(verticalAxis < 127 && horizontalAxis == 127)
+							{
+								basicMotor_p->Mobc+=0.1;
+								TimerMsDelay(TimerGet(),150);
+							}
+							else if(verticalAxis == 127 && horizontalAxis > 127)
+							{
+								basicMotor_p->U+=0.1;
+								TimerMsDelay(TimerGet(),150);
+							}
+							else if(verticalAxis == 127 && horizontalAxis < 127)
+							{
+								basicMotor_p->U-=0.1;
+								TimerMsDelay(TimerGet(),150);
+							}
 							break;
 
 
 					}
+		}
+		else if(startFlag == TRUE) // simulation in progress, print
+		{
+		//plot motor symulation
+				if(isChartPrinted == FALSE){
+					if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+						{
+							LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+						}
+					else isChartPrinted = TRUE;
+				}
+
+				switch(simulationMotor){
+				case(FIRSTMOTOR):
+					if(Simulation(USPiEnvGetScreen(),&basicMotor, &basicSimulation,WHITE_COLOR,pState) != 0)
+					{
+						LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+					}
+					break;
+				case(SECONDMOTOR):
+					if(Simulation(USPiEnvGetScreen(),&basicMotor2, &basicSimulation,RED_COLOR,pState) != 0)
+					{
+						LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+					}
+					break;
+				case(BOTHMOTORS):
+					if(SimulationBoth(USPiEnvGetScreen(),&basicMotor, &basicMotor2, &basicSimulation, &basicSimulation2,RED_COLOR,WHITE_COLOR,pState) !=0 )
+					{
+						LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+					}
+					break;
+				}
+				//copy structures
+				copyBasicMotor = basicMotor; //TODO: delete this if recover mod not used
+				copyBasicMotor2 = basicMotor2;
 		}
 
 	}
