@@ -20,7 +20,7 @@ boolean isChartPrinted;
 boolean clearFlag;
 int horizontalAxis;
 int verticalAxis;
-
+unsigned int fifoBuffer[1100];
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {

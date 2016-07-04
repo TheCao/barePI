@@ -792,8 +792,10 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 	// draw chart axis
 	unsigned startPointX = ((pThis->m_nWidth)/10); //10% of whole Screen Width
 	unsigned startPointY = ((pThis->m_nHeight)*9)/10;//90% of whole screen Height
-	unsigned lenX = (pThis->m_nWidth)-2*startPointX;
-	unsigned lenY = startPointY-(pThis->m_nHeight)/10;
+	unsigned lenX = ((pThis->m_nWidth)-2*startPointX)/10;
+	lenX*=10;
+	unsigned lenY = (startPointY-(pThis->m_nHeight/10))/10;
+	lenY*=10;
 
 	// chart lines drawing
 	for(unsigned i = 0;i<2;i++)
@@ -804,6 +806,7 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 	{
 		ScreenDeviceDrawLine(pThis,startPointX-i,startPointY,lenY,color,VERTICAL);
 	}
+	// dotted lines
 	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10)
 	{
 		if(linesOption == VERTICALLINES || linesOption == BOTH)

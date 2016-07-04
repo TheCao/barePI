@@ -33,7 +33,6 @@ extern void LogWrite (const char *pSource, unsigned Severity, const char *pMessa
 extern void ScreenDeviceCursorHome (TScreenDevice *pThis);
 unsigned actMenuPosition = 1;
 unsigned actBasicMotor = 1;
-
 motorParams_t basicMotor = {
 		.number = 		1,
 		.R = 			2,
@@ -107,7 +106,7 @@ void setDefaultValues()
 	basicMotor2.Mobc = 0.4;
 	basicMotor2.U = 24.0;
 	//basicSimulation.dt =0.01;
-	basicSimulation.tk = 100.0;
+	basicSimulation.tk = 10.0;
 	basicSimulation.I = 0.0;
 	basicSimulation.actualTimeD = 0.0;
 	basicSimulation.actualTimeUI = 0;
@@ -169,7 +168,10 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			symParams->I+=symParams->didt*symParams->dt;
 
 			symParams->actualTimeUI = symParams->actualTimeD*10; // for printing purposes
-			symParams->tempOmega = symParams->dthetadt*400;
+			UartSendString("Actual time UI = %u", symParams->actualTimeUI);
+			symParams->tempOmega = symParams->dthetadt*400; //TODO: skalowanie tip: zamiast w pêtli for korzystaæ z obliczonego czasu to mo¿e zajêtoœæ pola wykresu a czas dostosowaæ na koniec i podpisaæ wykres ?
+			// fifo buffer
+
 			// plotting function, width 5 px
 			for(signed i = -2;i<=2;i++)
 			{
@@ -312,7 +314,7 @@ unsigned ChangeSimulationParam(simulationParams_t *structure,unsigned menuPositi
 	switch(menuPosition){
 	case(1):
 		/*structure->dt+= value*0.1;
-		if(structure->dt <=0){
+		if(structure->dt <=0){ //TODO: Refaactor
 			structure->dt = 0.0;
 		}
 		LogWrite("Simulation Params Setting Mode", 1, "dt = %f",(structure->dt)); //TODO: Delete this possibility in case of wrong calculations*/
@@ -525,7 +527,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 					break;
 			}
 		isChartPrinted = TRUE;
-		TimerMsDelay(TimerGet(),300); // delay*/
+		TimerMsDelay(TimerGet(),300); // delay*/ //TODO: Refactor if not used
 		break;
 
 	//left joystick handling
