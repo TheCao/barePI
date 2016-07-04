@@ -24,6 +24,7 @@ extern motorParams_t basicMotor, basicMotor2;
 extern motorParams_t copyBasicMotor, copyBasicMotor2;
 extern simulationParams_t basicSimulation;
 extern const USPiGamePadState *pStatus;
+extern unsigned int * fifoBuffer;
 extern void KeyPressedHandler (const char *pString);
 extern void MouseStatusHandler();
 extern void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
@@ -122,9 +123,14 @@ int main (void)
 		// chart params based on screen width and height
 		basicSimulation.startPosX = (USPiEnvGetScreen()->m_nWidth)/10; 		//10% of whole Screen Width
 		basicSimulation.startPosY = ((USPiEnvGetScreen()->m_nHeight)*9)/10; 	//90% of whole screen Height
+		basicSimulation.lenX = ((unsigned int)((USPiEnvGetScreen()->m_nWidth - 2*basicSimulation.startPosX)/10))*10;
+		basicSimulation.bufferMax = 0.1*basicSimulation.lenX*(1/(basicSimulation.dt));
 	}
 	
 	readyFlag = TRUE;
+
+	// memory for fifo buffer
+	fifoBuffer = (unsigned int*) malloc (basicSimulation.bufferMax);
 	while(1)
 	{
 

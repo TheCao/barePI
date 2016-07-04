@@ -20,15 +20,17 @@ boolean isChartPrinted;
 boolean clearFlag;
 int horizontalAxis;
 int verticalAxis;
-unsigned int fifoBuffer[1100];
+unsigned int * fifoBuffer;
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {
-	unsigned startPosX,startPosY;
+	unsigned startPosX,startPosY,lenX;
 	unsigned int actualTimeUI,tempOmega; // for chart printing purposes;
-	double I,didt,d2thetadt,dthetadt,tk,actualTimeD,stepEndTime;
+	unsigned int bufferIndex;
+	double I,didt,d2thetadt,dthetadt,tk,actualTimeD, actualTimeTemp,stepEndTime;
 	const double dt;
 	double dtCopy, tkCopy;
+	unsigned long bufferMax;
 } simulationParams_t;
 
 typedef struct motorParams {

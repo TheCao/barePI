@@ -61,13 +61,15 @@ motorParams_t basicMotor2 = {
 simulationParams_t basicSimulation ={
 		.actualTimeUI = 0,
 		.actualTimeD =	0.0,
+		.actualTimeTemp = 0.0,
 		.dt =			0.01, // value in seconds! DO NOT CHANGE!
 		.tempOmega = 	0,
 		.I = 			0.0,
 		.didt = 		0.0,
 		.d2thetadt =	0.0,
 		.dthetadt = 	0.0,
-		.tk = 			100.0
+		.tk = 			100.0,
+		.bufferIndex = 	0
 };
 
 simulationParams_t basicSimulation2 = {
@@ -106,16 +108,18 @@ void setDefaultValues()
 	basicMotor2.Mobc = 0.4;
 	basicMotor2.U = 24.0;
 	//basicSimulation.dt =0.01;
-	basicSimulation.tk = 10.0;
+	basicSimulation.tk = 100.0;
 	basicSimulation.I = 0.0;
 	basicSimulation.actualTimeD = 0.0;
 	basicSimulation.actualTimeUI = 0;
+	basicSimulation.actualTimeTemp = 0.0;
 	basicSimulation.d2thetadt = 0.0;
 	basicSimulation.didt = 0;
 	basicSimulation.dthetadt = 0.0;
 	basicSimulation.stepEndTime = 0.0;
 	basicSimulation.tempOmega = 0.0;
 	basicSimulation.I = 0.0;
+	basicSimulation.bufferIndex = 0;
 	//second simulation
 	basicSimulation2.actualTimeD = 0.0;
 	basicSimulation2.actualTimeUI = 0;
@@ -136,11 +140,13 @@ void finishSimulation()
 	basicSimulation.I = 0.0;
 	basicSimulation.actualTimeD = 0.0;
 	basicSimulation.actualTimeUI = 0;
+	basicSimulation.actualTimeTemp = 0.0;
 	basicSimulation.d2thetadt = 0.0;
 	basicSimulation.didt = 0;
 	basicSimulation.dthetadt = 0.0;
 	basicSimulation.stepEndTime = 0.0;
 	basicSimulation.tempOmega = 0.0;
+	basicSimulation.bufferIndex = 0;
 	basicSimulation2.actualTimeD = 0.0;
 	basicSimulation2.actualTimeUI = 0;
 	basicSimulation2.d2thetadt = 0.0;
@@ -158,7 +164,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 		else uart_sendC("Simulation for 2 motor has been started");
 	}
 	symParams->stepEndTime = symParams->actualTimeD+5*symParams->dt; // set end time for for loop at 5 steps
-	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
+	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt,symParams->actualTimeTemp += (symParams->dt)*10)
 		{
 			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
 			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
@@ -167,24 +173,34 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			symParams->dthetadt+= symParams->d2thetadt*symParams->dt;
 			symParams->I+=symParams->didt*symParams->dt;
 
-			symParams->actualTimeUI = symParams->actualTimeD*10; // for printing purposes
-			UartSendString("Actual time UI = %u", symParams->actualTimeUI);
+			symParams->actualTimeUI = symParams->actualTimeTemp; // for printing purposes
+			//UartSendString("Actual time UI = %u", symParams->actualTimeUI); //TODO: delete this!! for testing purposes only
 			symParams->tempOmega = symParams->dthetadt*400; //TODO: skalowanie tip: zamiast w pêtli for korzystaæ z obliczonego czasu to mo¿e zajêtoœæ pola wykresu a czas dostosowaæ na koniec i podpisaæ wykres ?
+
 			// fifo buffer
+			if(symParams->bufferIndex >= symParams->bufferMax)
+			{
+				symParams->actualTimeTemp = 0;
+				symParams->bufferIndex = 0;
+			}
+			fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
+			// clear and prepare
 
 			// plotting function, width 5 px
 			for(signed i = -2;i<=2;i++)
 			{
 				ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualTimeUI, symParams->startPosY
-						- symParams->tempOmega+i, color);
+						- fifoBuffer[symParams->bufferIndex]+i, color);
 			}
+			symParams->bufferIndex++;
+			UartSendString("Buffer index = %u Max index = %u", symParams->bufferIndex, symParams->bufferMax);
 			// sending data to PC by UART
 			UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
 			//if(symParams->actualTimeD>=5) motorParams->Mobc = 0.3;
 			//if(symParams->actualTimeD>=8) motorParams->U = 24;
-
 			//delay
-			TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
+			//TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
+			TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*10);
 		}
 	// set startFlag to false and simulation values when simulation ends
 	if(symParams->actualTimeD >= symParams->tk)
