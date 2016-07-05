@@ -68,7 +68,7 @@ simulationParams_t basicSimulation ={
 		.didt = 		0.0,
 		.d2thetadt =	0.0,
 		.dthetadt = 	0.0,
-		.tk = 			100.0,
+		.tk = 			200.0,
 		.bufferIndex = 	0
 };
 
@@ -108,7 +108,7 @@ void setDefaultValues()
 	basicMotor2.Mobc = 0.4;
 	basicMotor2.U = 24.0;
 	//basicSimulation.dt =0.01;
-	basicSimulation.tk = 100.0;
+	basicSimulation.tk = 200.0;
 	basicSimulation.I = 0.0;
 	basicSimulation.actualTimeD = 0.0;
 	basicSimulation.actualTimeUI = 0;
@@ -180,20 +180,49 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			// fifo buffer
 			if(symParams->bufferIndex >= symParams->bufferMax)
 			{
-				symParams->actualTimeTemp = 0;
-				symParams->bufferIndex = 0;
-			}
-			fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
-			// clear and prepare
+				for(unsigned int pixel =0;pixel<=1020;pixel++) //TODO: change pixel value to const
+				{
+					for(signed i = -2;i<=2;i++)
+					{
+						ScreenDeviceSetPixel(pThis, symParams->startPosX + pixel, symParams->startPosY - fifoBuffer[10*pixel]+i, BLACK_COLOR);
+					}
+				}
+				ScreenDeviceDrawDottedBackground(pThis, GREEN_COLOR, symParams->startPosX, symParams->startPosY,symParams->lenX, symParams->lenY, BOTH );
+				//first out
+				for(unsigned int i=0;i<symParams->bufferMax;i++)
+				{
+					fifoBuffer[i]=fifoBuffer[i+1];
+				}
+				fifoBuffer[symParams->bufferMax] = symParams->tempOmega;
+				//plot whole buffer
+				//ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
+				for(unsigned int pixel =0;pixel<=1000;pixel++)
+				{
+					for(signed i = -2;i<=2;i++)
+					{
+						ScreenDeviceSetPixel(pThis, symParams->startPosX + pixel, symParams->startPosY
+																		- fifoBuffer[10*pixel]+i, color);
+					}
 
-			// plotting function, width 5 px
-			for(signed i = -2;i<=2;i++)
-			{
-				ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualTimeUI, symParams->startPosY
-						- fifoBuffer[symParams->bufferIndex]+i, color);
+				}
 			}
-			symParams->bufferIndex++;
-			UartSendString("Buffer index = %u Max index = %u", symParams->bufferIndex, symParams->bufferMax);
+			else
+			{
+				fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
+				// plotting function, width 5 px
+				for(signed i = -2;i<=2;i++)
+				{
+					ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualTimeUI, symParams->startPosY
+							- fifoBuffer[symParams->bufferIndex]+i, color);
+				}
+				symParams->bufferIndex++;
+
+			}
+
+
+
+
+			//UartSendString("Buffer index = %u Max index = %u", symParams->bufferIndex, symParams->bufferMax);
 			// sending data to PC by UART
 			UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
 			//if(symParams->actualTimeD>=5) motorParams->Mobc = 0.3;

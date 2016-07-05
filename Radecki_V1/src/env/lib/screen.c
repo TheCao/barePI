@@ -784,6 +784,27 @@ void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
 }
 
+unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption)
+{
+	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10)
+		{
+			if(linesOption == VERTICALLINES || linesOption == BOTH)
+				{
+					ScreenDeviceDrawDottedLine(pThis,i,startPointY,lenY,5,color,VERTICAL);
+				}
+			ScreenDeviceDrawLine(pThis,i,startPointY+10,10,color,VERTICAL);
+		}
+		for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10)
+		{
+			if(linesOption == HORIZONTALLINES || linesOption == BOTH)
+				{
+					ScreenDeviceDrawDottedLine(pThis,startPointX,j,lenX,3,color,HORIZONTAL);
+				}
+			ScreenDeviceDrawLine(pThis,startPointX-10,j,10,color,HORIZONTAL);
+		}
+		return 0;
+}
+
 unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAddLines_t linesOption)
 {
 	// Clear the screen
@@ -807,22 +828,7 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 		ScreenDeviceDrawLine(pThis,startPointX-i,startPointY,lenY,color,VERTICAL);
 	}
 	// dotted lines
-	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10)
-	{
-		if(linesOption == VERTICALLINES || linesOption == BOTH)
-			{
-				ScreenDeviceDrawDottedLine(pThis,i,startPointY,lenY,5,color,VERTICAL);
-			}
-		ScreenDeviceDrawLine(pThis,i,startPointY+10,10,color,VERTICAL);
-	}
-	for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10)
-	{
-		if(linesOption == HORIZONTALLINES || linesOption == BOTH)
-			{
-				ScreenDeviceDrawDottedLine(pThis,startPointX,j,lenX,3,color,HORIZONTAL);
-			}
-		ScreenDeviceDrawLine(pThis,startPointX-10,j,10,color,HORIZONTAL);
-	}
+	ScreenDeviceDrawDottedBackground(pThis,color,startPointX,startPointY,lenX, lenY,BOTH);
 	return 0;
 
 }
