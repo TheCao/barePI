@@ -24,7 +24,7 @@ unsigned int * fifoBuffer;
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {
-	unsigned startPosX,startPosY,lenX,lenY;
+	unsigned startPosX,startPosY,lenX,lenY,actualPosX,resolution;
 	unsigned int actualTimeUI,tempOmega; // for chart printing purposes;
 	unsigned int bufferIndex;
 	double I,didt,d2thetadt,dthetadt,tk,actualTimeD, actualTimeTemp,stepEndTime;

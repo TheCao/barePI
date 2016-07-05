@@ -125,7 +125,7 @@ int main (void)
 		basicSimulation.startPosY = ((USPiEnvGetScreen()->m_nHeight)*9)/10; 	//90% of whole screen Height
 		basicSimulation.lenX = ((unsigned int)((USPiEnvGetScreen()->m_nWidth - 2*basicSimulation.startPosX)/10))*10;
 		basicSimulation.lenY = ((basicSimulation.startPosY-(USPiEnvGetScreen()->m_nHeight/10))/10)*10;
-		basicSimulation.bufferMax = 0.1*basicSimulation.lenX*(1/(basicSimulation.dt));
+		basicSimulation.bufferMax = basicSimulation.lenX*(1/(basicSimulation.dt));
 	}
 	
 	readyFlag = TRUE;

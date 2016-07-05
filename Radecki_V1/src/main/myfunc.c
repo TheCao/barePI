@@ -33,6 +33,8 @@ extern void LogWrite (const char *pSource, unsigned Severity, const char *pMessa
 extern void ScreenDeviceCursorHome (TScreenDevice *pThis);
 unsigned actMenuPosition = 1;
 unsigned actBasicMotor = 1;
+unsigned tempPosX = 0;
+
 motorParams_t basicMotor = {
 		.number = 		1,
 		.R = 			2,
@@ -69,7 +71,9 @@ simulationParams_t basicSimulation ={
 		.d2thetadt =	0.0,
 		.dthetadt = 	0.0,
 		.tk = 			200.0,
-		.bufferIndex = 	0
+		.bufferIndex = 	0,
+		.actualPosX = 0,
+		.resolution = 10 // co który pomiar bêdzie wyœwietlany na wykresie
 };
 
 simulationParams_t basicSimulation2 = {
@@ -91,6 +95,7 @@ void setDefaultValues()
 {
 	startFlag = FALSE;
 	clearFlag = FALSE;
+	tempPosX = 0;
 	basicMotor.R = 2;
 	basicMotor.L = 0.1;
 	basicMotor.Ke = 0.1;
@@ -120,6 +125,7 @@ void setDefaultValues()
 	basicSimulation.tempOmega = 0.0;
 	basicSimulation.I = 0.0;
 	basicSimulation.bufferIndex = 0;
+	basicSimulation.actualPosX = 0;
 	//second simulation
 	basicSimulation2.actualTimeD = 0.0;
 	basicSimulation2.actualTimeUI = 0;
@@ -135,6 +141,7 @@ void finishSimulation()
 {
 	startFlag = FALSE;
 	clearFlag = FALSE;
+	tempPosX = 0;
 	//basicSimulation.dt = basicSimulation.dtCopy;
 	basicSimulation.tk = basicSimulation.tkCopy;
 	basicSimulation.I = 0.0;
@@ -154,6 +161,7 @@ void finishSimulation()
 	basicSimulation2.dthetadt = 0.0;
 	basicSimulation2.stepEndTime = 0.0;
 	basicSimulation2.tempOmega = 0.0;
+	basicSimulation.actualPosX = 0;
 
 }
 unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationParams_t *symParams,TScreenColor color,const USPiGamePadState *pState)
@@ -164,7 +172,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 		else uart_sendC("Simulation for 2 motor has been started");
 	}
 	symParams->stepEndTime = symParams->actualTimeD+5*symParams->dt; // set end time for for loop at 5 steps
-	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt,symParams->actualTimeTemp += (symParams->dt)*10)
+	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
 		{
 			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
 			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
@@ -173,64 +181,63 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			symParams->dthetadt+= symParams->d2thetadt*symParams->dt;
 			symParams->I+=symParams->didt*symParams->dt;
 
-			symParams->actualTimeUI = symParams->actualTimeTemp; // for printing purposes
-			//UartSendString("Actual time UI = %u", symParams->actualTimeUI); //TODO: delete this!! for testing purposes only
 			symParams->tempOmega = symParams->dthetadt*400; //TODO: skalowanie tip: zamiast w pêtli for korzystaæ z obliczonego czasu to mo¿e zajêtoœæ pola wykresu a czas dostosowaæ na koniec i podpisaæ wykres ?
-
-			// fifo buffer
-			if(symParams->bufferIndex >= symParams->bufferMax)
-			{
-				for(unsigned int pixel =0;pixel<=1020;pixel++) //TODO: change pixel value to const
-				{
-					for(signed i = -2;i<=2;i++)
-					{
-						ScreenDeviceSetPixel(pThis, symParams->startPosX + pixel, symParams->startPosY - fifoBuffer[10*pixel]+i, BLACK_COLOR);
-					}
-				}
-				ScreenDeviceDrawDottedBackground(pThis, GREEN_COLOR, symParams->startPosX, symParams->startPosY,symParams->lenX, symParams->lenY, BOTH );
-				//first out
-				for(unsigned int i=0;i<symParams->bufferMax;i++)
-				{
-					fifoBuffer[i]=fifoBuffer[i+1];
-				}
-				fifoBuffer[symParams->bufferMax] = symParams->tempOmega;
-				//plot whole buffer
-				//ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
-				for(unsigned int pixel =0;pixel<=1000;pixel++)
-				{
-					for(signed i = -2;i<=2;i++)
-					{
-						ScreenDeviceSetPixel(pThis, symParams->startPosX + pixel, symParams->startPosY
-																		- fifoBuffer[10*pixel]+i, color);
-					}
-
-				}
-			}
-			else
+			// fifo buffer - przypadek pracy ci¹g³ej
+			if(symParams->bufferIndex < symParams->bufferMax)
 			{
 				fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
-				// plotting function, width 5 px
-				for(signed i = -2;i<=2;i++)
+				// indeks bufora miesci siê w zakresie
+				if(symParams->actualPosX <= 1020) // czy ekran wymaga przesuniecia
 				{
-					ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualTimeUI, symParams->startPosY
-							- fifoBuffer[symParams->bufferIndex]+i, color);
+					if(symParams->actualPosX != tempPosX)
+					{// plotting function, width 5 px
+						for(signed i = -2;i<=2;i++)
+						{
+							ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualPosX, symParams->startPosY
+									- fifoBuffer[symParams->bufferIndex]+i, color);
+						}
+					}
+					tempPosX = symParams->actualPosX;
+					if(!((symParams->bufferIndex)%symParams->resolution)) symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
+				}
+				else
+				{
+					UartSendString("Przekroczyles ekran na indeksie %u", symParams->bufferIndex);
+					// usuniêcie wydruków na ekranie - 1020p; actualPosX = 1020; bufferIndex ciagle sie zwieksza
+					for(unsigned u = 0;u <=1020;u++)
+					{
+						for(signed i = -2;i<=2;i++)
+						{
+							ScreenDeviceSetPixel(pThis, symParams->startPosX + u+1, symParams->startPosY
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+2*u]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
+						}
+					}
+					// wyrosowanie linii w tle
+					ScreenDeviceDrawDottedBackground(pThis, GREEN_COLOR, symParams->startPosX, symParams->startPosY,symParams->lenX, symParams->lenY, BOTH );
+					// rysowanie na 1020 px wartosci przesunietego bufora tj 1-1021
+					for(unsigned u = 0;u <=1020;u++)
+					{
+						for(signed i = -2;i<=2;i++)
+						{
+							ScreenDeviceSetPixel(pThis, symParams->startPosX + u, symParams->startPosY
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+1+2*u]+i, color);
+						}
+					}
 				}
 				symParams->bufferIndex++;
-
+				// sending data to PC by UART
+				UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
+				//if(symParams->actualTimeD>=5) motorParams->Mobc = 0.3;
+				//if(symParams->actualTimeD>=8) motorParams->U = 24;
+				//delay
+				//TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
 			}
-
-
-
-
-			//UartSendString("Buffer index = %u Max index = %u", symParams->bufferIndex, symParams->bufferMax);
-			// sending data to PC by UART
-			UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
-			//if(symParams->actualTimeD>=5) motorParams->Mobc = 0.3;
-			//if(symParams->actualTimeD>=8) motorParams->U = 24;
-			//delay
-			//TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
-			TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*10);
+			else // przekroczenie bufora
+			{
+				UartSendString("Buff error: MaxBuff = %u \t Act Buff = %u \t actTime = %f ", symParams->bufferMax, symParams->bufferIndex, symParams->actualTimeD);
+			}
 		}
+
 	// set startFlag to false and simulation values when simulation ends
 	if(symParams->actualTimeD >= symParams->tk)
 	{
