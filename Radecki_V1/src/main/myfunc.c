@@ -73,7 +73,7 @@ simulationParams_t basicSimulation ={
 		.tk = 			200.0,
 		.bufferIndex = 	0,
 		.actualPosX = 0,
-		.resolution = 10 // co który pomiar bêdzie wyœwietlany na wykresie
+		.resolution = 3 // co który pomiar bêdzie wyœwietlany na wykresie
 };
 
 simulationParams_t basicSimulation2 = {
@@ -202,14 +202,14 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 				}
 				else
 				{
-					UartSendString("Przekroczyles ekran na indeksie %u", symParams->bufferIndex);
+					//UartSendString("Przekroczyles ekran na indeksie %u", symParams->bufferIndex);
 					// usuniêcie wydruków na ekranie - 1020p; actualPosX = 1020; bufferIndex ciagle sie zwieksza
 					for(unsigned u = 0;u <=1020;u++)
 					{
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u+1, symParams->startPosY
-									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+2*u]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+(symParams->resolution*u)]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
 						}
 					}
 					// wyrosowanie linii w tle
@@ -220,7 +220,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u, symParams->startPosY
-									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+1+2*u]+i, color);
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+1+(symParams->resolution*u)]+i, color);
 						}
 					}
 				}
