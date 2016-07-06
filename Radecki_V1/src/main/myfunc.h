@@ -67,6 +67,8 @@ unsigned PrintActMotorParam(unsigned val);
 unsigned PrintActSimulationParam(unsigned val);
 void setDefaultValues();
 void finishSimulation();
+unsigned unsignedLenght(unsigned x);
+int power(int base, int exp);
 unsigned UartSendString(const char *pMessage,...);
 void KeyPressedHandler (const char *pString);
 void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);

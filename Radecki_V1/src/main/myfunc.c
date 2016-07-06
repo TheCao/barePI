@@ -73,7 +73,7 @@ simulationParams_t basicSimulation ={
 		.tk = 			200.0,
 		.bufferIndex = 	0,
 		.actualPosX = 0,
-		.resolution = 3 // co który pomiar bêdzie wyœwietlany na wykresie
+		.resolution = 2 // co który pomiar bêdzie wyœwietlany na wykresie
 };
 
 simulationParams_t basicSimulation2 = {
@@ -164,6 +164,31 @@ void finishSimulation()
 	basicSimulation.actualPosX = 0;
 
 }
+unsigned unsignedLenght(unsigned x) {
+    if(x>=1000000000) return 10;
+    if(x>=100000000) return 9;
+    if(x>=10000000) return 8;
+    if(x>=1000000) return 7;
+    if(x>=100000) return 6;
+    if(x>=10000) return 5;
+    if(x>=1000) return 4;
+    if(x>=100) return 3;
+    if(x>=10) return 2;
+    return 1;
+}
+int power(int base, int exp)
+{
+    int result = 1;
+    while (exp)
+    {
+        if (exp & 1)
+            result *= base;
+        exp >>= 1;
+        base *= base;
+    }
+
+    return result;
+}
 unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationParams_t *symParams,TScreenColor color,const USPiGamePadState *pState)
 {
 	if(symParams->actualTimeD < 0.01)
@@ -202,7 +227,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 				}
 				else
 				{
-					//UartSendString("Przekroczyles ekran na indeksie %u", symParams->bufferIndex);
 					// usuniêcie wydruków na ekranie - 1020p; actualPosX = 1020; bufferIndex ciagle sie zwieksza
 					for(unsigned u = 0;u <=1020;u++)
 					{
@@ -212,8 +236,8 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+(symParams->resolution*u)]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
 						}
 					}
-					// wyrosowanie linii w tle
-					ScreenDeviceDrawDottedBackground(pThis, GREEN_COLOR, symParams->startPosX, symParams->startPosY,symParams->lenX, symParams->lenY, BOTH );
+					// wyrosowanie t³a i kropkowanych linii
+					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
 					// rysowanie na 1020 px wartosci przesunietego bufora tj 1-1021
 					for(unsigned u = 0;u <=1020;u++)
 					{
@@ -365,11 +389,10 @@ unsigned ChangeSimulationParam(simulationParams_t *structure,unsigned menuPositi
 {
 	switch(menuPosition){
 	case(1):
-		/*structure->dt+= value*0.1;
-		if(structure->dt <=0){ //TODO: Refaactor
-			structure->dt = 0.0;
-		}
-		LogWrite("Simulation Params Setting Mode", 1, "dt = %f",(structure->dt)); //TODO: Delete this possibility in case of wrong calculations*/
+		structure->resolution+= value;
+		if(structure->resolution <=1) structure->resolution = 1;
+		else if(structure->resolution >=10) structure->resolution = 10;
+		LogWrite("Simulation Params Setting Mode", 1, "resolution = %u",(structure->resolution));
 		break;
 	case(2):
 		structure->tk+=value*1;
@@ -382,8 +405,6 @@ unsigned ChangeSimulationParam(simulationParams_t *structure,unsigned menuPositi
 		LogWrite("Simulation Params Setting Mode ERROR",0,"Wrong Parameter Number");
 		break;
 	}
-
-
 	return 0;
 }
 
@@ -422,7 +443,7 @@ unsigned PrintActSimulationParam(unsigned val)
 {
 	switch(val){
 	case(1):
-		LogWrite("Simulation Params Setting Mode", 1, "Simulation Parameter: dt");
+		LogWrite("Simulation Params Setting Mode", 1, "Simulation Parameter: resolution");
 		break;
 	case(2):
 		LogWrite("Simulation Params Setting Mode", 1, "Simulation Parameter: tk");
@@ -541,6 +562,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		else
 		{
 			setDefaultValues();
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
 			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
 			{
 				LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
@@ -553,33 +575,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(BUTTON4): //recover last simulation params :TODO sprawdz czy potrzebne w ogóle - jeœli tak to przenieœ do default a tutaj zostaw flage
-		/*if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
-				{
-					LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
-				}
-		switch(simulationMotor){
-		case(FIRSTMOTOR):
-					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, &basicSimulation,WHITE_COLOR,pState) != 0)
-					{
-						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
-					}
-					break;
-				case(SECONDMOTOR):
-					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor2, &basicSimulation,RED_COLOR,pState) != 0)
-					{
-						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
-					}
-					break;
-				case(BOTHMOTORS):
-					if(Simulation(USPiEnvGetScreen(),&copyBasicMotor, &basicSimulation,WHITE_COLOR,pState) !=0 ||
-					Simulation(USPiEnvGetScreen(),&copyBasicMotor2, &basicSimulation,RED_COLOR,pState) != 0)
-					{
-						LogWrite("Chart Error ", LOG_ERROR, "Recovering simulation encountered unexpected error!");
-					}
-					break;
-			}
-		isChartPrinted = TRUE;
-		TimerMsDelay(TimerGet(),300); // delay*/ //TODO: Refactor if not used
+
 		break;
 
 	//left joystick handling
@@ -743,6 +739,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		{
 		//plot motor symulation
 				if(isChartPrinted == FALSE){
+					ScreenDeviceClearDisplay(USPiEnvGetScreen());
 					if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
 						{
 							LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");

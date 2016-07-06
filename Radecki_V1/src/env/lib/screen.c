@@ -66,6 +66,8 @@ void ScreenDeviceScroll (TScreenDevice *pThis) MAXOPT;
 void ScreenDeviceDisplayChar2 (TScreenDevice *pThis, char chChar, unsigned nPosX, unsigned nPosY, TScreenColor Color);
 void ScreenDeviceEraseChar (TScreenDevice *pThis, unsigned nPosX, unsigned nPosY);
 void ScreenDeviceInvertCursor (TScreenDevice *pThis);
+extern unsigned unsignedLenght(unsigned x);
+extern int power(int base, int exp);
 
 void ScreenDevice (TScreenDevice *pThis, unsigned nWidth, unsigned nHeight)
 {
@@ -784,15 +786,33 @@ void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
 }
 
+unsigned int ScreenDeviceDrawChartCaption(TScreenDevice *pThis, unsigned number, unsigned startPointX, unsigned startPointY,TScreenColor color)
+{
+	unsigned length = unsignedLenght(number);
+	char temp;
+	int temp1digt;
+	for(unsigned i = length; i>0;i--)
+	{
+		temp1digt = (number/power(10,i-1));
+		number-= temp1digt*power(10,i-1);
+		temp = (temp1digt + 0x30);
+		ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i),startPointY,WHITE_COLOR);
+	}
+
+	return 0;
+}
+
 unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption)
 {
 	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10)
 		{
 			if(linesOption == VERTICALLINES || linesOption == BOTH)
 				{
+					if(i == startPointX+lenX) ScreenDeviceDrawLine(pThis,i,startPointY,lenY,BLACK_COLOR,VERTICAL); // last vertical dotted line need to cleared before drawing dots
 					ScreenDeviceDrawDottedLine(pThis,i,startPointY,lenY,5,color,VERTICAL);
 				}
 			ScreenDeviceDrawLine(pThis,i,startPointY+10,10,color,VERTICAL);
+			ScreenDeviceDrawChartCaption(pThis,123,i-15,startPointY+20,WHITE_COLOR);
 		}
 		for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10)
 		{
@@ -801,15 +821,13 @@ unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor col
 					ScreenDeviceDrawDottedLine(pThis,startPointX,j,lenX,3,color,HORIZONTAL);
 				}
 			ScreenDeviceDrawLine(pThis,startPointX-10,j,10,color,HORIZONTAL);
+			ScreenDeviceDrawChartCaption(pThis,567,startPointX-50,j-5,WHITE_COLOR);
 		}
 		return 0;
 }
 
 unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAddLines_t linesOption)
 {
-	// Clear the screen
-	ScreenDeviceClearDisplay(pThis);
-
 	// draw chart axis
 	unsigned startPointX = ((pThis->m_nWidth)/10); //10% of whole Screen Width
 	unsigned startPointY = ((pThis->m_nHeight)*9)/10;//90% of whole screen Height
@@ -830,7 +848,4 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 	// dotted lines
 	ScreenDeviceDrawDottedBackground(pThis,color,startPointX,startPointY,lenX, lenY,BOTH);
 	return 0;
-
 }
-
-
