@@ -21,6 +21,7 @@ boolean clearFlag;
 int horizontalAxis;
 int verticalAxis;
 unsigned int * fifoBuffer;
+unsigned int * fifoBuffer2;
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {

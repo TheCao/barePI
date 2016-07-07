@@ -25,6 +25,7 @@ extern motorParams_t copyBasicMotor, copyBasicMotor2;
 extern simulationParams_t basicSimulation;
 extern const USPiGamePadState *pStatus;
 extern unsigned int * fifoBuffer;
+extern unsigned int * fifoBuffer2;
 extern void KeyPressedHandler (const char *pString);
 extern void MouseStatusHandler();
 extern void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
@@ -132,6 +133,7 @@ int main (void)
 
 	// memory for fifo buffer
 	fifoBuffer = (unsigned int*) malloc (basicSimulation.bufferMax);
+	fifoBuffer2 = (unsigned int*) malloc (basicSimulation.bufferMax);
 	while(1)
 	{
 

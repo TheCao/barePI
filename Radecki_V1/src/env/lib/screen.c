@@ -817,13 +817,39 @@ unsigned int ScreenDeviceDrawChartCaption(TScreenDevice *pThis, double number, u
 
 	return 0;
 }
-
-unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption, boolean isFirstDraw, double dt, unsigned resolution,double actualTime)
+unsigned ScreenDeviceDrawChartCaptionAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY, unsigned lenX,unsigned lenY, boolean isFirstDraw, double dt, unsigned resolution,double actualTime)
 {
 	double counterOY = 0.201;
-	double maxValueFirstDrawOX = (1020 * dt)*resolution; //max time OX value in first draw of chart
-	double actValueDrawOX = maxValueFirstDrawOX/10;
+		double maxValueFirstDrawOX = (1020 * dt)*resolution; //max time OX value in first draw of chart
+		double actValueDrawOX = maxValueFirstDrawOX/10;
 
+	if(isFirstDraw == TRUE)
+	{
+		for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10) //dotted lines vertical
+			{
+		ScreenDeviceDrawChartCaption(pThis,actValueDrawOX,i-15,startPointY+20,WHITE_COLOR); // dolne
+		actValueDrawOX+=maxValueFirstDrawOX/10;
+			}
+	}
+	else
+	{
+		ScreenDeviceDrawChartCaption(pThis,actualTime,startPointX+lenX-15,startPointY+20,WHITE_COLOR); // ostatni podpis z prawej
+		for(unsigned i = 1; i<=9;i++)
+		{
+			ScreenDeviceDrawChartCaption(pThis,actualTime-(i*(maxValueFirstDrawOX/10)),startPointX+((lenX/10)*(10-i))-15,startPointY+20,WHITE_COLOR);
+		}
+	}
+	if(isFirstDraw == TRUE)
+	{
+		for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10, counterOY+=0.2)
+		{
+			ScreenDeviceDrawChartCaption(pThis,counterOY,startPointX-50,j-5,WHITE_COLOR);
+		}
+	}
+	return 0;
+}
+unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption)
+{
 	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10) //dotted lines vertical
 	{
 		if(linesOption == VERTICALLINES || linesOption == BOTH)
@@ -832,34 +858,22 @@ unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor col
 				ScreenDeviceDrawDottedLine(pThis,i,startPointY,lenY,5,color,VERTICAL);
 			}
 		ScreenDeviceDrawLine(pThis,i,startPointY+10,10,color,VERTICAL);
-		if(isFirstDraw == TRUE)
-			{
-				ScreenDeviceDrawChartCaption(pThis,actValueDrawOX,i-15,startPointY+20,WHITE_COLOR); // dolne
-				actValueDrawOX+=maxValueFirstDrawOX/10;
-			}
-		else
-		{
-			ScreenDeviceDrawChartCaption(pThis,actualTime,startPointX+lenX-15,startPointY+20,WHITE_COLOR); // ostatni podpis z prawej
-			for(unsigned i = 1; i<=9;i++)
-			{
-				ScreenDeviceDrawChartCaption(pThis,actualTime-(i*(maxValueFirstDrawOX/10)),startPointX+((lenX/10)*(10-i))-15,startPointY+20,WHITE_COLOR);
-			}
-		}
+
 	}
 
-	for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10, counterOY+=0.2) // dotted lines horizontal
+	for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10) // dotted lines horizontal
 	{
 		if(linesOption == HORIZONTALLINES || linesOption == BOTH)
 			{
 				ScreenDeviceDrawDottedLine(pThis,startPointX,j,lenX,3,color,HORIZONTAL);
 			}
 		ScreenDeviceDrawLine(pThis,startPointX-10,j,10,color,HORIZONTAL);
-		if(isFirstDraw == TRUE)	ScreenDeviceDrawChartCaption(pThis,counterOY,startPointX-50,j-5,WHITE_COLOR); // lewe
+
 	}
 	return 0;
 }
 
-unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAddLines_t linesOption,boolean isFirstDraw, double dt, unsigned resolution,double actualTime)
+unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAddLines_t linesOption)
 {
 	// draw chart axis
 	unsigned startPointX = ((pThis->m_nWidth)/10); //10% of whole Screen Width
@@ -879,6 +893,6 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 		ScreenDeviceDrawLine(pThis,startPointX-i,startPointY,lenY,color,VERTICAL);
 	}
 	// dotted lines
-	ScreenDeviceDrawDottedBackground(pThis,color,startPointX,startPointY,lenX, lenY,BOTH,isFirstDraw, dt, resolution,actualTime);
+	ScreenDeviceDrawDottedBackground(pThis,color,startPointX,startPointY,lenX, lenY,BOTH);
 	return 0;
 }
