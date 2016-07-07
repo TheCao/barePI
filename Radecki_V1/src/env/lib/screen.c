@@ -66,7 +66,7 @@ void ScreenDeviceScroll (TScreenDevice *pThis) MAXOPT;
 void ScreenDeviceDisplayChar2 (TScreenDevice *pThis, char chChar, unsigned nPosX, unsigned nPosY, TScreenColor Color);
 void ScreenDeviceEraseChar (TScreenDevice *pThis, unsigned nPosX, unsigned nPosY);
 void ScreenDeviceInvertCursor (TScreenDevice *pThis);
-extern unsigned unsignedLenght(unsigned x);
+extern unsigned getNumberLenght(double x);
 extern int power(int base, int exp);
 
 void ScreenDevice (TScreenDevice *pThis, unsigned nWidth, unsigned nHeight)
@@ -786,47 +786,80 @@ void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color)
 	ScreenDeviceDrawRect(pThis,0,0,pThis->m_nWidth, pThis->m_nHeight,color);
 }
 
-unsigned int ScreenDeviceDrawChartCaption(TScreenDevice *pThis, unsigned number, unsigned startPointX, unsigned startPointY,TScreenColor color)
+unsigned int ScreenDeviceDrawChartCaption(TScreenDevice *pThis, double number, unsigned startPointX, unsigned startPointY,TScreenColor color)
 {
-	unsigned length = unsignedLenght(number);
+	unsigned length = getNumberLenght(number);
+	boolean isFloatingPoint = FALSE;
 	char temp;
 	int temp1digt;
+	if((int)number<number)
+	{
+		isFloatingPoint = TRUE;
+		number*=10;
+		length+=1;
+	}
 	for(unsigned i = length; i>0;i--)
 	{
 		temp1digt = (number/power(10,i-1));
 		number-= temp1digt*power(10,i-1);
 		temp = (temp1digt + 0x30);
-		ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i),startPointY,WHITE_COLOR);
+		if(isFloatingPoint == TRUE && i ==1)
+		{
+			// set comma
+			ScreenDeviceDisplayChar2(pThis,',',startPointX+10*(length-i),startPointY,WHITE_COLOR);
+			ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i)+10,startPointY,WHITE_COLOR);
+		}
+		else
+		{
+			ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i),startPointY,WHITE_COLOR);
+		}
 	}
 
 	return 0;
 }
 
-unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption)
+unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption, boolean isFirstDraw, double dt, unsigned resolution,double actualTime)
 {
-	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10)
+	double counterOY = 0.201;
+	double maxValueFirstDrawOX = (1020 * dt)*resolution; //max time OX value in first draw of chart
+	double actValueDrawOX = maxValueFirstDrawOX/10;
+
+	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10) //dotted lines vertical
+	{
+		if(linesOption == VERTICALLINES || linesOption == BOTH)
+			{
+				if(i == startPointX+lenX) ScreenDeviceDrawLine(pThis,i,startPointY,lenY,BLACK_COLOR,VERTICAL); // last vertical dotted line need to cleared before drawing dots
+				ScreenDeviceDrawDottedLine(pThis,i,startPointY,lenY,5,color,VERTICAL);
+			}
+		ScreenDeviceDrawLine(pThis,i,startPointY+10,10,color,VERTICAL);
+		if(isFirstDraw == TRUE)
+			{
+				ScreenDeviceDrawChartCaption(pThis,actValueDrawOX,i-15,startPointY+20,WHITE_COLOR); // dolne
+				actValueDrawOX+=maxValueFirstDrawOX/10;
+			}
+		else
 		{
-			if(linesOption == VERTICALLINES || linesOption == BOTH)
-				{
-					if(i == startPointX+lenX) ScreenDeviceDrawLine(pThis,i,startPointY,lenY,BLACK_COLOR,VERTICAL); // last vertical dotted line need to cleared before drawing dots
-					ScreenDeviceDrawDottedLine(pThis,i,startPointY,lenY,5,color,VERTICAL);
-				}
-			ScreenDeviceDrawLine(pThis,i,startPointY+10,10,color,VERTICAL);
-			ScreenDeviceDrawChartCaption(pThis,123,i-15,startPointY+20,WHITE_COLOR);
+			ScreenDeviceDrawChartCaption(pThis,actualTime,startPointX+lenX-15,startPointY+20,WHITE_COLOR); // ostatni podpis z prawej
+			for(unsigned i = 1; i<=9;i++)
+			{
+				ScreenDeviceDrawChartCaption(pThis,actualTime-(i*(maxValueFirstDrawOX/10)),startPointX+((lenX/10)*(10-i))-15,startPointY+20,WHITE_COLOR);
+			}
 		}
-		for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10)
-		{
-			if(linesOption == HORIZONTALLINES || linesOption == BOTH)
-				{
-					ScreenDeviceDrawDottedLine(pThis,startPointX,j,lenX,3,color,HORIZONTAL);
-				}
-			ScreenDeviceDrawLine(pThis,startPointX-10,j,10,color,HORIZONTAL);
-			ScreenDeviceDrawChartCaption(pThis,567,startPointX-50,j-5,WHITE_COLOR);
-		}
-		return 0;
+	}
+
+	for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10, counterOY+=0.2) // dotted lines horizontal
+	{
+		if(linesOption == HORIZONTALLINES || linesOption == BOTH)
+			{
+				ScreenDeviceDrawDottedLine(pThis,startPointX,j,lenX,3,color,HORIZONTAL);
+			}
+		ScreenDeviceDrawLine(pThis,startPointX-10,j,10,color,HORIZONTAL);
+		if(isFirstDraw == TRUE)	ScreenDeviceDrawChartCaption(pThis,counterOY,startPointX-50,j-5,WHITE_COLOR); // lewe
+	}
+	return 0;
 }
 
-unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAddLines_t linesOption)
+unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAddLines_t linesOption,boolean isFirstDraw, double dt, unsigned resolution,double actualTime)
 {
 	// draw chart axis
 	unsigned startPointX = ((pThis->m_nWidth)/10); //10% of whole Screen Width
@@ -846,6 +879,6 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 		ScreenDeviceDrawLine(pThis,startPointX-i,startPointY,lenY,color,VERTICAL);
 	}
 	// dotted lines
-	ScreenDeviceDrawDottedBackground(pThis,color,startPointX,startPointY,lenX, lenY,BOTH);
+	ScreenDeviceDrawDottedBackground(pThis,color,startPointX,startPointY,lenX, lenY,BOTH,isFirstDraw, dt, resolution,actualTime);
 	return 0;
 }

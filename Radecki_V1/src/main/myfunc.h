@@ -31,6 +31,7 @@ typedef struct simulationParams {
 	const double dt;
 	double dtCopy, tkCopy;
 	unsigned long bufferMax;
+	boolean isFirstDraw;
 } simulationParams_t;
 
 typedef struct motorParams {
@@ -67,7 +68,7 @@ unsigned PrintActMotorParam(unsigned val);
 unsigned PrintActSimulationParam(unsigned val);
 void setDefaultValues();
 void finishSimulation();
-unsigned unsignedLenght(unsigned x);
+unsigned getNumberLenght(double x);
 int power(int base, int exp);
 unsigned UartSendString(const char *pMessage,...);
 void KeyPressedHandler (const char *pString);

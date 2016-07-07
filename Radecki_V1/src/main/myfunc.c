@@ -73,7 +73,8 @@ simulationParams_t basicSimulation ={
 		.tk = 			200.0,
 		.bufferIndex = 	0,
 		.actualPosX = 0,
-		.resolution = 2 // co który pomiar bêdzie wyœwietlany na wykresie
+		.resolution = 2, // co który pomiar bêdzie wyœwietlany na wykresie
+		.isFirstDraw = TRUE
 };
 
 simulationParams_t basicSimulation2 = {
@@ -126,6 +127,7 @@ void setDefaultValues()
 	basicSimulation.I = 0.0;
 	basicSimulation.bufferIndex = 0;
 	basicSimulation.actualPosX = 0;
+	basicSimulation.isFirstDraw = TRUE;
 	//second simulation
 	basicSimulation2.actualTimeD = 0.0;
 	basicSimulation2.actualTimeUI = 0;
@@ -162,9 +164,10 @@ void finishSimulation()
 	basicSimulation2.stepEndTime = 0.0;
 	basicSimulation2.tempOmega = 0.0;
 	basicSimulation.actualPosX = 0;
+	basicSimulation.isFirstDraw = TRUE;
 
 }
-unsigned unsignedLenght(unsigned x) {
+unsigned getNumberLenght(double x) {
     if(x>=1000000000) return 10;
     if(x>=100000000) return 9;
     if(x>=10000000) return 8;
@@ -236,8 +239,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+(symParams->resolution*u)]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
 						}
 					}
-					// wyrosowanie t³a i kropkowanych linii
-					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
 					// rysowanie na 1020 px wartosci przesunietego bufora tj 1-1021
 					for(unsigned u = 0;u <=1020;u++)
 					{
@@ -247,6 +248,9 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+1+(symParams->resolution*u)]+i, color);
 						}
 					}
+					// wyrosowanie t³a i kropkowanych linii
+					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
+					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 				}
 				symParams->bufferIndex++;
 				// sending data to PC by UART
@@ -254,7 +258,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 				//if(symParams->actualTimeD>=5) motorParams->Mobc = 0.3;
 				//if(symParams->actualTimeD>=8) motorParams->U = 24;
 				//delay
-				//TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
+				//TimerMsDelay(TimerGet(),(unsigned int)10);
 			}
 			else // przekroczenie bufora
 			{
@@ -563,7 +567,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		{
 			setDefaultValues();
 			ScreenDeviceClearDisplay(USPiEnvGetScreen());
-			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH, TRUE,basicSimulation.dt,basicSimulation.resolution,0) != 0)
 			{
 				LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
 			}
@@ -740,7 +744,7 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		//plot motor symulation
 				if(isChartPrinted == FALSE){
 					ScreenDeviceClearDisplay(USPiEnvGetScreen());
-					if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+					if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH, TRUE,basicSimulation.dt,basicSimulation.resolution,0) != 0)
 						{
 							LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
 						}
