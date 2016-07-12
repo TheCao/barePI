@@ -33,6 +33,7 @@ typedef struct simulationParams {
 	double dtCopy, tkCopy;
 	unsigned long bufferMax;
 	boolean isFirstDraw;
+	unsigned actualPosY;
 } simulationParams_t;
 
 typedef struct motorParams {
