@@ -29,7 +29,6 @@
 #include <uspi/assert.h>
 
 #define ARM_IRQ_USB		9		// for ConnectInterrupt()
-static int counter = 100000;
 #define DEVICE_ID_USB_HCD	3		// for SetPowerStateOn()
 
 //

@@ -142,7 +142,8 @@ int main (void)
 		LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
 	}
 	else isChartPrinted = TRUE;
-	ScreenDeviceDrawChartCaptionAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
+	ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
+	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0);
 	InterruptSystemEnableIRQ(ARM_IRQ_USB);
 	while(1)
 	{

@@ -122,8 +122,8 @@ void ScreenDeviceFillDisplay(TScreenDevice *pThis,TScreenColor color);
 unsigned ScreenDeviceDrawChart(TScreenDevice *pThis,TScreenColor color, chartAddLines_t linesOption);
 unsigned ScreenDeviceDrawChartCaption(TScreenDevice *pThis,  double number, unsigned startPointX, unsigned startPointY,TScreenColor color);
 unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption);
-unsigned ScreenDeviceDrawChartCaptionAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY, unsigned lenX,unsigned lenY, boolean isFirstDraw, double dt, unsigned resolution,double actualTime);
-
+unsigned ScreenDeviceDrawChartCaptionOXAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY, unsigned lenX,unsigned lenY, boolean isFirstDraw, double dt, unsigned resolution,double actualTime);
+unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, boolean isFirstDraw,unsigned resolution, double actualValue);
 void ScreenDevice (TScreenDevice *pThis, unsigned nWidth, unsigned nHeight);
 void _ScreenDevice (TScreenDevice *pThis);
 
