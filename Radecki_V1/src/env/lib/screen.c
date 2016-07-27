@@ -806,22 +806,22 @@ unsigned int ScreenDeviceDrawChartCaption(TScreenDevice *pThis, double number, u
 		if(isFloatingPoint == TRUE && i ==1)
 		{
 			// set comma
-			ScreenDeviceDisplayChar2(pThis,',',startPointX+10*(length-i),startPointY,color);
-			ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i)+10,startPointY,color);
+			ScreenDeviceDisplayChar2(pThis,',',startPointX+10*(length-i),startPointY,WHITE_COLOR);
+			ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i)+10,startPointY,WHITE_COLOR);
 		}
 		else
 		{
-			ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i),startPointY,color);
+			ScreenDeviceDisplayChar2(pThis,temp,startPointX+10*(length-i),startPointY,WHITE_COLOR);
 		}
 	}
 
 	return 0;
 }
-unsigned ScreenDeviceDrawChartCaptionOXAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY, unsigned lenX,unsigned lenY, boolean isFirstDraw, double dt, unsigned resolution,double actualTime)
+unsigned ScreenDeviceDrawChartCaptionAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY, unsigned lenX,unsigned lenY, boolean isFirstDraw, double dt, unsigned resolution,double actualTime)
 {
-
-	double maxValueFirstDrawOX = (lenX * dt)*resolution; //max time OX value in first draw of chart
-	double actValueDrawOX = maxValueFirstDrawOX/10;
+	double counterOY = 0.201;
+		double maxValueFirstDrawOX = (1020 * dt)*resolution; //max time OX value in first draw of chart
+		double actValueDrawOX = maxValueFirstDrawOX/10;
 
 	if(isFirstDraw == TRUE)
 	{
@@ -839,29 +839,14 @@ unsigned ScreenDeviceDrawChartCaptionOXAll(TScreenDevice *pThis, unsigned startP
 			ScreenDeviceDrawChartCaption(pThis,actualTime-(i*(maxValueFirstDrawOX/10)),startPointX+((lenX/10)*(10-i))-15,startPointY+20,WHITE_COLOR);
 		}
 	}
+	if(isFirstDraw == TRUE)
+	{
+		for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10, counterOY+=0.2)
+		{
+			ScreenDeviceDrawChartCaption(pThis,counterOY,startPointX-50,j-5,WHITE_COLOR);
+		}
+	}
 	return 0;
-}
-unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, boolean isFirstDraw,unsigned resolution, double actualValue)
-{
-	double counterOY = 0.201;
-	double maxValueFirstDrawOY = 2.0;
-
-		if(isFirstDraw == TRUE)
-		{
-			for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10, counterOY+=0.2)
-			{
-				ScreenDeviceDrawChartCaption(pThis,counterOY,startPointX-50,j-5,WHITE_COLOR);
-			}
-		}
-		else
-		{
-			ScreenDeviceDrawChartCaption(pThis,actualValue,startPointX-50,startPointY-lenY-5,WHITE_COLOR); // górny podpis
-			for(unsigned i = 1; i<=9;i++)
-			{
-				ScreenDeviceDrawChartCaption(pThis,actualValue-(i*maxValueFirstDrawOY/10),startPointX-50,startPointY-5-lenY+(i*lenY/10),WHITE_COLOR);
-			}
-		}
-		return 0;
 }
 unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption)
 {

@@ -336,7 +336,7 @@ boolean USBStandardHubEnumeratePorts (TUSBStandardHub *pThis)
 		TString *pNames = USBStandardHubGetDeviceNames (pThis->m_pDevice[nPort]);
 		assert (pNames != 0);
 
-		LogWrite (FromHub, LOG_NOTICE, "Port %u: Device %s found", nPort+1, StringGet (pNames));
+//		LogWrite (FromHub, LOG_NOTICE, "Port %u: Device %s found", nPort+1, StringGet (pNames));
 
 		_String (pNames);
 		free (pNames);
@@ -365,7 +365,7 @@ boolean USBStandardHubEnumeratePorts (TUSBStandardHub *pThis)
 				continue;
 			}
 			
-			LogWrite (FromHub, LOG_DEBUG, "Port %u: Device configured", nPort+1);
+//			LogWrite (FromHub, LOG_DEBUG, "Port %u: Device configured", nPort+1);
 		}
 		else
 		{

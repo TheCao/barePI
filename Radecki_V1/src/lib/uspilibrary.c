@@ -81,7 +81,7 @@ int USPiInitialize (void)
 		_String  (&DeviceName);
 	}
 
-	LogWrite (FromUSPi, LOG_DEBUG, "USPi library successfully initialized");
+//	LogWrite (FromUSPi, LOG_DEBUG, "USPi library successfully initialized");
 
 	return 1;
 }

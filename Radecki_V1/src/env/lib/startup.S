@@ -51,6 +51,16 @@
 _start:
 	safe_svcmode_maskall r0
 
+	@ L1 cache
+	//To enable L1 Cache on the ARMv6 CPU and enable branch prediction we set bits 11 and 12 in the Control Registor of CP15.
+//Bit 12 enables the L1 instruction Cache, and is available in the StrongARM and all later ARM CPUs.
+//Bit 11 enables branch prediction, and is only available in ARMv6 and all later CPUs.
+//If you wish you can also enable Bit 2 to enable the Data Cache, though be careful with this one.
+    mrc p15,0,r0,c1,c0
+    mov r1,#3
+    orr r0,r0,r1,LSL#11      //Set bits 11 and 12.
+    mcr p15,0,r0,c1,c0      //Update the CP15 Control registor (C1) from R0.
+
 	@ enable the VFP
 	mrc p15, 0, r0, c1, c0, 2		 /* move from coprocessor to register(s) */
 	orr r0, r0, #0x300000            /* single precision */
@@ -61,6 +71,8 @@ _start:
 
 	cps	#0x1F				/* set system mode */
 	mov	sp, #MEM_KERNEL_STACK
+
+
 	b	sysinit
 
 #if RASPPI != 1

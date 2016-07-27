@@ -48,7 +48,7 @@ boolean LoggerInitialize (TLogger *pThis, TScreenDevice *pTarget)
 {
 	pThis->m_pTarget = pTarget;
 	
-	LoggerWrite (pThis, "logger", LogNotice, "Logging started");
+//	LoggerWrite (pThis, "logger", LogNotice, "Logging started");
 
 	return TRUE;
 }

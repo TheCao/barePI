@@ -99,11 +99,11 @@ TUSBDevice *GetDevice (TUSBDevice *pParent, TString *pName)
     }
 	// new devices follow
 
-	if (pResult != 0)
+	/*if (pResult != 0)
 	{
 		LogWrite ("usbdev", LOG_NOTICE, "Using device %s", StringGet (pName));
 	}
-	
+	*/
 	_String (pName);
 	free (pName);
 	

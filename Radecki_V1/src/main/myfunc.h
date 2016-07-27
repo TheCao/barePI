@@ -33,7 +33,6 @@ typedef struct simulationParams {
 	double dtCopy, tkCopy;
 	unsigned long bufferMax;
 	boolean isFirstDraw;
-	unsigned actualPosY;
 } simulationParams_t;
 
 typedef struct motorParams {
@@ -76,6 +75,7 @@ unsigned UartSendString(const char *pMessage,...);
 void KeyPressedHandler (const char *pString);
 void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
 void MouseStatusHandler();
+void Symulator();
 #endif /* SRC_MAIN_MYFUNC_H_ */
 
 

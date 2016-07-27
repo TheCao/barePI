@@ -192,7 +192,7 @@ boolean SMSC951xDeviceConfigure (TUSBDevice *pUSBDevice)
 	TString MACString;
 	String (&MACString);
 	MACAddressFormat (&pThis->m_MACAddress, &MACString);
-	LogWrite (FromSMSC951x, LOG_DEBUG, "MAC address is %s", StringGet (&MACString));
+//	LogWrite (FromSMSC951x, LOG_DEBUG, "MAC address is %s", StringGet (&MACString));
 
 	const TUSBConfigurationDescriptor *pConfigDesc =
 		(TUSBConfigurationDescriptor *) USBDeviceGetDescriptor (&pThis->m_USBDevice, DESCRIPTOR_CONFIGURATION);

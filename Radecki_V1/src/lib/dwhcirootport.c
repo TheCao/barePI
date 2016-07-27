@@ -81,7 +81,7 @@ boolean DWHCIRootPortInitialize (TDWHCIRootPort *pThis)
 	TString *pNames = USBStandardHubGetDeviceNames (pThis->m_pDevice);
 	assert (pNames != 0);
 
-	LogWrite (FromDWHCIRoot, LOG_NOTICE, "Device %s found", StringGet (pNames));
+//	LogWrite (FromDWHCIRoot, LOG_NOTICE, "Device %s found", StringGet (pNames));
 
 	_String (pNames);
 	free (pNames);
@@ -105,7 +105,7 @@ boolean DWHCIRootPortInitialize (TDWHCIRootPort *pThis)
 			return FALSE;
 		}
 		
-		LogWrite (FromDWHCIRoot, LOG_DEBUG, "Device configured");
+//		LogWrite (FromDWHCIRoot, LOG_DEBUG, "Device configured");
 	}
 	else
 	{

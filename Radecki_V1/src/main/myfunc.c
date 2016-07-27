@@ -29,14 +29,12 @@ boolean isChartPrinted = FALSE;
 boolean startFlag = FALSE;
 boolean readyFlag = FALSE;
 boolean clearFlag = FALSE;
-boolean isMoved = FALSE;
+boolean buttonFlag = FALSE; // flaga do blokowania przycisku po wciœniêciu
 extern void LogWrite (const char *pSource, unsigned Severity, const char *pMessage, ...);
 extern void ScreenDeviceCursorHome (TScreenDevice *pThis);
 unsigned actMenuPosition = 1;
 unsigned actBasicMotor = 1;
 unsigned tempPosX = 0;
-unsigned tempPosY = 0;
-double dthetadtTemp = 0.0;
 
 motorParams_t basicMotor = {
 		.number = 		1,
@@ -47,7 +45,7 @@ motorParams_t basicMotor = {
 		.J =			0.1,
 		.B =			0.5,
 		.Mobc =			0.0,
-		.U = 			20.0
+		.U = 			12.0
 };
 motorParams_t basicMotor2 = {
 		.number = 		2,
@@ -76,7 +74,6 @@ simulationParams_t basicSimulation ={
 		.tk = 			200.0,
 		.bufferIndex = 	0,
 		.actualPosX = 0,
-		.actualPosY = 0,
 		.resolution = 2, // co który pomiar bêdzie wyœwietlany na wykresie
 		.isFirstDraw = TRUE
 };
@@ -94,14 +91,13 @@ simulationParams_t basicSimulation2 = {
 };
 
 
+motorParams_t copyBasicMotor, copyBasicMotor2;
 
 void setDefaultValues()
 {
 	startFlag = FALSE;
 	clearFlag = FALSE;
-	isMoved = FALSE;
 	tempPosX = 0;
-	dthetadtTemp = 0.0;
 	basicMotor.R = 2;
 	basicMotor.L = 0.1;
 	basicMotor.Ke = 0.1;
@@ -109,7 +105,7 @@ void setDefaultValues()
 	basicMotor.J = 0.1;
 	basicMotor.B = 0.5;
 	basicMotor.Mobc = 0.0;
-	basicMotor.U = 19.0;
+	basicMotor.U = 12.0;
 	basicMotor2.R = 4;
 	basicMotor2.L = 0.05;
 	basicMotor2.Ke = 0.1;
@@ -131,7 +127,6 @@ void setDefaultValues()
 	basicSimulation.I = 0.0;
 	basicSimulation.bufferIndex = 0;
 	basicSimulation.actualPosX = 0;
-	basicSimulation.actualPosY = 0;
 	basicSimulation.isFirstDraw = TRUE;
 	//second simulation
 	basicSimulation2.actualTimeD = 0.0;
@@ -148,8 +143,6 @@ void finishSimulation()
 {
 	startFlag = FALSE;
 	clearFlag = FALSE;
-	isMoved = FALSE;
-	dthetadtTemp = 0.0;
 	tempPosX = 0;
 	basicSimulation.tk = basicSimulation.tkCopy;
 	basicSimulation.I = 0.0;
@@ -170,7 +163,6 @@ void finishSimulation()
 	basicSimulation2.stepEndTime = 0.0;
 	basicSimulation2.tempOmega = 0.0;
 	basicSimulation.actualPosX = 0;
-	basicSimulation.actualPosY = 0;
 	basicSimulation.isFirstDraw = TRUE;
 
 }
@@ -216,92 +208,51 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			symParams->dthetadt+= symParams->d2thetadt*symParams->dt;
 			symParams->I+=symParams->didt*symParams->dt;
 
-			symParams->tempOmega = symParams->dthetadt*0.5*symParams->lenY;
+			symParams->tempOmega = symParams->dthetadt*400; //TODO: skalowanie tip: zamiast w pêtli for korzystaæ z obliczonego czasu to mo¿e zajêtoœæ pola wykresu a czas dostosowaæ na koniec i podpisaæ wykres ?
 			// fifo buffer - przypadek pracy ci¹g³ej
 			if(symParams->bufferIndex < symParams->bufferMax) // indeks bufora miesci siê w zakresie osi X
 			{
 				fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
-				// czy ekran wymaga przesuniecia
-				if(symParams->actualPosX <= symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY) // brak przesuniêcia w OX i OY
+				// indeks bufora miesci siê w zakresie
+				if(symParams->actualPosX <= 1020) // czy ekran wymaga przesuniecia
 				{
 					if(symParams->actualPosX != tempPosX)
 					{// plotting function, width 5 px
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualPosX, symParams->startPosY
-																- fifoBuffer[symParams->bufferIndex]+i, color);
+									- fifoBuffer[symParams->bufferIndex]+i, color);
 						}
 					}
 					tempPosX = symParams->actualPosX;
 					if(!((symParams->bufferIndex)%symParams->resolution)) symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
 				}
-				else if (symParams->actualPosX <= symParams->lenX && fifoBuffer[symParams->bufferIndex] > symParams->lenY) // przekroczono OY
+				else
 				{
-					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
-					if(symParams->actualPosX != tempPosX)
-					{
-						// usuniêcie wydruków na ekranie
-						for(unsigned u = symParams->actualPosX-1;u > 0 ;u--)
-						{
-							if(isMoved == TRUE)
-							{
-								for(signed i = -2;i<=2;i++)
-								{
-									ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualPosX - u, symParams->startPosY
-										- (fifoBuffer[symParams->bufferIndex-u*symParams->resolution])+(unsigned)((dthetadtTemp-2.0)*0.5*symParams->lenY)+i, BLACK_COLOR);
-								}
-							}
-							else
-							{
-								for(signed i = -2;i<=2;i++)
-								{
-									ScreenDeviceSetPixel(pThis, symParams->startPosX + symParams->actualPosX - u, symParams->startPosY
-											- fifoBuffer[symParams->bufferIndex-u*symParams->resolution]+i, BLACK_COLOR); //
-
-								}
-							}
-						}
-						ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
-						// plotting function, width 5 px
-						//przesuniecie wczesniejszych wartosci w dol
-
-						ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt);
-						isMoved = TRUE;
-					}
-
-					tempPosX = symParams->actualPosX;
-					dthetadtTemp = symParams->dthetadt;
-					if(!((symParams->bufferIndex)%symParams->resolution)) symParams->actualPosX++;
-					//TimerMsDelay(TimerGet(),1000);
-				}
-				else if(symParams->actualPosX > symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY) // przekroczono OX
-				{
-					// usuniêcie wydruków na ekranie
-					for(unsigned u = 0;u <=symParams->lenX;u++)
+					InterruptSystemDisableIRQ(ARM_IRQ_USB);
+					// usuniêcie wydruków na ekranie - 1020p; actualPosX = 1020; bufferIndex ciagle sie zwieksza
+					for(unsigned u = 0;u <=1020;u++)
 					{
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u+1, symParams->startPosY
-									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*symParams->lenX)+(symParams->resolution*u)]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+(symParams->resolution*u)]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
 						}
 					}
 					// wyrosowanie t³a i kropkowanych linii
 					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
-					// rysowanie na symParams->lenX px wartosci przesunietego bufora tj 1-1021
-					for(unsigned u = 0;u <=symParams->lenX;u++)
+					// rysowanie na 1020 px wartosci przesunietego bufora tj 1-1021
+					for(unsigned u = 0;u <=1020;u++)
 					{
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u, symParams->startPosY
-									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*symParams->lenX)+1+(symParams->resolution*u)]+i, color);
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+1+(symParams->resolution*u)]+i, color);
 						}
 					}
-					ScreenDeviceDrawChartCaptionOXAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
+					ScreenDeviceDrawChartCaptionAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
-				}
-				else if(symParams->actualPosX > symParams->lenX && fifoBuffer[symParams->bufferIndex] > symParams->lenY) // przekroczono OX i OY
-				{
-					UartSendString("OX i OY");
+					InterruptSystemEnableIRQ(ARM_IRQ_USB);
 				}
 				symParams->bufferIndex++;
 				// sending data to PC by UART
@@ -314,7 +265,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			else // przekroczenie bufora
 			{
 				UartSendString("Buff error: MaxBuff = %u \t Act Buff = %u \t actTime = %f ", symParams->bufferMax, symParams->bufferIndex, symParams->actualTimeD);
-				return 1;
 			}
 		}
 	// set startFlag to false and simulation values when simulation ends
@@ -357,7 +307,7 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 				fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
 				fifoBuffer2[symParams->bufferIndex] = symParams2->tempOmega;
 				// indeks bufora miesci siê w zakresie
-				if(symParams->actualPosX <= symParams->lenX) // czy ekran wymaga przesuniecia
+				if(symParams->actualPosX <= 1020) // czy ekran wymaga przesuniecia
 				{
 					if(symParams->actualPosX != tempPosX)
 					{// plotting function, width 5 px
@@ -374,32 +324,32 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 				}
 				else
 				{
-					// usuniêcie wydruków na ekrani
-					for(unsigned u = 0;u <=symParams->lenX;u++)
+					// usuniêcie wydruków na ekranie - 1020p; actualPosX = 1020; bufferIndex ciagle sie zwieksza
+					for(unsigned u = 0;u <=1020;u++)
 					{
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u+1, symParams->startPosY
-									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*symParams->lenX)+(symParams->resolution*u)]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+(symParams->resolution*u)]+i, BLACK_COLOR); //poniewaz rysowalem z krokiem resolution to zmazywanie tez
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u+1, symParams->startPosY
-									- fifoBuffer2[symParams->bufferIndex-((symParams->resolution)*symParams->lenX)+(symParams->resolution*u)]+i, BLACK_COLOR);
+									- fifoBuffer2[symParams->bufferIndex-((symParams->resolution)*1020)+(symParams->resolution*u)]+i, BLACK_COLOR);
 						}
 					}
 					// wyrosowanie t³a i kropkowanych linii
 					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
-					// rysowanie na symParams->lenX px wartosci przesunietego bufora tj 1-1021
-					for(unsigned u = 0;u <=symParams->lenX;u++)
+					// rysowanie na 1020 px wartosci przesunietego bufora tj 1-1021
+					for(unsigned u = 0;u <=1020;u++)
 					{
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u, symParams->startPosY
-									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*symParams->lenX)+1+(symParams->resolution*u)]+i, color);
+									- fifoBuffer[symParams->bufferIndex-((symParams->resolution)*1020)+1+(symParams->resolution*u)]+i, color);
 							ScreenDeviceSetPixel(pThis, symParams->startPosX + u, symParams->startPosY
-									- fifoBuffer2[symParams->bufferIndex-((symParams->resolution)*symParams->lenX)+1+(symParams->resolution*u)]+i, color2);
+									- fifoBuffer2[symParams->bufferIndex-((symParams->resolution)*1020)+1+(symParams->resolution*u)]+i, color2);
 
 						}
 					}
-					ScreenDeviceDrawChartCaptionOXAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
+					ScreenDeviceDrawChartCaptionAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 				}
 				symParams->bufferIndex++;
@@ -413,12 +363,12 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 			else // przekroczenie bufora
 			{
 				UartSendString("Buff error: MaxBuff = %u \t Act Buff = %u \t actTime = %f ", symParams->bufferMax, symParams->bufferIndex, symParams->actualTimeD);
-				return 1;
 			}
 			// sending data to PC by UART
 			UartSendString("%f \t %f \t %f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt, symParams2->I, symParams2->dthetadt);
 
-
+			//delay
+			TimerMsDelay(TimerGet(),(unsigned int)symParams->dt*1000);
 		}
 	// set startFlag to false and simulation values when simulation ends
 	if(symParams->actualTimeD >= symParams->tk)
@@ -590,10 +540,20 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 		basicSimulation.tkCopy = basicSimulation.tk;
 		//set EnabledMode
 		actualEnabledMode = NONEENABLED; //left joystick used for change U or Mobc
-		TimerMsDelay(TimerGet(),300); // delay
+		if(isChartPrinted == FALSE){
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+				{
+					LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+				}
+			else isChartPrinted = TRUE;
+			ScreenDeviceDrawChartCaptionAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
+		}
+//			TimerMsDelay(TimerGet(),300); // delay
 		break;
+
 	case(SELECT):
-		//clear screen and set default settings
+	//clear screen and set default settings
 		ScreenDeviceClearDisplay(USPiEnvGetScreen());
 		isChartPrinted = FALSE;
 		actualEnabledMode = NONEENABLED;
@@ -677,213 +637,222 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 				LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
 			}
 			isChartPrinted = TRUE;
-			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0);
+			ScreenDeviceDrawChartCaptionAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
 		}
 		TimerMsDelay(TimerGet(),300); // delay
 		break;
 	case(BUTTON4):
 		break;
-
-	//left joystick handling
 	default:
+		//left joystick handling
 		horizontalAxis = pState->axes[0].value;
 		verticalAxis = pState->axes[1].value;
-		if( horizontalAxis != 127 || verticalAxis !=127 )
-		{
-			switch(actualEnabledMode){
-						case(DCMOTOR):
-							if(verticalAxis > 127 && horizontalAxis == 127)
+		if( (horizontalAxis != 127 || verticalAxis !=127) && buttonFlag == FALSE ) // left joystick and buttonFlag = False
+			{
+				switch(actualEnabledMode){
+					case(DCMOTOR):
+						if(verticalAxis > 127 && horizontalAxis == 127)
+						{
+							// next from list
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							if(actMenuPosition >=8) actMenuPosition = 1;
+							else actMenuPosition++;
+							LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+							PrintActMotorParam(actMenuPosition);
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
+						}
+						else if(verticalAxis < 127 && horizontalAxis == 127)
+						{
+							// go backward
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							if(actMenuPosition <=1) actMenuPosition = 8;
+							else actMenuPosition--;
+							LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+							PrintActMotorParam(actMenuPosition);
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
+						}
+						else if(horizontalAxis > 127 && verticalAxis == 127)
+						{
+							// increase
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+							PrintActMotorParam(actMenuPosition);
+							switch(actBasicMotor){
+							case(1):
+								ChangeMotorParam(&basicMotor,actMenuPosition,1);
+							break;
+							case(2):
+								ChangeMotorParam(&basicMotor2,actMenuPosition,1);
+							break;
+							}
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
+						}
+						else if (horizontalAxis < 127 && verticalAxis == 127 )
+						{
+							//decrease
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+							PrintActMotorParam(actMenuPosition);
+							switch(actBasicMotor){
+							case(1):
+								ChangeMotorParam(&basicMotor,actMenuPosition,-1);
+							break;
+							case(2):
+								ChangeMotorParam(&basicMotor2,actMenuPosition,-1);
+							break;
+							}
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
+						}
+						else
+						{
+							// both axis are set - do nothing
+						}
+						break;
+					case(SIMULATION):
+						if(verticalAxis > 127 && horizontalAxis == 127)
 							{
 								// next from list
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								if(actMenuPosition >=8) actMenuPosition = 1;
-								else actMenuPosition++;
-								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
-								PrintActMotorParam(actMenuPosition);
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							if(actMenuPosition >=2) actMenuPosition = 1;
+							else actMenuPosition++;
+							PrintActSimulationParam(actMenuPosition);
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
 							}
-							else if(verticalAxis < 127 && horizontalAxis == 127)
+						else if(verticalAxis < 127 && horizontalAxis == 127)
 							{
 								// go backward
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								if(actMenuPosition <=1) actMenuPosition = 8;
-								else actMenuPosition--;
-								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
-								PrintActMotorParam(actMenuPosition);
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							if(actMenuPosition <=1) actMenuPosition = 2;
+							else actMenuPosition--;
+							PrintActSimulationParam(actMenuPosition);
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
 							}
-							else if(horizontalAxis > 127 && verticalAxis == 127)
+						else if(horizontalAxis > 127 && verticalAxis == 127)
 							{
 								// increase
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
-								PrintActMotorParam(actMenuPosition);
-								switch(actBasicMotor){
-								case(1):
-									ChangeMotorParam(&basicMotor,actMenuPosition,1);
-								break;
-								case(2):
-									ChangeMotorParam(&basicMotor2,actMenuPosition,1);
-								break;
-								}
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							PrintActSimulationParam(actMenuPosition);
+							ChangeSimulationParam(&basicSimulation,actMenuPosition,1);
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
 							}
-							else if (horizontalAxis < 127 && verticalAxis == 127 )
+						else if (horizontalAxis < 127 && verticalAxis == 127 )
 							{
 								//decrease
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
-								PrintActMotorParam(actMenuPosition);
-								switch(actBasicMotor){
-								case(1):
-									ChangeMotorParam(&basicMotor,actMenuPosition,-1);
-								break;
-								case(2):
-									ChangeMotorParam(&basicMotor2,actMenuPosition,-1);
-								break;
-								}
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
+							ScreenDeviceClearDisplay(USPiEnvGetScreen());
+							PrintActSimulationParam(actMenuPosition);
+							ChangeSimulationParam(&basicSimulation,actMenuPosition,-1);
+							isChartPrinted = FALSE;
+							//TimerMsDelay(TimerGet(),300); // delay
+							buttonFlag = TRUE;
 							}
-							else
+						else
 							{
 								// both axis are set - do nothing
 							}
-							break;
-						case(SIMULATION):
-							if(verticalAxis > 127 && horizontalAxis == 127)
-								{
-									// next from list
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								if(actMenuPosition >=2) actMenuPosition = 1;
-								else actMenuPosition++;
-								PrintActSimulationParam(actMenuPosition);
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
-								}
-							else if(verticalAxis < 127 && horizontalAxis == 127)
-								{
-									// go backward
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								if(actMenuPosition <=1) actMenuPosition = 2;
-								else actMenuPosition--;
-								PrintActSimulationParam(actMenuPosition);
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
-								}
-							else if(horizontalAxis > 127 && verticalAxis == 127)
-								{
-									// increase
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								PrintActSimulationParam(actMenuPosition);
-								ChangeSimulationParam(&basicSimulation,actMenuPosition,1);
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
-								}
-							else if (horizontalAxis < 127 && verticalAxis == 127 )
-								{
-									//decrease
-								ScreenDeviceClearDisplay(USPiEnvGetScreen());
-								PrintActSimulationParam(actMenuPosition);
-								ChangeSimulationParam(&basicSimulation,actMenuPosition,-1);
-								isChartPrinted = FALSE;
-								TimerMsDelay(TimerGet(),300); // delay
-								}
-							else
-								{
-									// both axis are set - do nothing
-								}
-							break;
-						case(NONEENABLED): //change U or Mobc durinig simulation for Motor1 ONLY
-							if(verticalAxis > 127 && horizontalAxis == 127)
-							{
-								if(basicMotor.Mobc <=0.0) basicMotor.Mobc=0.0;
-								else basicMotor.Mobc-=0.1;
-								UartSendString("Mobc = %f", basicMotor.Mobc);
-								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
-								ScreenDeviceCursorHome(USPiEnvGetScreen());
-								LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
-								TimerMsDelay(TimerGet(),150);
-							}
-							else if(verticalAxis < 127 && horizontalAxis == 127)
-							{
-								basicMotor.Mobc+=0.1;
-								UartSendString("Mobc = %f", basicMotor.Mobc);
-								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
-								ScreenDeviceCursorHome(USPiEnvGetScreen());
-								LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
-								TimerMsDelay(TimerGet(),150);
-							}
-							else if(verticalAxis == 127 && horizontalAxis > 127)
-							{
-								basicMotor.U+=0.1;
-								UartSendString("U = %f", basicMotor.U);
-								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
-								ScreenDeviceCursorHome(USPiEnvGetScreen());
-								LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
-								TimerMsDelay(TimerGet(),150);
-							}
-							else if(verticalAxis == 127 && horizontalAxis < 127)
-							{
-								if(basicMotor.U <=0) basicMotor.U = 0.0;
-								else basicMotor.U-=0.1;
-								UartSendString("U = %f", basicMotor.U);
-								ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
-								ScreenDeviceCursorHome(USPiEnvGetScreen());
-								LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
-								TimerMsDelay(TimerGet(),150);
-							}
-							break;
-
-
-					}
-		}
-		else if(startFlag == TRUE) // simulation in progress, print
-		{
-		//plot motor symulation
-				if(isChartPrinted == FALSE){
-					ScreenDeviceClearDisplay(USPiEnvGetScreen());
-					if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+						break;
+					case(NONEENABLED): //change U or Mobc durinig simulation for Motor1 ONLY
+						if(verticalAxis > 127 && horizontalAxis == 127)
 						{
-							LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+							basicMotor.Mobc-=0.1;
+							if(basicMotor.Mobc <=0.0) basicMotor.Mobc=0.0;
+							UartSendString("Mobc = %f", basicMotor.Mobc);
+							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+							ScreenDeviceCursorHome(USPiEnvGetScreen());
+							//LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
+//							TimerMsDelay(TimerGet(),150);
+							buttonFlag = TRUE;
 						}
-					else isChartPrinted = TRUE;
-					ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-					ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0);
-				}
+						else if(verticalAxis < 127 && horizontalAxis == 127)
+						{
+							basicMotor.Mobc+=0.1;
+							UartSendString("Mobc = %f", basicMotor.Mobc);
+							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+							ScreenDeviceCursorHome(USPiEnvGetScreen());
+		//					LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
+//							TimerMsDelay(TimerGet(),150);
+							buttonFlag = TRUE;
+						}
+						else if(verticalAxis == 127 && horizontalAxis > 127)
+						{
+							basicMotor.U+=0.1;
+							UartSendString("U = %f", basicMotor.U);
+							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+							ScreenDeviceCursorHome(USPiEnvGetScreen());
+		//					LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
+//							TimerMsDelay(TimerGet(),150);
+							buttonFlag = TRUE;
+						}
+						else if(verticalAxis == 127 && horizontalAxis < 127)
+						{
+							basicMotor.U-=0.1;
+							if(basicMotor.U <=0) basicMotor.U = 0.0;
+							UartSendString("U = %f", basicMotor.U);
+							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+							ScreenDeviceCursorHome(USPiEnvGetScreen());
+		//					LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
+//							TimerMsDelay(TimerGet(),150);
+							buttonFlag = TRUE;
+						}
+						break;
 
-				switch(simulationMotor){
-				case(FIRSTMOTOR):
-					if(Simulation(USPiEnvGetScreen(),&basicMotor, &basicSimulation,WHITE_COLOR,pState) != 0)
-					{
-						LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
-					}
-					break;
-				case(SECONDMOTOR):
-					if(Simulation(USPiEnvGetScreen(),&basicMotor2, &basicSimulation,RED_COLOR,pState) != 0)
-					{
-						LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
-					}
-					break;
-				case(BOTHMOTORS):
-					if(SimulationBoth(USPiEnvGetScreen(),&basicMotor, &basicMotor2, &basicSimulation, &basicSimulation2,RED_COLOR,WHITE_COLOR,pState) !=0 )
-					{
-						LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
-					}
-					break;
+
 				}
 		}
-
+		else if(horizontalAxis == 127 && verticalAxis ==127)// when buttonFlag = TRUE and left joy is in central pos
+		{
+			buttonFlag = FALSE;
+		}
 	}
 }
 
 
 void MouseStatusHandler()
 {
+	//TODO:
+}
 
+void Symulator(USPiGamePadState *pState)
+{
+
+	if(startFlag == TRUE) // to jest wykonywane jesli nie ruszam joyem - szybko
+	{
+	//plot motor symulation
+
+
+		switch(simulationMotor){
+		case(FIRSTMOTOR):
+			if(Simulation(USPiEnvGetScreen(),&basicMotor, &basicSimulation,WHITE_COLOR,pState) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+			}
+			break;
+		case(SECONDMOTOR):
+			if(Simulation(USPiEnvGetScreen(),&basicMotor2, &basicSimulation,RED_COLOR,pState) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+			}
+			break;
+		case(BOTHMOTORS):
+			if(SimulationBoth(USPiEnvGetScreen(),&basicMotor, &basicMotor2, &basicSimulation, &basicSimulation2,RED_COLOR,WHITE_COLOR,pState) !=0 )
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Simulation was stopped due to unexpected error!");
+			}
+			break;
+		}
+	}
 }
 
