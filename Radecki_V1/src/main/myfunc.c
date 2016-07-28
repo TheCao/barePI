@@ -29,7 +29,7 @@ boolean isChartPrinted = FALSE;
 boolean startFlag = FALSE;
 boolean readyFlag = FALSE;
 boolean clearFlag = FALSE;
-boolean isMoved = FALSE;
+boolean isMovedOY = FALSE;
 boolean buttonFlag = FALSE; // flaga do blokowania przycisku po wciœniêciu
 extern void LogWrite (const char *pSource, unsigned Severity, const char *pMessage, ...);
 extern void ScreenDeviceCursorHome (TScreenDevice *pThis);
@@ -102,7 +102,7 @@ void setDefaultValues()
 {
 	startFlag = FALSE;
 	clearFlag = FALSE;
-	isMoved = FALSE;
+	isMovedOY = FALSE;
 	tempPosX = 0;
 	dthetadtTemp = 0.0;
 	basicMotor.R = 2;
@@ -151,7 +151,7 @@ void finishSimulation()
 {
 	startFlag = FALSE;
 	clearFlag = FALSE;
-	isMoved = FALSE;
+	isMovedOY = FALSE;
 	dthetadtTemp = 0.0;
 	tempPosX = 0;
 	basicSimulation.tk = basicSimulation.tkCopy;
@@ -230,8 +230,10 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			if(symParams->bufferIndex < symParams->bufferMax) // indeks bufora miesci siê w zakresie osi X
 			{
 				fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
-				// czy ekran wymaga przesuniecia
-				if(symParams->actualPosX <= symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY) // brak przesuniêcia w OX i OY
+
+////////////////////////////////////////////// brak przesuniêcia w OX i OY///////////////////////////////////////////////////////////////////////////////
+
+				if(symParams->actualPosX <= symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY && isMovedOY == FALSE)
 				{
 					if(symParams->actualPosX != tempPosX)
 					{// plotting function, width 5 px
@@ -245,7 +247,13 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 					tempPosX = symParams->actualPosX;
 					if(!((symParams->bufferIndex)%symParams->resolution)) symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
 				}
-				else if ((symParams->actualPosX <= symParams->lenX && fifoBuffer[symParams->bufferIndex] > symParams->lenY) || isMoved == TRUE) // przesuniecie na Y
+/////////////////////////////////////// przejœcie sygna³u do 2 æwiartki///////////////////////////////////////////////////////////////////////////////////
+				else if ( fifoBuffer[symParams->bufferIndex] > symParams->lenY && isMovedOY == FALSE)
+				{
+					isMovedOY = TRUE;
+				}
+/////////////////////////////////////////////// przesuniecie na Y//////////////////////////////////////////////////////////////////////////////////////////////
+				else if (isMovedOY == TRUE && symParams->actualPosX <= symParams->lenX)
 				{
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 					if(symParams->actualPosX != tempPosX)
@@ -255,7 +263,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						for(unsigned u = symParams->actualPosX-1;u > 0 ;u--)
 						{
 							screenTempX = symParams->startPosX + symParams->actualPosX - u;
-							if(isMoved == TRUE) //czy wykres zosta³ ju¿ wczeœniej przesuniêty czy nie - zale¿y od tego sposób czyszczenia wczeœniejszego sygna³u
+							if(isMovedOY == TRUE) //czy wykres zosta³ ju¿ wczeœniej przesuniêty czy nie - zale¿y od tego sposób czyszczenia wczeœniejszego sygna³u
 							{
 								screenTempY = symParams->startPosY - (fifoBuffer[symParams->bufferIndex-u*symParams->resolution])+(unsigned)((dthetadtTemp-2.0)*0.5*symParams->lenY);
 								for(signed i = -2;i<=2;i++)
@@ -308,7 +316,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 								}
 							}
 						}
-						isMoved = TRUE;
+//						isMovedOY = TRUE;
 						InterruptSystemEnableIRQ(ARM_IRQ_USB);
 					}
 
@@ -317,7 +325,9 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 					if(!((symParams->bufferIndex)%symParams->resolution)) symParams->actualPosX++;
 					//TimerMsDelay(TimerGet(),1000);
 				}
-				else if(symParams->actualPosX > symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY) // przesuniecie na X
+
+///////////////////////////////////// przesuniecie na X bez wejscia w 2 æwiartkê//////////////////////////////////////////////////////////////////
+				else if(symParams->actualPosX > symParams->lenX && /*fifoBuffer[symParams->bufferIndex] <= symParams->lenY &&*/ isMovedOY==FALSE)
 				{
 					// usuniêcie wydruków na ekranie
 					InterruptSystemDisableIRQ(ARM_IRQ_USB);
@@ -344,18 +354,18 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 					InterruptSystemEnableIRQ(ARM_IRQ_USB);
 				}
-				else if(symParams->actualPosX > symParams->lenX && fifoBuffer[symParams->bufferIndex] > symParams->lenY) // przekroczono OX i OY
+///////////////////////////////////////////////// przekroczono OX i OY		////////////////////////////////////////////////////////////////////////////
+				else if(symParams->actualPosX > symParams->lenX && (fifoBuffer[symParams->bufferIndex] >= symParams->lenY || isMovedOY == TRUE))
 				{
 					UartSendString("OX i OY");
+				}
+				else
+				{
+				 LogWrite("Error",LOG_ERROR, "Chart printing problem");
 				}
 				symParams->bufferIndex++;
 				// sending data to PC by UART
 				UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
-//				UartSendString("%u \n",fifoBuffer[symParams->bufferIndex-1]);
-				//if(symParams->actualTimeD>=5) motorParams->Mobc = 0.3;
-				//if(symParams->actualTimeD>=8) motorParams->U = 24;
-				//delay
-				//TimerMsDelay(TimerGet(),(unsigned int)10);
 			}
 			else // przekroczenie bufora
 			{
