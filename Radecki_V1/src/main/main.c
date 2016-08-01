@@ -25,6 +25,7 @@ extern simulationParams_t basicSimulation;
 USPiGamePadState *pState;
 extern unsigned int * fifoBuffer;
 extern unsigned int * fifoBuffer2;
+
 extern void KeyPressedHandler (const char *pString);
 extern void MouseStatusHandler();
 extern void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
@@ -134,7 +135,8 @@ int main (void)
 
 	// memory for fifo buffer
 	fifoBuffer = (unsigned int*) malloc (basicSimulation.bufferMax);
-	fifoBuffer2 = (unsigned int*) malloc (basicSimulation.bufferMax);
+	fifoBuffer2 = (unsigned int*) malloc (basicSimulation.bufferMax); //TODO: zmiana wielkoœci bufora na tyle ile potrzebne na ekranie
+
 	startFlag = TRUE;
 	ScreenDeviceClearDisplay(USPiEnvGetScreen());
 	if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
