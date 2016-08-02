@@ -30,7 +30,7 @@ boolean startFlag = FALSE;
 boolean readyFlag = FALSE;
 boolean clearFlag = FALSE;
 boolean isMovedOY = FALSE;
-boolean isMovedOYFirst = FALSE;
+//boolean isMovedOYFirst = FALSE;
 boolean buttonFlag = FALSE; // flaga do blokowania przycisku po wciœniêciu
 extern void LogWrite (const char *pSource, unsigned Severity, const char *pMessage, ...);
 extern void ScreenDeviceCursorHome (TScreenDevice *pThis);
@@ -39,8 +39,8 @@ unsigned actBasicMotor = 1;
 unsigned tempPosX = 0;
 unsigned tempPosY = 0;
 double dthetadtTemp = 0.0;
-unsigned przesuniecieY = 0;
-unsigned resolutionCounter = 0;
+//unsigned przesuniecieY = 0;
+double setYValue =0.0;
 
 motorParams_t basicMotor = {
 		.number = 		1,
@@ -105,7 +105,7 @@ void setDefaultValues()
 	startFlag = FALSE;
 	clearFlag = FALSE;
 	isMovedOY = FALSE;
-	isMovedOYFirst = FALSE;
+	setYValue =0.0;
 	tempPosX = 0;
 	dthetadtTemp = 0.0;
 	basicMotor.R = 2;
@@ -155,7 +155,7 @@ void finishSimulation()
 	startFlag = FALSE;
 	clearFlag = FALSE;
 	isMovedOY = FALSE;
-	isMovedOYFirst = FALSE;
+	setYValue =0.0;
 	dthetadtTemp = 0.0;
 	tempPosX = 0;
 	basicSimulation.tk = basicSimulation.tkCopy;
@@ -213,13 +213,12 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 		if(motorParams->number == 1) uart_sendC("Simulation for 1 motor has been started");
 		else uart_sendC("Simulation for 2 motor has been started");
 	}
-//	symParams->stepEndTime = symParams->actualTimeD+5*symParams->dt; // set end time for for loop at 5 steps
+	symParams->stepEndTime = symParams->actualTimeD+5*symParams->dt; // set end time for for loop at 5 steps
 	unsigned screenTempX = 0;
 	unsigned screenTempY = 0;
 
-	for(;symParams->actualTimeD <= symParams->tk /*&& symParams->actualTimeD <= symParams->stepEndTime*/;symParams->actualTimeD+=symParams->dt)
+	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
 		{
-			if(startFlag !=TRUE) return 0; // sprawdzenie stanu flagi
 			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
 			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
 					-motorParams->Mobc);
@@ -227,68 +226,202 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			symParams->dthetadt+= symParams->d2thetadt*symParams->dt;
 			symParams->I+=symParams->didt*symParams->dt;
 
-			symParams->tempOmega = symParams->dthetadt*0.5*symParams->lenY; //przeskalowanie wartoœci do wyœwietlenia na wykresie
+			symParams->tempOmega = symParams->dthetadt*0.5*symParams->lenY;
 			//test for buffer overflow
-			if(symParams->tempOmega > 4000) LogWrite("",LOG_ERROR, "B³êdna wartoœæ w buforze!!");
-
-			if(!(resolutionCounter%symParams->resolution)) // jesli wartoœæ licznika jest nieodpowiednia to nie wyœwietlaj danych na wykresie i wróc do obliczeñ
-			{
-				resolutionCounter++;
-				// sending data to PC by UART
-				UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
-			}
-			else
-			{
-				fifoBuffer[symParams->actualPosX] = symParams->tempOmega; // dodanie na ostatnim miejscu bufora aktualnego wyniku do wyœwietlenia
-				////////////////////////////////////////////// brak przesuniêcia w OX i OY///////////////////////////////////////////////////////////////////////////////
-				if(symParams->actualPosX <= symParams->lenX && fifoBuffer[symParams->actualPosX] <= symParams->lenY && isMovedOY == FALSE)
+			if(symParams->tempOmega > 4000)
 				{
-					screenTempX =  symParams->startPosX + symParams->actualPosX;
-					screenTempY = symParams->startPosY - fifoBuffer[symParams->actualPosX];
-					for(signed i = -2;i<=2;i++)
-					{
-						ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i, color);
-					}
-					symParams->actualPosX++;
+					LogWrite("",LOG_ERROR, "Bledna wartoœæ w tempOmega. DthetaDT = %u", symParams->dthetadt);
+					symParams->dthetadt = 0;
+					continue; // nie wczytuje b³êdnej wartoœci do bufora
 				}
-				///////////////////////// sygna³ w 2 æwiartce bez przekroczenia granicy Y///////////////////////////////////////////////////////////////////////////////
-				else if(symParams->actualPosX >= symParams->lenX && isMovedOY==FALSE)
+
+			// sprawdzenie wartosci bufora
+			if(symParams->bufferIndex < symParams->bufferMax) // indeks bufora miesci siê w zakresie osi X
+			{
+				fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
+
+////////////////////////////////////////////// brak przesuniêcia w OX i OY///////////////////////////////////////////////////////////////////////////////
+
+				if(symParams->actualPosX < symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY && isMovedOY == FALSE)
 				{
-					//usuniecie starych wydruków z ekranu
-					InterruptSystemDisableIRQ(ARM_IRQ_USB);
-					for(unsigned u=0; u<= symParams->lenX;u++)
-					{
-						screenTempX =  symParams->startPosX + u;
-						screenTempY = symParams->startPosY - fifoBuffer[u];
-						for(signed i = -2; i<=2;i++)
+					if(symParams->actualPosX != tempPosX) //jeœli aktualna pozycja jest ró¿na od ostatniej plotowanej
+					{// plotting function, width 5 px
+						screenTempX =  symParams->startPosX + symParams->actualPosX;
+						screenTempY = symParams->startPosY - fifoBuffer[symParams->bufferIndex];
+						for(signed i = -2;i<=2;i++)
 						{
-							ScreenDeviceSetPixel(pThis, screenTempX, screenTempY+i, BLACK_COLOR); //usuwanie wczeœniejszych
+							ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i, color);
+						}
+						buforRysunkowy[symParams->actualPosX] = fifoBuffer[symParams->bufferIndex];
+					}
+					tempPosX = symParams->actualPosX;
+
+					if(!((symParams->bufferIndex)%symParams->resolution))
+						{
+							symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
+						}
+				}
+/////////////////////////////////////// przejœcie sygna³u do 2 æwiartki///////////////////////////////////////////////////////////////////////////////////
+				else if ( fifoBuffer[symParams->bufferIndex] > symParams->lenY && isMovedOY == FALSE)
+				{
+					isMovedOY = TRUE;
+					UartSendString("Wjazd w górê");
+				}
+/////////////////////////////////////////////// przesuniecie na Y//////////////////////////////////////////////////////////////////////////////////////////////
+				else if (isMovedOY == TRUE && symParams->actualPosX <= symParams->lenX)
+				{
+					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
+					if(symParams->actualPosX != tempPosX)
+					{
+						InterruptSystemDisableIRQ(ARM_IRQ_USB);
+						if(dthetadtTemp < symParams->dthetadt) // wartoœci rosn¹ wiêc przesuwanie wykresu w dó³
+						{
+							// przesuniecie wartoœci w buforze i usuniêcie wydruków na ekranie
+
+							for(unsigned u=0;u <=symParams->actualPosX ;u++)
+							{
+								// czyszczenie bufora
+								screenTempX = symParams->startPosX +u;
+								screenTempY = symParams->startPosY - buforRysunkowy[u];
+								for(signed i = -2;i<=2;i++)
+								{
+									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i, BLACK_COLOR);
+								}
+							}
+							for(unsigned u=0; u<symParams->actualPosX;u++)
+							{
+								// przesuwanie wartoœci w buforze
+								buforRysunkowy[u] = buforRysunkowy[u]+(unsigned)((dthetadtTemp-2.0)*0.5*symParams->lenY)-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY); // róznica pomiedzy nowym pomiarem a staym
+								// wyrysowanie starych wartoœci przesunietego bufora
+								screenTempX = symParams->startPosX +u;
+								screenTempY = symParams->startPosY - buforRysunkowy[u];
+								if(!(screenTempY > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
+								{
+									for(signed i = -2;i<=2;i++)
+									{
+										ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i,color);
+									}
+								}
+							}
+							// wyrysowanie aktualnej
+							buforRysunkowy[symParams->actualPosX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
+							for(signed i = -2;i<=2;i++)
+							{
+								ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->actualPosX, symParams->startPosY - buforRysunkowy[symParams->actualPosX]+i, color);
+							}
+
+							ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
+							// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
+							if(setYValue < symParams->dthetadt)
+							{
+								ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt);
+								setYValue = symParams->dthetadt;
+							}
+						}
+						else // wartoœci malej¹ wiêc nie przesuwam wykresu
+						{
+							for(unsigned u=0;u <=symParams->actualPosX ;u++)
+							{
+								// czyszczenie bufora
+								screenTempX = symParams->startPosX +u;
+								screenTempY = symParams->startPosY - buforRysunkowy[u];
+								for(signed i = -2;i<=2;i++)
+								{
+									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i, BLACK_COLOR);
+								}
+							}
+							//rysowanie bufora rysunkowego
+							for(unsigned u = 0;u < symParams->actualPosX ;u++)
+							{
+								screenTempX = symParams->startPosX + u;
+								screenTempY = symParams->startPosY - buforRysunkowy[u];
+								if(!(screenTempY > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
+								{
+									for(signed i = -2;i<=2;i++)
+									{
+										ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i,color);
+									}
+								}
+							}
+							// wyrysowanie aktualnej
+							buforRysunkowy[symParams->actualPosX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
+							for(signed i = -2;i<=2;i++)
+							{
+								ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->actualPosX, symParams->startPosY - buforRysunkowy[symParams->actualPosX]+i, color);
+							}
+
+							ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
+//							// aktualizacja numeracji na osi Y ( jeœli nie dociera do samego do³u to wy³¹czone //TODO )
+//							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt);
+						}
+						InterruptSystemEnableIRQ(ARM_IRQ_USB);
+					}
+					//aktualizacja wartoœci po przejsciu kroku na przesuniêciu Y
+					tempPosX = symParams->actualPosX;
+					dthetadtTemp = symParams->dthetadt;
+					if(!((symParams->bufferIndex)%symParams->resolution))
+					{
+						symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
+					}
+				}
+
+///////////////////////////////////// przesuniecie w 4 cwiartce bez przejscia przez górna granicê Y
+				else if(symParams->actualPosX >=symParams->lenX && /*fifoBuffer[symParams->bufferIndex] <= symParams->lenY &&*/ isMovedOY==FALSE)
+				{
+					// usuniêcie wydruków na ekranie
+					InterruptSystemDisableIRQ(ARM_IRQ_USB);
+					for(unsigned u = 0;u <=symParams->lenX;u++)
+					{
+						screenTempX = symParams->startPosX + u;
+						screenTempY = symParams->startPosY - buforRysunkowy[u];
+						for(signed i = -2;i<=2;i++) // zamalowanie bufora rysunkowego
+						{
+							ScreenDeviceSetPixel(pThis, screenTempX,screenTempY +i, BLACK_COLOR);
 						}
 					}
 					// wyrosowanie t³a i kropkowanych linii
 					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
-					//przesuniecie bufora i jego wyœwietlenie
-					for(unsigned u=0; u< symParams->lenX;u++)
+					// przesuniecie wartoœci bufora i rysowanie
+					for(unsigned u = 0;u <symParams->lenX;u++)
 					{
-						fifoBuffer[u] = fifoBuffer[u+1];
-						screenTempX =  symParams->startPosX + u;
-						screenTempY = symParams->startPosY - fifoBuffer[u];
+						screenTempX = symParams->startPosX + u;
+						buforRysunkowy[u] = buforRysunkowy[u+1];
+						screenTempY = symParams->startPosY - buforRysunkowy[u];
+//						UartSendString("Bufor %u = %u",u,buforRysunkowy[u]);
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, screenTempX, screenTempY+i, color);
 						}
 					}
+					//dodanie najnowszej wartosci do bufora i wyrysowanie
+					buforRysunkowy[symParams->lenX] = fifoBuffer[symParams->bufferIndex];
+					for(signed i = -2;i<=2;i++)
+					{
+						ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->lenX, symParams->startPosY - buforRysunkowy[symParams->lenX]+i, color);
+					}
 					ScreenDeviceDrawChartCaptionOXAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
-//					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
+					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 					InterruptSystemEnableIRQ(ARM_IRQ_USB);
 				}
-
-				resolutionCounter++;
+///////////////////////////////////////////////// przekroczono OX i OY		////////////////////////////////////////////////////////////////////////////
+				else if(symParams->actualPosX > symParams->lenX && (fifoBuffer[symParams->bufferIndex] >= symParams->lenY || isMovedOY == TRUE))
+				{
+					UartSendString("OX i OY");
+				}
+				else
+				{
+				 LogWrite("Error",LOG_ERROR, "Chart printing problem");
+				}
+				symParams->bufferIndex++;
+				// sending data to PC by UART
+				UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
 			}
-			// sending data to PC by UART
-			UartSendString("%f \t %f \t %f",symParams->actualTimeD, symParams->I, symParams->dthetadt);
+			else // przekroczenie bufora
+			{
+				UartSendString("Buff error: MaxBuff = %u \t Act Buff = %u \t actTime = %f ", symParams->bufferMax, symParams->bufferIndex, symParams->actualTimeD);
+				return 1;
+			}
 		}
-
 	// set startFlag to false and simulation values when simulation ends
 	if(symParams->actualTimeD >= symParams->tk)
 	{
@@ -856,8 +989,11 @@ void MouseStatusHandler()
 void Symulator(USPiGamePadState *pState)
 {
 
-	if(startFlag == TRUE) // wykonywanie symulacji tylko po ustawieniu flagi
+	if(startFlag == TRUE) // to jest wykonywane jesli nie ruszam joyem - szybko
 	{
+	//plot motor symulation
+
+
 		switch(simulationMotor){
 		case(FIRSTMOTOR):
 			if(Simulation(USPiEnvGetScreen(),&basicMotor, &basicSimulation,WHITE_COLOR,pState) != 0)

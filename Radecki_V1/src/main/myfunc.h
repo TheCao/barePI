@@ -22,6 +22,7 @@ int horizontalAxis;
 int verticalAxis;
 unsigned int * fifoBuffer;
 unsigned int * fifoBuffer2;
+unsigned int * buforRysunkowy;
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {
