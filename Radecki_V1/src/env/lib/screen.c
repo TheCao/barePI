@@ -843,6 +843,7 @@ unsigned ScreenDeviceDrawChartCaptionOXAll(TScreenDevice *pThis, unsigned startP
 }
 unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, boolean isFirstDraw,unsigned resolution, double actualValue)
 {
+	// printing actual values of OY
 	double counterOY = 0.201;
 	double maxValueFirstDrawOY = 2.0;
 

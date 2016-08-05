@@ -12,7 +12,7 @@
 #include <uspi.h>
 
 //#define TESTING		 1
-
+#define INEQUALITYVALUE 0.00001 //used to check double type bit representation inequality
 boolean isMouseConnected;
 boolean isKeyboardConnected;
 boolean isGamepadConnected;
@@ -23,6 +23,7 @@ int verticalAxis;
 unsigned int * fifoBuffer;
 unsigned int * fifoBuffer2;
 unsigned int * buforRysunkowy;
+unsigned int * buforRysunkowy2;
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {
