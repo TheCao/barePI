@@ -538,9 +538,12 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 			{
 				fifoBuffer[symParams->bufferIndex] = symParams->tempOmega;
 				fifoBuffer2[symParams->bufferIndex] = symParams2->tempOmega;
-
+				if ( ((fifoBuffer[symParams->bufferIndex] > symParams->lenY) || (fifoBuffer2[symParams->bufferIndex] > symParams->lenY))&& isMovedOY == FALSE)
+				{
+					isMovedOY = TRUE;
+				}
 				////////////////////////////////////////////// brak przesuniêcia w OX i OY///////////////////////////////////////////////////////////////////////////////
-				if(symParams->actualPosX < symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY && isMovedOY == FALSE)
+				else if(symParams->actualPosX < symParams->lenX && fifoBuffer[symParams->bufferIndex] <= symParams->lenY && isMovedOY == FALSE)
 				{
 					if(symParams->actualPosX != tempPosX) //jeœli aktualna pozycja jest ró¿na od ostatniej plotowanej
 					{// plotting function, width 5 px
@@ -562,10 +565,7 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 							symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
 						}
 				}
-				else if ( (fifoBuffer[symParams->bufferIndex] > symParams->lenY || fifoBuffer2[symParams->bufferIndex] > symParams->lenY)&& isMovedOY == FALSE)
-				{
-					isMovedOY = TRUE;
-				}
+
 /////////////////////////////////////////////// przesuniecie na Y//////////////////////////////////////////////////////////////////////////////////////////////
 				else if (isMovedOY == TRUE && symParams->actualPosX <= symParams->lenX)
 				{
@@ -675,6 +675,7 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 						}
 						else // wartoœci na sygna³ach malej¹ + wykres nie jest przesuwany
 						{
+							UartSendString("%f > %f" ,dthetadtTemp2,symParams2->dthetadt);
 							//rysowanie bufora rysunkowego
 							for(unsigned u = 0;u < symParams->actualPosX ;u++)
 							{
@@ -697,9 +698,17 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 									}
 								}
 							}
-							// wyrysowanie aktualnej
-							buforRysunkowy[symParams->actualPosX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
-							buforRysunkowy2[symParams->actualPosX] = fifoBuffer2[symParams->bufferIndex]-przesuniecieCalkowite;
+							// wyrysowanie aktualnej wartoœci dla przypadku kiedy sygna³ pierwszy przekroczy 2.0
+							if(actBasicMotor == 1)
+							{
+								buforRysunkowy[symParams->actualPosX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
+								buforRysunkowy2[symParams->actualPosX] = fifoBuffer2[symParams->bufferIndex]-przesuniecieCalkowite;
+							}
+							else if(actBasicMotor == 2)
+							{
+								buforRysunkowy[symParams->actualPosX] = fifoBuffer[symParams->bufferIndex]-przesuniecieCalkowite;
+								buforRysunkowy2[symParams->actualPosX] = fifoBuffer2[symParams->bufferIndex]-(unsigned)((symParams2->dthetadt-2.0)*0.5*symParams->lenY);
+							}
 							for(signed i = -2;i<=2;i++)
 							{
 								ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->actualPosX, symParams->startPosY - buforRysunkowy[symParams->actualPosX]+i, color);
@@ -1250,7 +1259,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
 							PrintActMotorParam(actMenuPosition);
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 						}
 						else if(verticalAxis < 127 && horizontalAxis == 127)
@@ -1262,7 +1270,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
 							PrintActMotorParam(actMenuPosition);
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 						}
 						else if(horizontalAxis > 127 && verticalAxis == 127)
@@ -1280,7 +1287,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							break;
 							}
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 						}
 						else if (horizontalAxis < 127 && verticalAxis == 127 )
@@ -1298,7 +1304,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							break;
 							}
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 						}
 						else
@@ -1315,7 +1320,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							else actMenuPosition++;
 							PrintActSimulationParam(actMenuPosition);
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 							}
 						else if(verticalAxis < 127 && horizontalAxis == 127)
@@ -1326,7 +1330,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							else actMenuPosition--;
 							PrintActSimulationParam(actMenuPosition);
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 							}
 						else if(horizontalAxis > 127 && verticalAxis == 127)
@@ -1336,7 +1339,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							PrintActSimulationParam(actMenuPosition);
 							ChangeSimulationParam(&basicSimulation,actMenuPosition,1);
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 							}
 						else if (horizontalAxis < 127 && verticalAxis == 127 )
@@ -1346,7 +1348,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 							PrintActSimulationParam(actMenuPosition);
 							ChangeSimulationParam(&basicSimulation,actMenuPosition,-1);
 							isChartPrinted = FALSE;
-							//TimerMsDelay(TimerGet(),300); // delay
 							buttonFlag = TRUE;
 							}
 						else
@@ -1354,47 +1355,74 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 								// both axis are set - do nothing
 							}
 						break;
-					case(NONEENABLED): //change U or Mobc durinig simulation for Motor1 ONLY
+					case(NONEENABLED): //change U or Mobc durinig simulation for actual motor
 						if(verticalAxis > 127 && horizontalAxis == 127)
 						{
-							basicMotor.Mobc-=0.1;
-							if(basicMotor.Mobc <=0.0) basicMotor.Mobc=0.0;
-							UartSendString("Mobc = %f", basicMotor.Mobc);
+							if(actBasicMotor == 1)
+							{
+								basicMotor.Mobc-=0.1;
+								if(basicMotor.Mobc <=0.0) basicMotor.Mobc=0.0;
+								UartSendString("Mobc = %f", basicMotor.Mobc);
+							}
+							else if(actBasicMotor == 2)
+							{
+								basicMotor2.Mobc-=0.1;
+								if(basicMotor2.Mobc <=0.0) basicMotor2.Mobc=0.0;
+								UartSendString("Mobc = %f", basicMotor2.Mobc);
+							}
 							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
 							ScreenDeviceCursorHome(USPiEnvGetScreen());
-							//LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
-//							TimerMsDelay(TimerGet(),150);
 							buttonFlag = TRUE;
 						}
 						else if(verticalAxis < 127 && horizontalAxis == 127)
 						{
-							basicMotor.Mobc+=0.1;
-							UartSendString("Mobc = %f", basicMotor.Mobc);
+							if(actBasicMotor == 1)
+							{
+								basicMotor.Mobc+=0.1;
+								UartSendString("Mobc = %f", basicMotor.Mobc);
+							}
+							else if (actBasicMotor == 2)
+							{
+								basicMotor2.Mobc+=0.1;
+								UartSendString("Mobc = %f", basicMotor2.Mobc);
+							}
 							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
 							ScreenDeviceCursorHome(USPiEnvGetScreen());
-		//					LogWrite("",LOG_NOTICE,"Mobc = %f", basicMotor.Mobc);
-//							TimerMsDelay(TimerGet(),150);
 							buttonFlag = TRUE;
 						}
 						else if(verticalAxis == 127 && horizontalAxis > 127)
 						{
-							basicMotor.U+=0.1;
-							UartSendString("U = %f", basicMotor.U);
+							if(actBasicMotor == 1)
+							{
+								basicMotor.U+=0.1;
+								UartSendString("U = %f", basicMotor.U);
+							}
+							else if(actBasicMotor == 2)
+							{
+								basicMotor2.U+=0.1;
+								UartSendString("U = %f", basicMotor2.U);
+							}
 							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
 							ScreenDeviceCursorHome(USPiEnvGetScreen());
-		//					LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
-//							TimerMsDelay(TimerGet(),150);
 							buttonFlag = TRUE;
 						}
 						else if(verticalAxis == 127 && horizontalAxis < 127)
 						{
-							basicMotor.U-=0.1;
-							if(basicMotor.U <=0) basicMotor.U = 0.0;
-							UartSendString("U = %f", basicMotor.U);
+							if(actBasicMotor == 1)
+							{
+								basicMotor.U-=0.1;
+								if(basicMotor.U <=0) basicMotor.U = 0.0;
+								UartSendString("U = %f", basicMotor.U);
+							}
+							else if(actBasicMotor == 2)
+							{
+								basicMotor2.U-=0.1;
+								if(basicMotor2.U <=0) basicMotor2.U = 0.0;
+								UartSendString("U = %f", basicMotor2.U);
+							}
+
 							ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
 							ScreenDeviceCursorHome(USPiEnvGetScreen());
-		//					LogWrite("",LOG_NOTICE,"U = %f", basicMotor.U);
-//							TimerMsDelay(TimerGet(),150);
 							buttonFlag = TRUE;
 						}
 						break;
