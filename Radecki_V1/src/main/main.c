@@ -138,6 +138,10 @@ int main (void)
 	fifoBuffer = (unsigned int*) malloc (basicSimulation.bufferMax);
 	fifoBuffer2 = (unsigned int*) malloc (basicSimulation.bufferMax);
 	buforRysunkowy = (unsigned int*) malloc (basicSimulation.lenX);
+	for(unsigned u=0; u <=basicSimulation.lenX;u++)
+	{
+		buforRysunkowy[u] = 0;
+	}
 	buforRysunkowy2 = (unsigned int*) malloc (basicSimulation.lenX);
 	startFlag = TRUE;
 	ScreenDeviceClearDisplay(USPiEnvGetScreen());

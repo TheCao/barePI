@@ -573,16 +573,16 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 					if(symParams->actualPosX != tempPosX)
 					{
 						InterruptSystemDisableIRQ(ARM_IRQ_USB);
-						for(unsigned u=0;u <=symParams->actualPosX ;u++)
+						for(unsigned u=0;u <symParams->actualPosX ;u++)
 						{
-							UartSendString("wartoœæ U = %u", u);
+//							UartSendString("wartoœæ U = %u", u);
 							// czyszczenie bufora
 							screenTempX = symParams->startPosX +u;
 							screenTempY = symParams->startPosY - buforRysunkowy[u];
 							screenTempY2 = symParams->startPosY - buforRysunkowy2[u];
 							for(signed i = -2;i<=2;i++)
 							{
-								ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i, BLUE_COLOR);
+								ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i, BLACK_COLOR);
 								ScreenDeviceSetPixel(pThis, screenTempX, screenTempY2 +i, BLACK_COLOR);
 							}
 						}
@@ -800,11 +800,17 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 							screenTempX = symParams->startPosX +u;
 							screenTempY = symParams->startPosY - buforRysunkowy[u];
 							screenTempY2 = symParams->startPosY - buforRysunkowy2[u];
-							if(!(screenTempY > symParams->startPosY ||screenTempY2 > symParams->startPosY )) //rysowanie tylko jesli miesci sie w obszarze wykresu
+							if(!(screenTempY > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
 							{
 								for(signed i = -2;i<=2;i++)
 								{
 									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i,color);
+								}
+							}
+							if(!(screenTempY2 > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
+							{
+								for(signed i = -2;i<=2;i++)
+								{
 									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY2 +i,color2);
 								}
 							}
@@ -840,11 +846,17 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 							screenTempX = symParams->startPosX +u;
 							screenTempY = symParams->startPosY - buforRysunkowy[u];
 							screenTempY2 = symParams->startPosY - buforRysunkowy2[u];
-							if(!(screenTempY > symParams->startPosY ||screenTempY2 > symParams->startPosY )) //rysowanie tylko jesli miesci sie w obszarze wykresu
+							if(!(screenTempY > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
 							{
 								for(signed i = -2;i<=2;i++)
 								{
 									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i,color);
+								}
+							}
+							if(!(screenTempY2 > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
+							{
+								for(signed i = -2;i<=2;i++)
+								{
 									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY2 +i,color2);
 								}
 							}
