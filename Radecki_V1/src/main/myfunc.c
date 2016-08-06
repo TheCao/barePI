@@ -675,7 +675,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 						}
 						else // wartoœci na sygna³ach malej¹ + wykres nie jest przesuwany
 						{
-							UartSendString("%f > %f" ,dthetadtTemp2,symParams2->dthetadt);
 							//rysowanie bufora rysunkowego
 							for(unsigned u = 0;u < symParams->actualPosX ;u++)
 							{
@@ -843,7 +842,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 					}
 					else if( dthetadtTemp2 + INEQUALITYVALUE < symParams2->dthetadt) // wartoœci 2 sygna³u rosn¹ wiêc przesuwanie wykresu w dó³
 					{
-						UartSendString("Else If odpalony!");
 						unsigned przesuniecieY = -(unsigned)((dthetadtTemp2-2.0)*0.5*symParams->lenY)+(unsigned)((symParams2->dthetadt-2.0)*0.5*symParams->lenY);
 						przesuniecieCalkowite+=przesuniecieY;
 						for(unsigned u=0; u<symParams->lenX;u++)
@@ -915,8 +913,16 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 							}
 						}
 						// wyrysowanie aktualnej
-						buforRysunkowy[symParams->lenX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
-						buforRysunkowy2[symParams->lenX] = fifoBuffer2[symParams->bufferIndex]-przesuniecieCalkowite;
+						if(actBasicMotor == 1)
+						{
+							buforRysunkowy[symParams->lenX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
+							buforRysunkowy2[symParams->lenX] = fifoBuffer2[symParams->bufferIndex]-przesuniecieCalkowite;
+						}
+						else if(actBasicMotor == 2)
+						{
+							buforRysunkowy[symParams->lenX] = fifoBuffer[symParams->bufferIndex]-przesuniecieCalkowite;
+							buforRysunkowy2[symParams->lenX] = fifoBuffer2[symParams->bufferIndex]-(unsigned)((symParams2->dthetadt-2.0)*0.5*symParams->lenY);
+						}
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->lenX, symParams->startPosY - buforRysunkowy[symParams->lenX]+i, color);
