@@ -8,4 +8,6 @@ all:
 	$(MAKE) -C main
 
 clean:
-	rm -f *.o *.a *.elf *.lst *.img *.cir *.map *~ $(EXTRACLEAN)
+	$(MAKE) -C env/lib clean
+	$(MAKE) -C lib clean
+	$(MAKE) -C main clean

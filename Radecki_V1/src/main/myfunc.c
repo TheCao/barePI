@@ -1130,6 +1130,280 @@ void KeyPressedHandler (const char *pString)
 	ScreenDeviceWrite (USPiEnvGetScreen (), pString, strlen (pString));
 }
 
+void KeyboardHandler (const char *pString)
+{
+	if(readyFlag != TRUE) return;
+	switch(*pString)
+	{
+	// left gamepad's joy (w,s,a,d)
+	case('w'):
+		switch(actualEnabledMode)
+		{
+		case(DCMOTOR):
+			// next from list
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			if(actMenuPosition >=8) actMenuPosition = 1;
+			else actMenuPosition++;
+			LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+			PrintActMotorParam(actMenuPosition);
+			isChartPrinted = FALSE;
+			break;
+		case(SIMULATION):
+			// next from list
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			if(actMenuPosition >=2) actMenuPosition = 1;
+			else actMenuPosition++;
+			PrintActSimulationParam(actMenuPosition);
+			isChartPrinted = FALSE;
+			break;
+		case(NONEENABLED): //change U or Mobc durinig simulation for actual motor
+			if(actBasicMotor == 1)
+			{
+				basicMotor.Mobc-=0.1;
+				if(basicMotor.Mobc <=0.0) basicMotor.Mobc=0.0;
+				UartSendString("Mobc = %f", basicMotor.Mobc);
+			}
+			else if(actBasicMotor == 2)
+			{
+				basicMotor2.Mobc-=0.1;
+				if(basicMotor2.Mobc <=0.0) basicMotor2.Mobc=0.0;
+				UartSendString("Mobc = %f", basicMotor2.Mobc);
+			}
+			ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+			ScreenDeviceCursorHome(USPiEnvGetScreen());
+			break;
+		}
+		break;
+	case('s'):
+		switch(actualEnabledMode)
+		{
+		case(DCMOTOR):
+			// go backward
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			if(actMenuPosition <=1) actMenuPosition = 8;
+			else actMenuPosition--;
+			LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+			PrintActMotorParam(actMenuPosition);
+			isChartPrinted = FALSE;
+			break;
+		case(SIMULATION):
+			// go backward
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			if(actMenuPosition <=1) actMenuPosition = 2;
+			else actMenuPosition--;
+			PrintActSimulationParam(actMenuPosition);
+			isChartPrinted = FALSE;
+			break;
+		case(NONEENABLED): //change U or Mobc durinig simulation for actual motor
+			if(actBasicMotor == 1)
+			{
+				basicMotor.Mobc+=0.1;
+				UartSendString("Mobc = %f", basicMotor.Mobc);
+			}
+			else if (actBasicMotor == 2)
+			{
+				basicMotor2.Mobc+=0.1;
+				UartSendString("Mobc = %f", basicMotor2.Mobc);
+			}
+			ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+			ScreenDeviceCursorHome(USPiEnvGetScreen());
+			break;
+		}
+		break;
+	case('d'):
+		switch(actualEnabledMode)
+		{
+		case(DCMOTOR):
+			// increase
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+			PrintActMotorParam(actMenuPosition);
+			switch(actBasicMotor){
+			case(1):
+				ChangeMotorParam(&basicMotor,actMenuPosition,1);
+			break;
+			case(2):
+				ChangeMotorParam(&basicMotor2,actMenuPosition,1);
+			break;
+			}
+			isChartPrinted = FALSE;
+			break;
+		case(SIMULATION):
+			// increase
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			PrintActSimulationParam(actMenuPosition);
+			ChangeSimulationParam(&basicSimulation,actMenuPosition,1);
+			isChartPrinted = FALSE;
+			break;
+		case(NONEENABLED):
+			if(actBasicMotor == 1)
+			{
+				basicMotor.U+=0.1;
+				UartSendString("U = %f", basicMotor.U);
+			}
+			else if(actBasicMotor == 2)
+			{
+				basicMotor2.U+=0.1;
+				UartSendString("U = %f", basicMotor2.U);
+			}
+			ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+			ScreenDeviceCursorHome(USPiEnvGetScreen());
+			break;
+		}
+		break;
+	case('a'):
+		switch(actualEnabledMode){
+		case(DCMOTOR):
+			//decrease
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+			PrintActMotorParam(actMenuPosition);
+			switch(actBasicMotor){
+			case(1):
+				ChangeMotorParam(&basicMotor,actMenuPosition,-1);
+			break;
+			case(2):
+				ChangeMotorParam(&basicMotor2,actMenuPosition,-1);
+			break;
+			}
+			isChartPrinted = FALSE;
+			break;
+		case(SIMULATION):
+			//decrease
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			PrintActSimulationParam(actMenuPosition);
+			ChangeSimulationParam(&basicSimulation,actMenuPosition,-1);
+			isChartPrinted = FALSE;
+			break;
+		case(NONEENABLED):
+			if(actBasicMotor == 1)
+			{
+				basicMotor.U-=0.1;
+				if(basicMotor.U <=0) basicMotor.U = 0.0;
+				UartSendString("U = %f", basicMotor.U);
+			}
+			else if(actBasicMotor == 2)
+			{
+				basicMotor2.U-=0.1;
+				if(basicMotor2.U <=0) basicMotor2.U = 0.0;
+				UartSendString("U = %f", basicMotor2.U);
+			}
+
+			ScreenDeviceDrawRect(USPiEnvGetScreen(),0,0,USPiEnvGetScreen()->m_nWidth,(USPiEnvGetScreen()->m_nHeight)/10,BLACK_COLOR);
+			ScreenDeviceCursorHome(USPiEnvGetScreen());
+			break;
+		}
+		break;
+	case('\n'): // ENTER -> START
+	startFlag = TRUE;
+		clearFlag = FALSE;
+		//copy prev. simulation params
+		basicSimulation.dtCopy = basicSimulation.dt;
+		basicSimulation.tkCopy = basicSimulation.tk;
+		//set EnabledMode
+		actualEnabledMode = NONEENABLED; //left joystick used for change U or Mobc
+		if(isChartPrinted == FALSE)
+		{
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+				{
+					LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+				}
+			else isChartPrinted = TRUE;
+			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
+						ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0);
+		}
+		break;
+	case('l'): //L -> SELECT
+		//clear screen and set default settings
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		isChartPrinted = FALSE;
+		actualEnabledMode = NONEENABLED;
+		actBasicMotor = 1;
+		actMenuPosition = 1;
+		simulationMotor = FIRSTMOTOR;
+		setDefaultValues();
+		LogWrite("", LOG_NOTICE, "Default values has been set!");
+		TimerMsDelay(TimerGet(),300); // delay
+
+		break;
+	case('p'): // P -> REBOOT
+		reboot();
+		break;
+
+	case('7'): //alphanumeric 7 -> change actual basic motor (RIGHT1)
+		//change actual basic motor
+		startFlag = FALSE; //stop simulation
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		if(actBasicMotor == 1) actBasicMotor = 2;
+		else actBasicMotor = 1;
+		LogWrite("", LOG_WARNING, "Actual Basic Motor = %u", actBasicMotor);
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
+		break;
+	case('9'): //alphanumeric 9 -> change simulation mode (RIGHT2)
+		// change simulationMotorMode for plotting purposes
+		startFlag = FALSE; //stop simulation
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		switch(simulationMotor){
+		case(FIRSTMOTOR):
+			simulationMotor = SECONDMOTOR;
+			LogWrite("",LOG_WARNING,"Only second motor will be plotted");
+			break;
+		case(SECONDMOTOR):
+			simulationMotor = BOTH;
+			LogWrite("",LOG_WARNING,"First and second motor will be plotted");
+			break;
+		case(BOTH):
+			simulationMotor = FIRSTMOTOR;
+			LogWrite("",LOG_WARNING,"Only first motor will be plotted");
+			break;
+		}
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
+		break;
+	case('8'): //alph. 8 -> change DC motor params (BUTTON1)
+		actualEnabledMode = DCMOTOR;
+		actMenuPosition = 1;
+		startFlag = FALSE; //stop simulation
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		LogWrite("", LOG_WARNING, "Changing Basic Motor %u Parameters", actBasicMotor);
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
+		break;
+	case('6'): //simulation params change(BUTTON2)
+		actualEnabledMode = SIMULATION;
+		actMenuPosition = 1;
+		startFlag = FALSE; //stop simulation
+		ScreenDeviceClearDisplay(USPiEnvGetScreen());
+		LogWrite("", LOG_WARNING, "Changing Simulation Parameters");
+		isChartPrinted = FALSE;
+		TimerMsDelay(TimerGet(),300); // delay
+		break;
+	case('2'): //draw or clear chart (BUTTON3)
+		//check if simulation was stopped earlier
+		if(clearFlag == FALSE)
+		{
+			startFlag = FALSE; //stop simulation
+			clearFlag = TRUE;
+		}
+		else
+		{
+			setDefaultValues();
+			ScreenDeviceClearDisplay(USPiEnvGetScreen());
+			if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
+			{
+				LogWrite("Chart Error ", LOG_ERROR, "Chart was not printed! :(");
+			}
+			isChartPrinted = TRUE;
+			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
+			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0);
+		}
+		TimerMsDelay(TimerGet(),300); // delay
+		break;
+	}
+
+}
 void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState)
 {
 	//buttons handlers
@@ -1153,7 +1427,6 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
 						ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0);
 		}
-//			TimerMsDelay(TimerGet(),300); // delay
 		break;
 
 	case(SELECT):
@@ -1452,11 +1725,8 @@ void MouseStatusHandler()
 void Symulator(USPiGamePadState *pState)
 {
 
-	if(startFlag == TRUE) // to jest wykonywane jesli nie ruszam joyem - szybko
+	if(startFlag == TRUE) //
 	{
-	//plot motor symulation
-
-
 		switch(simulationMotor){
 		case(FIRSTMOTOR):
 			if(Simulation(USPiEnvGetScreen(),&basicMotor, &basicSimulation,WHITE_COLOR,pState) != 0)

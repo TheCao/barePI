@@ -48,7 +48,6 @@ typedef enum enabledmode {
 	NONEENABLED,
 	DCMOTOR,
 	SIMULATION
-
 } enabledMode_t;
 
 enabledMode_t actualEnabledMode;
@@ -76,6 +75,7 @@ unsigned getNumberLenght(double x);
 int power(int base, int exp);
 unsigned UartSendString(const char *pMessage,...);
 void KeyPressedHandler (const char *pString);
+void KeyboardHandler (const char *pString);
 void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
 void MouseStatusHandler();
 void Symulator();

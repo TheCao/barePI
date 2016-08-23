@@ -54,14 +54,14 @@ int main (void)
 	else
 	{
 		isKeyboardConnected = TRUE;
-		USPiKeyboardRegisterKeyPressedHandler (KeyPressedHandler);
+		//USPiKeyboardRegisterKeyPressedHandler (KeyPressedHandler);
+		USPiKeyboardRegisterKeyPressedHandler (KeyboardHandler);
 	}
 	
 	int nGamePads = USPiGamePadAvailable ();
 	if (nGamePads < 1)
 	{
 //		LogWrite ("USPi Error", LOG_ERROR, "GamePad not found");
-
 	}
 	else
 	{
@@ -136,13 +136,13 @@ int main (void)
 
 	// memory for fifo buffer
 	fifoBuffer = (unsigned int*) malloc (basicSimulation.bufferMax);
+	assert(fifoBuffer != 0);
 	fifoBuffer2 = (unsigned int*) malloc (basicSimulation.bufferMax);
+	assert(fifoBuffer2 != 0);
 	buforRysunkowy = (unsigned int*) malloc (basicSimulation.lenX);
-	for(unsigned u=0; u <=basicSimulation.lenX;u++)
-	{
-		buforRysunkowy[u] = 0;
-	}
+	assert(buforRysunkowy != 0);
 	buforRysunkowy2 = (unsigned int*) malloc (basicSimulation.lenX);
+	assert(buforRysunkowy2 != 0);
 	startFlag = TRUE;
 	ScreenDeviceClearDisplay(USPiEnvGetScreen());
 	if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
