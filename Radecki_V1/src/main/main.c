@@ -30,7 +30,6 @@ extern unsigned int * buforRysunkowy2;
 extern void KeyPressedHandler (const char *pString);
 extern void MouseStatusHandler();
 extern void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
-//int controlRegister;
 int main (void)
 {
 	if (!USPiEnvInitialize ())
@@ -155,7 +154,7 @@ int main (void)
 	InterruptSystemEnableIRQ(ARM_IRQ_USB);
 	while(1)
 	{
-		Symulator(&pState);
+//		Symulator(&pState);
 	}
 	reboot();
 	return EXIT_HALT;

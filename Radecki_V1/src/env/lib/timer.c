@@ -27,6 +27,10 @@
 #include <uspienv/debug.h>
 #include <uspienv/assert.h>
 
+#include "../../main/gamepad.h"
+#include "../../main/myfunc.h"
+USPiGamePadState *pState;
+
 void DelayLoop (unsigned nCount);
 void TimerPollKernelTimers (TTimer *pThis);
 void TimerInterruptHandler (void *pParam);
@@ -271,6 +275,7 @@ void TimerPollKernelTimers (TTimer *pThis)
 
 void TimerInterruptHandler (void *pParam)
 {
+	Symulator(&pState);
 	TTimer *pThis = (TTimer *) pParam;
 	assert (pThis != 0);
 
@@ -294,7 +299,6 @@ void TimerInterruptHandler (void *pParam)
 	{
 		pThis->m_nTime++;
 	}
-
 	TimerPollKernelTimers (pThis);
 }
 

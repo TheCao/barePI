@@ -222,7 +222,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 
 	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
 		{
-			InterruptSystemDisableIRQ(ARM_IRQ_USB);
 			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
 			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
 					-motorParams->Mobc);
@@ -231,7 +230,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 			symParams->I+=symParams->didt*symParams->dt;
 
 			symParams->tempOmega = symParams->dthetadt*0.5*symParams->lenY;
-			InterruptSystemEnableIRQ(ARM_IRQ_USB);
 			usDelay(12);
 			//test dthetadt value
 			if(symParams->tempOmega > 4000)
@@ -278,7 +276,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 					if(symParams->actualPosX != tempPosX)
 					{
-						InterruptSystemDisableIRQ(ARM_IRQ_USB);
 						for(unsigned u=0;u <=symParams->actualPosX ;u++)
 						{
 							// czyszczenie bufora
@@ -347,7 +344,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 //							// aktualizacja numeracji na osi Y ( jeœli nie dociera do samego do³u to wy³¹czone //TODO )
 //							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt);
 						}
-						InterruptSystemEnableIRQ(ARM_IRQ_USB);
 					}
 					//aktualizacja wartoœci po przejsciu kroku na przesuniêciu Y
 					tempPosX = symParams->actualPosX;
@@ -362,7 +358,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 				else if(symParams->actualPosX >=symParams->lenX && /*fifoBuffer[symParams->bufferIndex] <= symParams->lenY &&*/ isMovedOY==FALSE)
 				{
 					// usuniêcie wydruków na ekranie
-					InterruptSystemDisableIRQ(ARM_IRQ_USB);
 					for(unsigned u = 0;u <=symParams->lenX;u++)
 					{
 						screenTempX = symParams->startPosX + u;
@@ -393,13 +388,11 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 					}
 					ScreenDeviceDrawChartCaptionOXAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
-					InterruptSystemEnableIRQ(ARM_IRQ_USB);
 				}
 ///////////////////////////////////////////////// przekroczono OX i OY		////////////////////////////////////////////////////////////////////////////
 				else if(symParams->actualPosX > symParams->lenX && (fifoBuffer[symParams->bufferIndex] >= symParams->lenY || isMovedOY == TRUE))
 				{
 					// usuniêcie wydruków na ekranie
-					InterruptSystemDisableIRQ(ARM_IRQ_USB);
 					// czyszczenie bufora
 					for(unsigned u = 0;u <=symParams->lenX;u++)
 					{
@@ -470,7 +463,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
 					}
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
-					InterruptSystemEnableIRQ(ARM_IRQ_USB);
 				}
 				else
 				{
@@ -506,7 +498,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 	unsigned screenTempY2 = 0;
 	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
 		{
-			InterruptSystemDisableIRQ(ARM_IRQ_USB);
 			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
 			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
 					-motorParams->Mobc);
@@ -524,7 +515,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 			//symParams->actualTimeUI = symParams->actualTimeD*10; // for printing purposes
 			symParams->tempOmega = symParams->dthetadt*0.5*symParams->lenY;
 			symParams2->tempOmega = symParams2->dthetadt*0.5*symParams->lenY;
-			InterruptSystemEnableIRQ(ARM_IRQ_USB);
 			// test values
 			if(symParams->tempOmega > 4000 || symParams2->tempOmega > 4000)
 			{
@@ -572,7 +562,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 					if(symParams->actualPosX != tempPosX)
 					{
-						InterruptSystemDisableIRQ(ARM_IRQ_USB);
 						for(unsigned u=0;u <symParams->actualPosX ;u++)
 						{
 //							UartSendString("wartoœæ U = %u", u);
@@ -718,7 +707,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 //							// aktualizacja numeracji na osi Y ( jeœli nie dociera do samego do³u to wy³¹czone //TODO )
 //							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt);
 						}
-						InterruptSystemEnableIRQ(ARM_IRQ_USB);
 					}
 					//aktualizacja wartoœci po przejsciu kroku na przesuniêciu Y
 					tempPosX = symParams->actualPosX;
@@ -733,7 +721,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 				else if(symParams->actualPosX >=symParams->lenX && isMovedOY==FALSE)
 				{
 					// usuniêcie wydruków na ekranie
-					InterruptSystemDisableIRQ(ARM_IRQ_USB);
 					MsDelay(12);
 					for(unsigned u = 0;u <=symParams->lenX;u++)
 					{
@@ -772,14 +759,12 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 					}
 					ScreenDeviceDrawChartCaptionOXAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
-					InterruptSystemEnableIRQ(ARM_IRQ_USB);
 				}
 
 ///////////////////////////////////////////////// przekroczono OX i OY		////////////////////////////////////////////////////////////////////////////
 				else if(symParams->actualPosX > symParams->lenX && ((fifoBuffer[symParams->bufferIndex] >= symParams->lenY  ||fifoBuffer2[symParams->bufferIndex] >= symParams->lenY )|| isMovedOY == TRUE))
 				{
 					// usuniêcie wydruków na ekranie
-					InterruptSystemDisableIRQ(ARM_IRQ_USB);
 					// czyszczenie bufora
 					for(unsigned u = 0;u <=symParams->lenX;u++)
 					{
@@ -953,7 +938,6 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 						symParams->actualPosX++;  //inkrementacja pozycji co n-ty pomiar okreslony przez resolution
 					}
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
-					InterruptSystemEnableIRQ(ARM_IRQ_USB);
 				}
 //////////////////////////////////////////////////////////////////////¯adna z powy¿szych æwiartek - B£AD! //////////////////////////////////////////////////////////////////////
 				else
