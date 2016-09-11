@@ -12,6 +12,7 @@
 #include "gamepad.h"
 #include "myfunc.h"
 
+
 extern boolean isMouseConnected;
 extern boolean isKeyboardConnected;
 extern boolean isGamepadConnected;
@@ -27,6 +28,8 @@ extern unsigned int * fifoBuffer;
 extern unsigned int * fifoBuffer2;
 extern unsigned int * buforRysunkowy;
 extern unsigned int * buforRysunkowy2;
+extern unsigned int * buforMobc;
+extern unsigned int * buforNapiecia;
 extern void KeyPressedHandler (const char *pString);
 extern void MouseStatusHandler();
 extern void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
@@ -45,7 +48,7 @@ int main (void)
 
 		return EXIT_HALT;
 	}
-	
+	uart_init();
 	if (!USPiKeyboardAvailable ())
 	{
 //		LogWrite ("USPi Error", LOG_ERROR, "Keyboard not found");
@@ -142,6 +145,10 @@ int main (void)
 	assert(buforRysunkowy != 0);
 	buforRysunkowy2 = (unsigned int*) malloc (basicSimulation.lenX);
 	assert(buforRysunkowy2 != 0);
+	buforMobc = (unsigned int*) malloc (basicSimulation.lenX);
+	assert(buforMobc != 0);
+	buforNapiecia = (unsigned int*) malloc (basicSimulation.lenX);
+	assert(buforNapiecia != 0);
 	startFlag = TRUE;
 	ScreenDeviceClearDisplay(USPiEnvGetScreen());
 	if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
@@ -150,11 +157,13 @@ int main (void)
 	}
 	else isChartPrinted = TRUE;
 	ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0);
+	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, WHITE_COLOR);
+	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, RED_COLOR);
 	InterruptSystemEnableIRQ(ARM_IRQ_USB);
+
 	while(1)
 	{
-//		Symulator(&pState);
+
 	}
 	reboot();
 	return EXIT_HALT;

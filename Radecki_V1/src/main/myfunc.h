@@ -24,6 +24,9 @@ unsigned int * fifoBuffer;
 unsigned int * fifoBuffer2;
 unsigned int * buforRysunkowy;
 unsigned int * buforRysunkowy2;
+unsigned int * buforMobc;
+unsigned int * buforNapiecia;
+unsigned int MobcTemp;
 
 unsigned actMenuPosition, actBasicMotor;
 typedef struct simulationParams {

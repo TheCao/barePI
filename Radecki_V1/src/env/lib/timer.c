@@ -30,6 +30,18 @@
 #include "../../main/gamepad.h"
 #include "../../main/myfunc.h"
 USPiGamePadState *pState;
+/** GPIO Register set */
+volatile unsigned int* gpio;
+#define GPIO_GPFSEL1    1
+#define GPIO_GPSET0     7 // Output Set0-32
+#define GPIO_GPCLR0     10 //Output Clear 0
+#define GPIO_BASE 0x3F200000UL
+ #define LED_GPFSEL      GPIO_GPFSEL4
+#define LED_GPFBIT      21
+#define LED_GPSET       GPIO_GPSET1
+#define LED_GPCLR       GPIO_GPCLR1
+#define LED_GPIO_BIT    15
+unsigned int counter = 0;
 
 void DelayLoop (unsigned nCount);
 void TimerPollKernelTimers (TTimer *pThis);
@@ -59,6 +71,8 @@ void Timer (TTimer *pThis, TInterruptSystem *pInterruptSystem)
 	{
 		pThis->m_KernelTimer[hTimer].m_pHandler = 0;
 	}
+	gpio = (unsigned int*)GPIO_BASE;
+	gpio[GPIO_GPFSEL1] = (1 << 24); // GPIO 18
 }
 
 void _Timer (TTimer *pThis)

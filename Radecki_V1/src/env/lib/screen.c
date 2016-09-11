@@ -841,7 +841,7 @@ unsigned ScreenDeviceDrawChartCaptionOXAll(TScreenDevice *pThis, unsigned startP
 	}
 	return 0;
 }
-unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, boolean isFirstDraw,unsigned resolution, double actualValue)
+unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, boolean isFirstDraw,unsigned resolution, double actualValue,TScreenColor color)
 {
 	// printing actual values of OY
 	double counterOY = 0.201;
@@ -851,15 +851,15 @@ unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startP
 		{
 			for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10, counterOY+=0.2)
 			{
-				ScreenDeviceDrawChartCaption(pThis,counterOY,startPointX-50,j-5,WHITE_COLOR);
+				ScreenDeviceDrawChartCaption(pThis,counterOY,startPointX-50,j-5,color);
 			}
 		}
 		else
 		{
-			ScreenDeviceDrawChartCaption(pThis,actualValue,startPointX-50,startPointY-lenY-5,WHITE_COLOR); // górny podpis
+			ScreenDeviceDrawChartCaption(pThis,actualValue,startPointX-50,startPointY-lenY-5,color); // górny podpis
 			for(unsigned i = 1; i<=9;i++)
 			{
-				ScreenDeviceDrawChartCaption(pThis,actualValue-(i*maxValueFirstDrawOY/10),startPointX-50,startPointY-5-lenY+(i*lenY/10),WHITE_COLOR);
+				ScreenDeviceDrawChartCaption(pThis,actualValue-(i*maxValueFirstDrawOY/10),startPointX-50,startPointY-5-lenY+(i*lenY/10),color);
 			}
 		}
 		return 0;
@@ -898,6 +898,9 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 	lenX*=10;
 	unsigned lenY = (startPointY-(pThis->m_nHeight/10))/10;
 	lenY*=10;
+	static const char czas[] = "Czas [s]";
+	static const char predkosc[] = "Predkosc";
+	static const char predkosc2[] = "[rad/s]";
 
 	// chart lines drawing
 	for(unsigned i = 0;i<2;i++)
@@ -910,5 +913,20 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 	}
 	// dotted lines
 	ScreenDeviceDrawDottedBackground(pThis,color,startPointX,startPointY,lenX, lenY,BOTH);
+	for(unsigned int i=0;i <sizeof(czas);i++)
+	{
+		ScreenDeviceDisplayChar2(pThis,czas[i],startPointX+10*i+(lenX/2),startPointY+50,WHITE_COLOR);
+	}
+	for(unsigned int i=0;i <sizeof(predkosc);i++)
+		{
+			ScreenDeviceDisplayChar2(pThis,predkosc[i],startPointX-120+i*10,startPointY-(lenY/2)-60,WHITE_COLOR);
+		}
+	for(unsigned int i=0;i <sizeof(predkosc2);i++)
+			{
+				ScreenDeviceDisplayChar2(pThis,predkosc2[i],startPointX-115+i*10,startPointY-(lenY/2)-42,WHITE_COLOR);
+			}
+
+
+
 	return 0;
 }
