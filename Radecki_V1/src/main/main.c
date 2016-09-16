@@ -30,6 +30,8 @@ extern unsigned int * buforRysunkowy;
 extern unsigned int * buforRysunkowy2;
 extern unsigned int * buforMobc;
 extern unsigned int * buforNapiecia;
+extern unsigned int * buforMobcRys;
+extern unsigned int * buforNapieciaRys;
 extern void KeyPressedHandler (const char *pString);
 extern void MouseStatusHandler();
 extern void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pState);
@@ -145,10 +147,14 @@ int main (void)
 	assert(buforRysunkowy != 0);
 	buforRysunkowy2 = (unsigned int*) malloc (basicSimulation.lenX);
 	assert(buforRysunkowy2 != 0);
-	buforMobc = (unsigned int*) malloc (basicSimulation.lenX);
+	buforMobc = (unsigned int*) malloc (basicSimulation.bufferMax);
 	assert(buforMobc != 0);
-	buforNapiecia = (unsigned int*) malloc (basicSimulation.lenX);
+	buforNapiecia = (unsigned int*) malloc (basicSimulation.bufferMax);
 	assert(buforNapiecia != 0);
+	buforMobcRys = (unsigned int*) malloc (basicSimulation.bufferMax);
+	assert(buforMobcRys != 0);
+	buforNapieciaRys = (unsigned int*) malloc (basicSimulation.bufferMax);
+	assert(buforNapieciaRys != 0);
 	startFlag = TRUE;
 	ScreenDeviceClearDisplay(USPiEnvGetScreen());
 	if(ScreenDeviceDrawChart(USPiEnvGetScreen(),GREEN_COLOR, BOTH) != 0)
@@ -157,8 +163,9 @@ int main (void)
 	}
 	else isChartPrinted = TRUE;
 	ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, WHITE_COLOR);
-	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, RED_COLOR);
+	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0, WHITE_COLOR);
+	ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0, RED_COLOR);
+	ScreenDeviceDrawChartCaptionOYAllCounter(USPiEnvGetScreen(),basicSimulation.startPosX+basicSimulation.lenX+70,basicSimulation.startPosY,basicSimulation.lenY,4.0, BLUE_COLOR);
 	InterruptSystemEnableIRQ(ARM_IRQ_USB);
 
 	while(1)

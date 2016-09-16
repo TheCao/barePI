@@ -38,8 +38,6 @@ unsigned actMenuPosition = 1;
 unsigned actBasicMotor = 1;
 unsigned tempPosX = 0;
 unsigned tempPosY = 0;
-unsigned int MobcTemp = 0;
-unsigned int NapiecieTemp = 0;
 double dthetadtTemp = 0.0;
 double dthetadtTemp2 = 0.0;
 //unsigned przesuniecieY = 0;
@@ -110,8 +108,6 @@ void setDefaultValues()
 	isMovedOY = FALSE;
 	setYValue =0.0;
 	przesuniecieCalkowite = 0;
-	NapiecieTemp = 0;
-	MobcTemp = 0;
 	tempPosX = 0;
 	dthetadtTemp = 0.0;
 	basicMotor.R = 2;
@@ -225,8 +221,6 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 	unsigned screenTempY = 0;
 	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
 		{
-//			if(symParams->actualTimeD > 15.0) motorParams->U =24;
-//			if(symParams->actualTimeD > 9.0) motorParams->Mobc=0.2;
 			symParams->didt = (1/motorParams->L)*(motorParams->U-motorParams->R*symParams->I-motorParams->Ke*symParams->dthetadt);
 			symParams->d2thetadt = (1/motorParams->J)*(motorParams->Km*symParams->I-motorParams->B*symParams->dthetadt
 					-motorParams->Mobc);
@@ -263,27 +257,29 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						{
 							ScreenDeviceSetPixel(pThis, screenTempX, screenTempY +i, color);
 						}
+						// rysowanie aktualnego piksela Mobc i U
+						buforMobcRys[symParams->actualPosX] = buforMobc[symParams->bufferIndex];
+						buforNapieciaRys[symParams->actualPosX] = buforNapiecia[symParams->bufferIndex];
+						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX], RED_COLOR);
+						ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[symParams->actualPosX], BLUE_COLOR);
+						// rysowanie linii pionowych ³¹cz¹cych kolejne punkty
+						if((buforMobcRys[symParams->actualPosX] > buforMobcRys[symParams->actualPosX-1]) && symParams->actualPosX>1 )
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX-1],buforMobcRys[symParams->actualPosX] - buforMobcRys[symParams->actualPosX-1],RED_COLOR,VERTICAL);
+						}
+						else if ((buforMobcRys[symParams->actualPosX] < buforMobcRys[symParams->actualPosX-1]) && symParams->actualPosX >1)
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX],buforMobcRys[symParams->actualPosX-1]-buforMobcRys[symParams->actualPosX],RED_COLOR,VERTICAL);
+						}
+						if ((buforNapieciaRys[symParams->actualPosX] > buforNapieciaRys[symParams->actualPosX-1]) && symParams->actualPosX>1)
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX-1], buforNapieciaRys[symParams->actualPosX] - buforNapieciaRys[symParams->actualPosX-1], BLUE_COLOR, VERTICAL);
+						}
+						else if ((buforNapieciaRys[symParams->actualPosX] < buforNapieciaRys[symParams->actualPosX-1])&& symParams->actualPosX>1)
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX], buforNapieciaRys[symParams->actualPosX-1]- buforNapieciaRys[symParams->actualPosX], BLUE_COLOR, VERTICAL);
+						}
 
-						if(buforMobc[symParams->bufferIndex] > MobcTemp && (buforMobc[symParams->bufferIndex] <= (symParams->startPosY + symParams->lenY)))
-						{
-							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-MobcTemp,buforMobc[symParams->bufferIndex] - MobcTemp,RED_COLOR,VERTICAL);
-						}
-						else if (buforMobc[symParams->bufferIndex] < MobcTemp)
-						{
-							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobc[symParams->bufferIndex],MobcTemp-buforMobc[symParams->bufferIndex],RED_COLOR,VERTICAL);
-						}
-						if (buforNapiecia[symParams->bufferIndex] > NapiecieTemp)
-						{
-							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-NapiecieTemp, buforNapiecia[symParams->bufferIndex] - NapiecieTemp, BLUE_COLOR, VERTICAL);
-						}
-						else if (buforNapiecia[symParams->bufferIndex] < NapiecieTemp)
-						{
-							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapiecia[symParams->bufferIndex], NapiecieTemp- buforNapiecia[symParams->bufferIndex] , BLUE_COLOR, VERTICAL);
-						}
-						MobcTemp = buforMobc[symParams->bufferIndex];
-						NapiecieTemp = buforNapiecia[symParams->bufferIndex];
-						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobc[symParams->bufferIndex], RED_COLOR);
-						ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapiecia[symParams->bufferIndex], BLUE_COLOR);
 						buforRysunkowy[symParams->actualPosX] = fifoBuffer[symParams->bufferIndex];
 					}
 					tempPosX = symParams->actualPosX;
@@ -342,7 +338,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 							// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
 							if(setYValue < symParams->dthetadt)
 							{
-								ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt,WHITE_COLOR);
+								ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->dthetadt,WHITE_COLOR);
 								setYValue = symParams->dthetadt;
 							}
 						}
@@ -372,6 +368,28 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 //							// aktualizacja numeracji na osi Y ( jeœli nie dociera do samego do³u to wy³¹czone //TODO )
 //							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt);
 						}
+						buforMobcRys[symParams->actualPosX] = buforMobc[symParams->bufferIndex];
+						buforNapieciaRys[symParams->actualPosX] = buforNapiecia[symParams->bufferIndex];
+						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX], RED_COLOR);
+						ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[symParams->actualPosX], BLUE_COLOR);
+						// rysowanie linii pionowych ³¹cz¹cych kolejne punkty
+						if((buforMobcRys[symParams->actualPosX] > buforMobcRys[symParams->actualPosX-1]) && symParams->actualPosX>1 )
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX-1],buforMobcRys[symParams->actualPosX] - buforMobcRys[symParams->actualPosX-1],RED_COLOR,VERTICAL);
+						}
+						else if ((buforMobcRys[symParams->actualPosX] < buforMobcRys[symParams->actualPosX-1]) && symParams->actualPosX >1)
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX],buforMobcRys[symParams->actualPosX-1]-buforMobcRys[symParams->actualPosX],RED_COLOR,VERTICAL);
+						}
+						if ((buforNapieciaRys[symParams->actualPosX] > buforNapieciaRys[symParams->actualPosX-1]) && symParams->actualPosX>1)
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX-1], buforNapieciaRys[symParams->actualPosX] - buforNapieciaRys[symParams->actualPosX-1], BLUE_COLOR, VERTICAL);
+						}
+						else if ((buforNapieciaRys[symParams->actualPosX] < buforNapieciaRys[symParams->actualPosX-1])&& symParams->actualPosX>1)
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX], buforNapieciaRys[symParams->actualPosX-1]- buforNapieciaRys[symParams->actualPosX], BLUE_COLOR, VERTICAL);
+						}
+
 					}
 					//aktualizacja wartoœci po przejsciu kroku na przesuniêciu Y
 					tempPosX = symParams->actualPosX;
@@ -394,6 +412,34 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						{
 							ScreenDeviceSetPixel(pThis, screenTempX,screenTempY +i, BLACK_COLOR);
 						}
+//						//usuwanie wykresu Mobc i U
+						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX-symParams->lenX+u], BLACK_COLOR);
+						ScreenDeviceSetPixel(pThis, screenTempX,symParams->startPosY-buforNapieciaRys[symParams->actualPosX-symParams->lenX+u], BLACK_COLOR);
+						if((buforMobcRys[symParams->actualPosX-symParams->lenX+u] > buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]))
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX-1-symParams->lenX+u],
+									(buforMobcRys[symParams->actualPosX-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-1-symParams->lenX+u])<symParams->lenY?buforMobcRys[symParams->actualPosX-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]:0,
+											BLACK_COLOR,VERTICAL);
+						}
+						else if ((buforMobcRys[symParams->actualPosX-symParams->lenX+u] < buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]))
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX-symParams->lenX+u],
+									(buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u]:0,
+									BLACK_COLOR,VERTICAL);
+						}
+						if ((buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] > buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]))
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u],
+									(buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]:0,
+									BLACK_COLOR, VERTICAL);
+						}
+						else if ((buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] < buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]))
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX-symParams->lenX+u],
+									(buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u]:0,
+									BLACK_COLOR, VERTICAL);
+						}
+
 					}
 					// wyrosowanie t³a i kropkowanych linii
 					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
@@ -402,11 +448,39 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 					{
 						screenTempX = symParams->startPosX + u;
 						buforRysunkowy[u] = buforRysunkowy[u+1];
+						buforMobcRys[u] = buforMobcRys[u+1];
+						buforNapieciaRys[u] = buforNapieciaRys[u+1];
 						screenTempY = symParams->startPosY - buforRysunkowy[u];
 						for(signed i = -2;i<=2;i++)
 						{
 							ScreenDeviceSetPixel(pThis, screenTempX, screenTempY+i, color);
 						}
+						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[u], RED_COLOR);
+						ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[u], BLUE_COLOR);
+//						// rysowanie linii pionowych ³¹cz¹cych kolejne punkty
+//						if((buforMobcRys[u] > buforMobcRys[u-1])  )
+//						{
+//							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[u-1],
+//								41,	RED_COLOR,VERTICAL);
+//						}
+//						else if ((buforMobcRys[symParams->actualPosX-symParams->lenX+u] < buforMobcRys[symParams->actualPosX-symParams->lenX+u-1]) )
+//						{
+//							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX-symParams->lenX+u],
+//									(buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u]:0,
+//									RED_COLOR,VERTICAL);
+//						}
+//						if ((buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] > buforNapieciaRys[symParams->actualPosX-symParams->lenX+u-1]) )
+//						{
+//							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX-symParams->lenX+u-1],
+//									(buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]:0,
+//									BLUE_COLOR, VERTICAL);
+//						}
+//						else if ((buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] < buforNapieciaRys[symParams->actualPosX-symParams->lenX+u-1]))
+//						{
+//							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX-symParams->lenX+u],
+//									(buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u]:0,
+//									BLUE_COLOR, VERTICAL);
+//						}
 					}
 					//dodanie najnowszej wartosci do bufora i wyrysowanie
 					buforRysunkowy[symParams->lenX] = fifoBuffer[symParams->bufferIndex];
@@ -414,6 +488,10 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 					{
 						ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->lenX, symParams->startPosY - buforRysunkowy[symParams->lenX]+i, color);
 					}
+					buforMobcRys[symParams->lenX] = buforMobc[symParams->bufferIndex];
+					buforNapieciaRys[symParams->lenX] = buforNapiecia[symParams->bufferIndex];
+					ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[symParams->lenX], RED_COLOR);
+					ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[symParams->lenX], BLUE_COLOR);
 					ScreenDeviceDrawChartCaptionOXAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
 					if(symParams->isFirstDraw == TRUE) symParams->isFirstDraw = FALSE;
 				}
@@ -430,6 +508,33 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						{
 							ScreenDeviceSetPixel(pThis, screenTempX,screenTempY +i, BLACK_COLOR);
 						}
+						//usuwanie wykresu Mobc i U
+						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[u], BLACK_COLOR);
+						ScreenDeviceSetPixel(pThis, screenTempX,symParams->startPosY-buforNapieciaRys[u], BLACK_COLOR);
+						if((buforMobcRys[u] > buforMobcRys[u-1]))
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[u-1],
+									(buforMobcRys[u]-buforMobcRys[u-1])<symParams->lenY?buforMobcRys[u]-buforMobcRys[u-1]:0,
+											BLACK_COLOR,VERTICAL);
+						}
+						else if ((buforMobcRys[u] < buforMobcRys[u-1]))
+						{
+							ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[symParams->actualPosX-symParams->lenX+u],
+									(buforMobcRys[u-1]-buforMobcRys[u])<symParams->lenY?buforMobcRys[u-1]-buforMobcRys[u]:0,
+											BLACK_COLOR,VERTICAL);
+						}
+						if ((buforNapieciaRys[u] > buforNapieciaRys[u-1]))
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[u-1],
+									(buforNapieciaRys[u] - buforNapieciaRys[u-1])<symParams->lenY?buforNapieciaRys[u] - buforNapieciaRys[u-1]:0,
+											BLACK_COLOR, VERTICAL);
+						}
+						else if ((buforNapieciaRys[u] < buforNapieciaRys[u-1]))
+						{
+							ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[symParams->actualPosX-symParams->lenX+u],
+									(buforNapieciaRys[u-1]- buforNapieciaRys[u])<symParams->lenY?buforNapieciaRys[u-1]- buforNapieciaRys[u]:0,
+									BLACK_COLOR, VERTICAL);
+						}
 					}
 					// wyrosowanie t³a i kropkowanych linii
 					ScreenDeviceDrawChart(pThis,GREEN_COLOR,BOTH);
@@ -441,6 +546,8 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 							screenTempX = symParams->startPosX + u;
 							buforRysunkowy[u] = buforRysunkowy[u+1]+(unsigned)((dthetadtTemp-2.0)*0.5*symParams->lenY)-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY); //przesuniecie wartoœci bufora w lewo i w dó³
 							screenTempY = symParams->startPosY - buforRysunkowy[u];
+							buforMobcRys[u] = buforMobcRys[u+1];
+							buforNapieciaRys[u] = buforNapieciaRys[u+1];
 							if(!(screenTempY > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
 							{
 								for(signed i = -2;i<=2;i++)
@@ -448,6 +555,33 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY+i, color);
 								}
 							}
+							ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[u], RED_COLOR);
+							ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[u], BLUE_COLOR);
+//							// rysowanie linii pionowych ³¹cz¹cych kolejne punkty
+//							if((buforMobcRys[u] > buforMobcRys[u-1]) && u>1 ) //STUCK! zastosuj ten sam trick co wyzej z wyr trojarg
+//							{
+//								ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[u-1],
+//										(buforMobcRys[symParams->actualPosX-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-1-symParams->lenX+u])<symParams->lenY?buforMobcRys[symParams->actualPosX-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]:0,
+//										RED_COLOR,VERTICAL);
+//							}
+//							else if ((buforMobcRys[u] < buforMobcRys[u-1]) && u >1)
+//							{
+//								ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[u],
+//										(buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u]:0,
+//										RED_COLOR,VERTICAL);
+//							}
+//							if ((buforNapieciaRys[u] > buforNapieciaRys[u-1]) && u>1)
+//							{
+//								ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[u-1],
+//										(buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]:0,
+//										BLUE_COLOR, VERTICAL);
+//							}
+//							else if ((buforNapieciaRys[u] < buforNapieciaRys[u-1])&& u>1)
+//							{
+//								ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[u],
+//										(buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u]:0,
+//										BLUE_COLOR, VERTICAL);
+//							}
 						}
 						//dodanie najnowszej wartosci do bufora i wyrysowanie
 						buforRysunkowy[symParams->lenX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
@@ -455,6 +589,10 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->lenX, symParams->startPosY - buforRysunkowy[symParams->lenX]+i, color);
 						}
+						buforMobcRys[symParams->lenX] = buforMobc[symParams->bufferIndex];
+						buforNapieciaRys[symParams->lenX] = buforNapiecia[symParams->bufferIndex];
+						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[symParams->lenX], RED_COLOR);
+						ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[symParams->lenX], BLUE_COLOR);
 					}
 					else// wartoœci malej¹ wiêc nie przesuwam wykresu
 					{
@@ -463,6 +601,8 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 							screenTempX = symParams->startPosX + u;
 							buforRysunkowy[u] = buforRysunkowy[u+1]; //przesuniecie wartoœci bufora w lewo
 							screenTempY = symParams->startPosY - buforRysunkowy[u];
+							buforMobcRys[u] = buforMobcRys[u+1];
+							buforNapieciaRys[u] = buforNapieciaRys[u+1];
 							if(!(screenTempY > symParams->startPosY)) //rysowanie tylko jesli miesci sie w obszarze wykresu
 							{
 								for(signed i = -2;i<=2;i++)
@@ -470,6 +610,33 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 									ScreenDeviceSetPixel(pThis, screenTempX, screenTempY+i, color);
 								}
 							}
+							ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[u], RED_COLOR);
+							ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[u], BLUE_COLOR);
+//							// rysowanie linii pionowych ³¹cz¹cych kolejne punkty
+//							if((buforMobcRys[u] > buforMobcRys[u-1]) && u>1 ) //STUCK! zastosuj ten sam trick co wyzej z wyr trojarg
+//							{
+//								ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[u-1],
+//										(buforMobcRys[symParams->actualPosX-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-1-symParams->lenX+u])<symParams->lenY?buforMobcRys[symParams->actualPosX-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]:0,
+//										RED_COLOR,VERTICAL);
+//							}
+//							else if ((buforMobcRys[u] < buforMobcRys[u-1]) && u >1)
+//							{
+//								ScreenDeviceDrawLine(pThis,screenTempX, symParams->startPosY-buforMobcRys[u],
+//										(buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforMobcRys[symParams->actualPosX-1-symParams->lenX+u]-buforMobcRys[symParams->actualPosX-symParams->lenX+u]:0,
+//										RED_COLOR,VERTICAL);
+//							}
+//							if ((buforNapieciaRys[u] > buforNapieciaRys[u-1]) && u>1)
+//							{
+//								ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[u-1],
+//										(buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-symParams->lenX+u] - buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]:0,
+//										BLUE_COLOR, VERTICAL);
+//							}
+//							else if ((buforNapieciaRys[u] < buforNapieciaRys[u-1])&& u>1)
+//							{
+//								ScreenDeviceDrawLine(pThis, screenTempX, symParams->startPosY-buforNapieciaRys[u],
+//										(buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u])<symParams->lenY?buforNapieciaRys[symParams->actualPosX-1-symParams->lenX+u]- buforNapieciaRys[symParams->actualPosX-symParams->lenX+u]:0,
+//										BLUE_COLOR, VERTICAL);
+//							}
 						}
 						//dodanie najnowszej wartosci do bufora i wyrysowanie
 						buforRysunkowy[symParams->lenX] = fifoBuffer[symParams->bufferIndex]-(unsigned)((symParams->dthetadt-2.0)*0.5*symParams->lenY);
@@ -477,12 +644,16 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 						{
 							ScreenDeviceSetPixel(pThis, symParams->startPosX+symParams->lenX, symParams->startPosY - buforRysunkowy[symParams->lenX]+i, color);
 						}
+						buforMobcRys[symParams->lenX] = buforMobc[symParams->bufferIndex];
+						buforNapieciaRys[symParams->lenX] = buforNapiecia[symParams->bufferIndex];
+						ScreenDeviceSetPixel(pThis, screenTempX, symParams->startPosY-buforMobcRys[symParams->lenX], RED_COLOR);
+						ScreenDeviceSetPixel(pThis,screenTempX,symParams->startPosY-buforNapieciaRys[symParams->lenX], BLUE_COLOR);
 					}
 					ScreenDeviceDrawChartCaptionOXAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenX,symParams->lenY,symParams->isFirstDraw,symParams->dt,symParams->resolution,symParams->actualTimeD);
 					// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
 					if(setYValue < symParams->dthetadt)
 					{
-						ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt,WHITE_COLOR);
+						ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->dthetadt,WHITE_COLOR);
 						setYValue = symParams->dthetadt;
 					}
 					dthetadtTemp = symParams->dthetadt;
@@ -647,7 +818,7 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 							// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
 							if(setYValue < symParams->dthetadt)
 							{
-								ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt,WHITE_COLOR);
+								ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->dthetadt,WHITE_COLOR);
 								setYValue = symParams->dthetadt;
 							}
 						}
@@ -686,7 +857,7 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 							// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
 							if (setYValue < symParams2->dthetadt)
 							{
-								ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams2->dthetadt,WHITE_COLOR);
+								ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams2->dthetadt,WHITE_COLOR);
 								setYValue = symParams2->dthetadt;
 							}
 						}
@@ -849,7 +1020,7 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 						// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
 						if(setYValue < symParams->dthetadt)
 						{
-							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt,WHITE_COLOR);
+							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->dthetadt,WHITE_COLOR);
 							setYValue = symParams->dthetadt;
 						}
 					}
@@ -894,7 +1065,7 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 						// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
 						if (setYValue < symParams2->dthetadt)
 						{
-							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams2->dthetadt,WHITE_COLOR);
+							ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams2->dthetadt,WHITE_COLOR);
 							setYValue = symParams2->dthetadt;
 						}
 					}
@@ -951,12 +1122,12 @@ unsigned SimulationBoth(TScreenDevice *pThis,motorParams_t *motorParams,motorPar
 					// aktualizacja numeracji na osi Y tylko w przypadku kiedy wartoœæ jest wiêksza ni¿ ostatnia ustawiona
 					if(setYValue < symParams->dthetadt)
 					{
-						ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt,WHITE_COLOR);
+						ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->dthetadt,WHITE_COLOR);
 						setYValue = symParams->dthetadt;
 					}
 					else if(setYValue < symParams2->dthetadt)
 					{
-						ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->resolution,symParams->dthetadt,WHITE_COLOR);
+						ScreenDeviceDrawChartCaptionOYAll(pThis,symParams->startPosX, symParams->startPosY,symParams->lenY,symParams->isFirstDraw,symParams->dthetadt,WHITE_COLOR);
 						setYValue = symParams2->dthetadt;
 					}
 					dthetadtTemp = symParams->dthetadt;
@@ -1323,8 +1494,9 @@ void KeyboardHandler (const char *pString)
 				}
 			else isChartPrinted = TRUE;
 			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-						ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0,WHITE_COLOR);
-						ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, RED_COLOR);
+						ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0,WHITE_COLOR);
+						ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0, RED_COLOR);
+						ScreenDeviceDrawChartCaptionOYAllCounter(USPiEnvGetScreen(),basicSimulation.startPosX+basicSimulation.lenX+70,basicSimulation.startPosY,basicSimulation.lenY,4.0, BLUE_COLOR);
 		}
 		break;
 	case('l'): //L -> SELECT
@@ -1410,8 +1582,9 @@ void KeyboardHandler (const char *pString)
 			}
 			isChartPrinted = TRUE;
 			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0,WHITE_COLOR);
-			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, RED_COLOR);
+			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0,WHITE_COLOR);
+			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0, RED_COLOR);
+			ScreenDeviceDrawChartCaptionOYAllCounter(USPiEnvGetScreen(),basicSimulation.startPosX+basicSimulation.lenX+70,basicSimulation.startPosY,basicSimulation.lenY,4.0, BLUE_COLOR);
 		}
 		TimerMsDelay(TimerGet(),300); // delay
 		break;
@@ -1439,8 +1612,9 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 				}
 			else isChartPrinted = TRUE;
 			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0,WHITE_COLOR);
-			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, RED_COLOR);
+			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0,WHITE_COLOR);
+			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0, RED_COLOR);
+			ScreenDeviceDrawChartCaptionOYAllCounter(USPiEnvGetScreen(),basicSimulation.startPosX+basicSimulation.lenX+70,basicSimulation.startPosY,basicSimulation.lenY,4.0, BLUE_COLOR);
 		}
 		break;
 
@@ -1530,8 +1704,9 @@ void GamePadStatusHandler (unsigned int nDeviceIndex, const USPiGamePadState *pS
 			}
 			isChartPrinted = TRUE;
 			ScreenDeviceDrawChartCaptionOXAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenX,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.dt,basicSimulation.resolution,basicSimulation.actualTimeD);
-			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0,WHITE_COLOR);
-			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,basicSimulation.resolution,2.0, RED_COLOR);
+			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX, basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0,WHITE_COLOR);
+			ScreenDeviceDrawChartCaptionOYAll(USPiEnvGetScreen(),basicSimulation.startPosX-35,basicSimulation.startPosY,basicSimulation.lenY,basicSimulation.isFirstDraw,2.0, RED_COLOR);
+			ScreenDeviceDrawChartCaptionOYAllCounter(USPiEnvGetScreen(),basicSimulation.startPosX+basicSimulation.lenX+70,basicSimulation.startPosY,basicSimulation.lenY,4.0, BLUE_COLOR);
 		}
 		TimerMsDelay(TimerGet(),300); // delay
 		break;

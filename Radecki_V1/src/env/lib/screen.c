@@ -841,7 +841,7 @@ unsigned ScreenDeviceDrawChartCaptionOXAll(TScreenDevice *pThis, unsigned startP
 	}
 	return 0;
 }
-unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, boolean isFirstDraw,unsigned resolution, double actualValue,TScreenColor color)
+unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, boolean isFirstDraw, double actualValue,TScreenColor color)
 {
 	// printing actual values of OY
 	double counterOY = 0.201;
@@ -864,6 +864,17 @@ unsigned ScreenDeviceDrawChartCaptionOYAll(TScreenDevice *pThis, unsigned startP
 		}
 		return 0;
 }
+unsigned ScreenDeviceDrawChartCaptionOYAllCounter(TScreenDevice *pThis, unsigned startPointX, unsigned startPointY,unsigned lenY, double counter,TScreenColor color)
+{
+	// printing actual values of OY
+	double actualCounter = counter+0.01;
+	for(unsigned j=startPointY-lenY/10;j>=startPointY-lenY;j-=lenY/10, actualCounter+=counter)
+	{
+		ScreenDeviceDrawChartCaption(pThis,actualCounter,startPointX-50,j-5,color);
+	}
+	return 0;
+}
+
 unsigned ScreenDeviceDrawDottedBackground(TScreenDevice *pThis, TScreenColor color, unsigned startPointX, unsigned startPointY, unsigned lenX, unsigned lenY,chartAddLines_t linesOption)
 {
 	for(unsigned i = startPointX+lenX/10;i<=startPointX+lenX;i+=lenX/10) //dotted lines vertical
@@ -901,6 +912,8 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 	static const char czas[] = "Czas [s]";
 	static const char predkosc[] = "Predkosc";
 	static const char predkosc2[] = "[rad/s]";
+	static const char moment[] = "Moment [Nm]";
+	static const char napiecie[] = "Napiecie [V]";
 
 	// chart lines drawing
 	for(unsigned i = 0;i<2;i++)
@@ -918,13 +931,22 @@ unsigned ScreenDeviceDrawChart(TScreenDevice *pThis, TScreenColor color,chartAdd
 		ScreenDeviceDisplayChar2(pThis,czas[i],startPointX+10*i+(lenX/2),startPointY+50,WHITE_COLOR);
 	}
 	for(unsigned int i=0;i <sizeof(predkosc);i++)
-		{
-			ScreenDeviceDisplayChar2(pThis,predkosc[i],startPointX-120+i*10,startPointY-(lenY/2)-60,WHITE_COLOR);
-		}
+	{
+		ScreenDeviceDisplayChar2(pThis,predkosc[i],startPointX-120+i*10,startPointY-(lenY/2)-60,WHITE_COLOR);
+	}
 	for(unsigned int i=0;i <sizeof(predkosc2);i++)
-			{
-				ScreenDeviceDisplayChar2(pThis,predkosc2[i],startPointX-115+i*10,startPointY-(lenY/2)-42,WHITE_COLOR);
-			}
+	{
+		ScreenDeviceDisplayChar2(pThis,predkosc2[i],startPointX-115+i*10,startPointY-(lenY/2)-42,WHITE_COLOR);
+	}
+	for(unsigned int i=0;i <sizeof(moment);i++)
+	{
+		ScreenDeviceDisplayChar2(pThis,moment[i],startPointX-120+i*10,startPointY-(lenY/2)+20,RED_COLOR);
+	}
+
+	for(unsigned int i=0;i <sizeof(napiecie);i++)
+	{
+		ScreenDeviceDisplayChar2(pThis,napiecie[i],startPointX+lenX+10+i*10,startPointY-(lenY/2)-42,BLUE_COLOR);
+	}
 
 
 
