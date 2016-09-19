@@ -218,7 +218,7 @@ unsigned Simulation(TScreenDevice *pThis,motorParams_t *motorParams, simulationP
 		if(motorParams->number == 1) uart_sendC("Simulation for 1 motor has been started");
 		else uart_sendC("Simulation for 2 motor has been started");
 	}
-	symParams->stepEndTime = symParams->actualTimeD+5*symParams->dt; // set end time for for loop at 5 steps
+	symParams->stepEndTime = symParams->actualTimeD/*+5*symParams->dt*/; // set end time for for loop at 5 steps
 	unsigned screenTempX = 0;
 	unsigned screenTempY = 0;
 	for(;symParams->actualTimeD <= symParams->tk && symParams->actualTimeD <= symParams->stepEndTime;symParams->actualTimeD+=symParams->dt)
