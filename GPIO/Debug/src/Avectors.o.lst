@@ -1,0 +1,63 @@
+   1              	# 1 "../src/Avectors.S"
+   1              	
+   0              	
+   0              	
+   0              	
+   2              	;@-------------------------------------------------------------------------
+   3              	;@-------------------------------------------------------------------------
+   4              	
+   5              	.globl _start
+   6              	_start:
+   7              	// CACHE ON
+   8 0000 100F11EE 	   mrc p15,0,r0,c1,c0
+   9 0004 0310A0E3 	    mov r1,#3
+  10 0008 810580E1 	    orr r0,r0,r1,LSL#11      //Set bits 11 and 12.
+  11 000c 100F01EE 	    mcr p15,0,r0,c1,c0
+  12 0010 02D9A0E3 	    mov sp,#0x08000 //set up stack pointer on 0x8000
+  13 0014 FEFFFFEB 	    bl notmain //branch with link to notmain function
+  14 0018 FEFFFFEA 	hang: b hang
+  15              	
+  16              	.globl PUT32
+  17              	PUT32:
+  18 001c 001080E5 	    str r1,[r0]
+  19 0020 1EFF2FE1 	    bx lr
+  20              	
+  21              	
+  22              	.globl GET32
+  23              	GET32:
+  24 0024 000090E5 	    ldr r0,[r0]
+  25 0028 1EFF2FE1 	    bx lr
+  26              	
+  27              	.globl GETPC
+  28              	GETPC:
+  29 002c 0E00A0E1 	    mov r0,lr
+  30 0030 1EFF2FE1 	    bx lr
+  31              	
+  32              	
+  33              	
+  34              	;@-------------------------------------------------------------------------
+  35              	;@-------------------------------------------------------------------------
+  36              	
+  37              	
+  38              	;@-------------------------------------------------------------------------
+  39              	;@
+  40              	;@ Copyright (c) 2012 David Welch dwelch@dwelch.com
+  41              	;@
+  42              	;@ Permission is hereby granted, free of charge, to any person obtaining a copy of this software an
+  43              	;@
+  44              	;@ The above copyright notice and this permission notice shall be included in all copies or substan
+  45              	;@
+  46              	;@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BU
+  47              	;@
+  48              	;@-------------------------------------------------------------------------
+DEFINED SYMBOLS
+   ../src/Avectors.S:6      .text:00000000 _start
+   ../src/Avectors.S:8      .text:00000000 $a
+   ../src/Avectors.S:14     .text:00000018 hang
+   ../src/Avectors.S:17     .text:0000001c PUT32
+   ../src/Avectors.S:23     .text:00000024 GET32
+   ../src/Avectors.S:28     .text:0000002c GETPC
+                   .debug_aranges:0000000c $d
+
+UNDEFINED SYMBOLS
+notmain

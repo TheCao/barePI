@@ -1,0 +1,182 @@
+   1              		.cpu cortex-a7
+   2              		.eabi_attribute 28, 1
+   3              		.fpu vfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"main.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.comm	gpio,4,4
+  18              		.comm	tim,4,4
+  19              		.section	.text.notmain,"ax",%progbits
+  20              		.align	2
+  21              		.global	notmain
+  23              	notmain:
+  24              	.LFB0:
+  25              		.file 1 "../src/main.c"
+   1:../src/main.c **** 
+   2:../src/main.c **** #define GPIO_BASE 0x3F200000UL
+   3:../src/main.c ****  #define LED_GPFSEL      GPIO_GPFSEL4
+   4:../src/main.c **** #define LED_GPFBIT      21
+   5:../src/main.c **** #define LED_GPSET       GPIO_GPSET1
+   6:../src/main.c **** #define LED_GPCLR       GPIO_GPCLR1
+   7:../src/main.c **** #define LED_GPIO_BIT    15
+   8:../src/main.c **** 
+   9:../src/main.c **** #define GPIO_GPFSEL0    0 //GPIO Function Select
+  10:../src/main.c **** #define GPIO_GPFSEL1    1
+  11:../src/main.c **** #define GPIO_GPFSEL2    2
+  12:../src/main.c **** #define GPIO_GPFSEL3    3
+  13:../src/main.c **** #define GPIO_GPFSEL4    4
+  14:../src/main.c **** #define GPIO_GPFSEL5    5
+  15:../src/main.c **** 
+  16:../src/main.c **** #define GPIO_GPSET0     7 // Output Set0-32
+  17:../src/main.c **** #define GPIO_GPSET1     8 // Output Set33-53
+  18:../src/main.c **** 
+  19:../src/main.c **** #define GPIO_GPCLR0     10 //Output Clear 0
+  20:../src/main.c **** #define GPIO_GPCLR1     11 // Output Clear 1
+  21:../src/main.c **** 
+  22:../src/main.c **** #define GPIO_GPLEV0     13 //Pin Level 0
+  23:../src/main.c **** #define GPIO_GPLEV1     14 //Pin Level 1
+  24:../src/main.c **** 
+  25:../src/main.c **** #define GPIO_GPEDS0     16
+  26:../src/main.c **** #define GPIO_GPEDS1     17
+  27:../src/main.c **** 
+  28:../src/main.c **** #define GPIO_GPREN0     19
+  29:../src/main.c **** #define GPIO_GPREN1     20
+  30:../src/main.c **** 
+  31:../src/main.c **** #define GPIO_GPFEN0     22
+  32:../src/main.c **** #define GPIO_GPFEN1     23
+  33:../src/main.c **** 
+  34:../src/main.c **** #define GPIO_GPHEN0     25
+  35:../src/main.c **** #define GPIO_GPHEN1     26
+  36:../src/main.c **** 
+  37:../src/main.c **** #define GPIO_GPLEN0     28
+  38:../src/main.c **** #define GPIO_GPLEN1     29
+  39:../src/main.c **** 
+  40:../src/main.c **** #define GPIO_GPAREN0    31
+  41:../src/main.c **** #define GPIO_GPAREN1    32
+  42:../src/main.c **** 
+  43:../src/main.c **** #define GPIO_GPAFEN0    34
+  44:../src/main.c **** #define GPIO_GPAFEN1    35
+  45:../src/main.c **** 
+  46:../src/main.c **** #define GPIO_GPPUD      37
+  47:../src/main.c **** #define GPIO_GPPUDCLK0  38
+  48:../src/main.c **** #define GPIO_GPPUDCLK1  39
+  49:../src/main.c **** 
+  50:../src/main.c **** /** GPIO Register set */
+  51:../src/main.c **** volatile unsigned int* gpio;
+  52:../src/main.c **** 
+  53:../src/main.c **** /** Simple loop variable */
+  54:../src/main.c **** volatile unsigned int tim;
+  55:../src/main.c **** int notmain ( void )
+  56:../src/main.c **** {
+  26              		.loc 1 56 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 8
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 04B02DE5 		str	fp, [sp, #-4]!
+  32              		.cfi_def_cfa_offset 4
+  33              		.cfi_offset 11, -4
+  34 0004 00B08DE2 		add	fp, sp, #0
+  35              		.cfi_def_cfa_register 11
+  36 0008 0CD04DE2 		sub	sp, sp, #12
+  57:../src/main.c **** 	 /* Assign the address of the GPIO peripheral (Using ARM Physical Address) */
+  58:../src/main.c **** 	    gpio = (unsigned int*)GPIO_BASE;
+  37              		.loc 1 58 0
+  38 000c 002000E3 		movw	r2, #:lower16:gpio
+  39 0010 002040E3 		movt	r2, #:upper16:gpio
+  40 0014 0030A0E3 		mov	r3, #0
+  41 0018 203F43E3 		movt	r3, 16160
+  42 001c 003082E5 		str	r3, [r2]
+  59:../src/main.c **** 
+  60:../src/main.c **** 	    //FSEL47 ( LED ) i FSEL18 ( pin ) na output
+  61:../src/main.c **** 	    //gpio[LED_GPFSEL] |= (1 << LED_GPFBIT); // LED
+  62:../src/main.c **** 	    gpio[GPIO_GPFSEL1] = (1 << 24); // GPIO 18
+  43              		.loc 1 62 0
+  44 0020 003000E3 		movw	r3, #:lower16:gpio
+  45 0024 003040E3 		movt	r3, #:upper16:gpio
+  46 0028 003093E5 		ldr	r3, [r3]
+  47 002c 043083E2 		add	r3, r3, #4
+  48 0030 0124A0E3 		mov	r2, #16777216
+  49 0034 002083E5 		str	r2, [r3]
+  50              	.L4:
+  63:../src/main.c **** 	    while(1)
+  64:../src/main.c **** 	    {
+  65:../src/main.c **** 	    	// naprzemienna zmiana stanu pinu GPIO18
+  66:../src/main.c **** 	    	gpio[GPIO_GPCLR0] = (1 << 18);
+  51              		.loc 1 66 0
+  52 0038 003000E3 		movw	r3, #:lower16:gpio
+  53 003c 003040E3 		movt	r3, #:upper16:gpio
+  54 0040 003093E5 		ldr	r3, [r3]
+  55 0044 283083E2 		add	r3, r3, #40
+  56 0048 0127A0E3 		mov	r2, #262144
+  57 004c 002083E5 		str	r2, [r3]
+  67:../src/main.c **** 
+  68:../src/main.c **** 	    	gpio[GPIO_GPSET0] = (1 << 18);
+  58              		.loc 1 68 0
+  59 0050 003000E3 		movw	r3, #:lower16:gpio
+  60 0054 003040E3 		movt	r3, #:upper16:gpio
+  61 0058 003093E5 		ldr	r3, [r3]
+  62 005c 1C3083E2 		add	r3, r3, #28
+  63 0060 0127A0E3 		mov	r2, #262144
+  64 0064 002083E5 		str	r2, [r3]
+  65              	.LBB2:
+  69:../src/main.c **** 	    	for(unsigned int i= 0; i <=10;i++)
+  66              		.loc 1 69 0
+  67 0068 0030A0E3 		mov	r3, #0
+  68 006c 08300BE5 		str	r3, [fp, #-8]
+  69 0070 020000EA 		b	.L2
+  70              	.L3:
+  71              		.loc 1 69 0 is_stmt 0 discriminator 3
+  72 0074 08301BE5 		ldr	r3, [fp, #-8]
+  73 0078 013083E2 		add	r3, r3, #1
+  74 007c 08300BE5 		str	r3, [fp, #-8]
+  75              	.L2:
+  76              		.loc 1 69 0 discriminator 1
+  77 0080 08301BE5 		ldr	r3, [fp, #-8]
+  78 0084 0A0053E3 		cmp	r3, #10
+  79 0088 F9FFFF9A 		bls	.L3
+  80              	.LBE2:
+  70:../src/main.c **** 	    		    	{
+  71:../src/main.c **** 	    		    		//pass
+  72:../src/main.c **** 	    		    	}
+  73:../src/main.c **** 	    	// mryganie diodami
+  74:../src/main.c **** 	       /* for(tim = 0; tim < 500000; tim++)
+  75:../src/main.c **** 	            ;
+  76:../src/main.c **** 
+  77:../src/main.c **** 
+  78:../src/main.c **** 	        gpio[LED_GPCLR] = (1 << LED_GPIO_BIT);
+  79:../src/main.c **** 
+  80:../src/main.c **** 
+  81:../src/main.c **** 	        for(tim = 0; tim < 500000; tim++)
+  82:../src/main.c **** 	            ;
+  83:../src/main.c **** 
+  84:../src/main.c **** 
+  85:../src/main.c **** 	        gpio[LED_GPSET] = (1 << LED_GPIO_BIT);*/
+  86:../src/main.c **** 
+  87:../src/main.c **** 	    }
+  81              		.loc 1 87 0 is_stmt 1
+  82 008c E9FFFFEA 		b	.L4
+  83              		.cfi_endproc
+  84              	.LFE0:
+  86              		.text
+  87              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+                            *COM*:00000004 gpio
+                            *COM*:00000004 tim
+C:\Users\Komar\AppData\Local\Temp\ccZwbaRb.s:20     .text.notmain:00000000 $a
+C:\Users\Komar\AppData\Local\Temp\ccZwbaRb.s:23     .text.notmain:00000000 notmain
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.0.bb08bb6cc37edaa080849c0e3a667f5f
+
+NO UNDEFINED SYMBOLS

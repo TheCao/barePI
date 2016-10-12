@@ -1,0 +1,160 @@
+
+Discarded input sections
+
+ .group         0x00000000        0x8 ./src/bootloader07.o
+ .group         0x00000000        0x8 ./src/periph.o
+ .debug_macro   0x00000000      0x862 ./src/periph.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ram              0x00008000         0x01000000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+START GROUP
+LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm-none-eabi/4.9.3\libgcc.a
+LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib\libc.a
+LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib\libc.a
+LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib\libm.a
+LOAD c:/program files (x86)/gnu tools arm embedded/4.9 2015q1/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib\librdimon.a
+END GROUP
+LOAD ./src/Avectors.o
+LOAD ./src/bootloader07.o
+LOAD ./src/periph.o
+
+.text           0x00008000      0x89c
+ *(.text*)
+ .text          0x00008000       0x3c ./src/Avectors.o
+                0x00008000                _start
+                0x0000800c                PUT32
+                0x00008014                PUT16
+                0x0000801c                PUT8
+                0x00008024                GET32
+                0x0000802c                GETPC
+                0x00008034                BRANCHTO
+                0x00008038                dummy
+ .text          0x0000803c        0x0 ./src/bootloader07.o
+ .text.notmain  0x0000803c      0x4bc ./src/bootloader07.o
+                0x0000803c                notmain
+ .text          0x000084f8        0x0 ./src/periph.o
+ .text.uart_lcr
+                0x000084f8       0x20 ./src/periph.o
+                0x000084f8                uart_lcr
+ .text.uart_recv
+                0x00008518       0x48 ./src/periph.o
+                0x00008518                uart_recv
+ .text.uart_check
+                0x00008560       0x38 ./src/periph.o
+                0x00008560                uart_check
+ .text.uart_send
+                0x00008598       0x4c ./src/periph.o
+                0x00008598                uart_send
+ .text.uart_flush
+                0x000085e4       0x30 ./src/periph.o
+                0x000085e4                uart_flush
+ .text.hexstrings
+                0x00008614       0x8c ./src/periph.o
+                0x00008614                hexstrings
+ .text.hexstring
+                0x000086a0       0x30 ./src/periph.o
+                0x000086a0                hexstring
+ .text.uart_init
+                0x000086d0      0x17c ./src/periph.o
+                0x000086d0                uart_init
+ .text.timer_init
+                0x0000884c       0x30 ./src/periph.o
+                0x0000884c                timer_init
+ .text.timer_tick
+                0x0000887c       0x20 ./src/periph.o
+                0x0000887c                timer_tick
+
+.data           0x0000889c        0x0
+ .data          0x0000889c        0x0 ./src/Avectors.o
+ .data          0x0000889c        0x0 ./src/bootloader07.o
+ .data          0x0000889c        0x0 ./src/periph.o
+
+.igot.plt       0x0000889c        0x0
+ .igot.plt      0x00000000        0x0 ./src/Avectors.o
+
+.glue_7         0x0000889c        0x0
+ .glue_7        0x00000000        0x0 linker stubs
+
+.glue_7t        0x0000889c        0x0
+ .glue_7t       0x00000000        0x0 linker stubs
+
+.vfp11_veneer   0x0000889c        0x0
+ .vfp11_veneer  0x00000000        0x0 linker stubs
+
+.v4_bx          0x0000889c        0x0
+ .v4_bx         0x00000000        0x0 linker stubs
+
+.iplt           0x0000889c        0x0
+ .iplt          0x00000000        0x0 ./src/Avectors.o
+
+.rel.dyn        0x0000889c        0x0
+ .rel.iplt      0x00000000        0x0 ./src/Avectors.o
+
+.bss            0x0000889c        0x0
+ *(.bss*)
+ .bss           0x0000889c        0x0 ./src/Avectors.o
+ .bss           0x0000889c        0x0 ./src/bootloader07.o
+ .bss           0x0000889c        0x0 ./src/periph.o
+OUTPUT(boot_rpi.elf elf32-littlearm)
+
+.ARM.attributes
+                0x00000000       0x3b
+ .ARM.attributes
+                0x00000000       0x29 ./src/Avectors.o
+ .ARM.attributes
+                0x00000029       0x3f ./src/bootloader07.o
+ .ARM.attributes
+                0x00000068       0x3f ./src/periph.o
+
+.comment        0x00000000       0x70
+ .comment       0x00000000       0x70 ./src/bootloader07.o
+                                 0x71 (size before relaxing)
+ .comment       0x00000000       0x71 ./src/periph.o
+
+.debug_line     0x00000000      0x273
+ .debug_line    0x00000000       0x4f ./src/Avectors.o
+ .debug_line    0x0000004f       0xe9 ./src/bootloader07.o
+ .debug_line    0x00000138      0x13b ./src/periph.o
+
+.debug_info     0x00000000      0x287
+ .debug_info    0x00000000       0x7c ./src/Avectors.o
+ .debug_info    0x0000007c       0xc1 ./src/bootloader07.o
+ .debug_info    0x0000013d      0x14a ./src/periph.o
+
+.debug_abbrev   0x00000000      0x107
+ .debug_abbrev  0x00000000       0x14 ./src/Avectors.o
+ .debug_abbrev  0x00000014       0x67 ./src/bootloader07.o
+ .debug_abbrev  0x0000007b       0x8c ./src/periph.o
+
+.debug_aranges  0x00000000       0xa8
+ .debug_aranges
+                0x00000000       0x20 ./src/Avectors.o
+ .debug_aranges
+                0x00000020       0x20 ./src/bootloader07.o
+ .debug_aranges
+                0x00000040       0x68 ./src/periph.o
+
+.debug_ranges   0x00000000       0x68
+ .debug_ranges  0x00000000       0x10 ./src/bootloader07.o
+ .debug_ranges  0x00000010       0x58 ./src/periph.o
+
+.debug_macro    0x00000000      0x900
+ .debug_macro   0x00000000       0x11 ./src/bootloader07.o
+ .debug_macro   0x00000011      0x862 ./src/bootloader07.o
+ .debug_macro   0x00000873       0x8d ./src/periph.o
+
+.debug_str      0x00000000     0x27d1
+ .debug_str     0x00000000     0x24ea ./src/bootloader07.o
+                               0x24f7 (size before relaxing)
+ .debug_str     0x000024ea      0x2e7 ./src/periph.o
+                               0x278e (size before relaxing)
+
+.debug_frame    0x00000000      0x16c
+ .debug_frame   0x00000000       0x34 ./src/bootloader07.o
+ .debug_frame   0x00000034      0x138 ./src/periph.o
